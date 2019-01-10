@@ -1,0 +1,45 @@
+{
+  "name": "salesforce-fdk",
+  "version": "1.0.0",
+  "description": "Salesforce Lightning Function Developer Kit",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "directories": {
+    "lib": "lib"
+  },
+  "scripts": {
+    "build": "tsc",
+    "lint": "tslint -c tslint.json 'src/**/*.ts'",
+    "start": "npm run dist/index",
+    "test": "mocha --reporter spec"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/forcedotcom/sf-fx-sdk-node.git"
+  },
+  "author": "cwall@salesforce.com",
+  "license": "UNLICENSED",
+  "bugs": {
+    "url": "https://github.com/forcedotcom/sf-fx-sdk-node/issues"
+  },
+  "homepage": "https://github.com/forcedotcom/sf-fx-sdk-node#readme",
+  "dependencies": {
+    "@types/jsforce": "^1.9.3",
+    "@types/restify": "^7.2.7",
+    "dotenv": "^4.0.0",
+    "jsforce": "^1.9.0",
+    "jsforce-connection": "^2.1.0",
+    "node-rdkafka": "~2.2.3",
+    "restify": "^7.2.7",
+    "restify-await-promise": "^2.1.0",
+    "tslib": "1.9.3"
+  },
+  "devDependencies": {
+    "@types/node": "^10.12.18",
+    "chai": "^4.2.0",
+    "mocha": "^5.2.0",
+    "prettier": "1.15.3",
+    "ts-node": "7.0.0",
+    "typescript": "3.2.2"
+  }
+}
