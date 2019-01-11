@@ -15,7 +15,6 @@
     "prepare" : "npm run build",
     "prepublishOnly" : "npm test && npm run lint",
     "preversion" : "npm run lint",
-    "postinstall": "npm run build",
     "postversion" : "git push && git push --tags",
     "start": "npm run dist/index",
     "test": "mocha --reporter spec",

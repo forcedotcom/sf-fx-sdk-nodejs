@@ -5,4 +5,4 @@ npm-debug.log
 # Local development
 .vscode
 .DS_Store
-dist
+#dist
