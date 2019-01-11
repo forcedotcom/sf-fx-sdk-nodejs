@@ -1,11 +1,10 @@
-import * as sdk from './sf-sdk'
+import * as sdk from './sf-sdk';
 import EventManager from './events';
 import RestManager from './rest';
 
 const valueSeparator = /[,\s]+/;
 
 async function run(fx: sdk.SfFunction) {
-
     const config = new sdk.Config();
     const logger = sdk.logInit(config.isVerbose());
 
@@ -14,7 +13,4 @@ async function run(fx: sdk.SfFunction) {
     new EventManager(config, logger, fx);
 }
 
-export {
-    run,
-    sdk
-};
+export { run, sdk };

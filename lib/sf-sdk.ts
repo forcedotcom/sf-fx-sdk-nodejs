@@ -3,7 +3,6 @@ import * as jsforce from 'jsforce';
 import { nameFromLevel } from 'bunyan';
 
 export default class Config {
-
     private env;
 
     constructor() {
@@ -12,11 +11,11 @@ export default class Config {
     }
 
     public isVerbose(): boolean {
-        return this.env.VERBOSE === 'true' || this.env.VERBOSE === '1'
+        return this.env.VERBOSE === 'true' || this.env.VERBOSE === '1';
     }
 
     public isFinest(): boolean {
-        return this.env.FINEST === 'true' || this.env.FINEST === '1'
+        return this.env.FINEST === 'true' || this.env.FINEST === '1';
     }
 
     public getPort(): string {
@@ -55,13 +54,13 @@ interface Logger {
 }
 
 class NoOpLoggerImpl implements Logger {
-    log(msg: string, ...supportingData: any[]): void { }
-    shout(msg: string, ...supportingData: any[]): void { }
+    log(msg: string, ...supportingData: any[]): void {}
+    shout(msg: string, ...supportingData: any[]): void {}
 
-    debug(msg: string, ...supportingData: any[]): void { }
-    warn(msg: string, ...supportingData: any[]): void { }
-    error(msg: string, ...supportingData: any[]): void { }
-    info(msg: string, ...supportingData: any[]): void { }
+    debug(msg: string, ...supportingData: any[]): void {}
+    warn(msg: string, ...supportingData: any[]): void {}
+    error(msg: string, ...supportingData: any[]): void {}
+    info(msg: string, ...supportingData: any[]): void {}
 }
 
 class LoggerImpl implements Logger {
@@ -116,7 +115,7 @@ class UserContext {
             userContext.userId,
             userContext.salesforceBaseUrl,
             userContext.orgDomainUrl,
-            userContext.sessionId
+            userContext.sessionId,
         );
     }
 
@@ -126,8 +125,8 @@ class UserContext {
         public userId: string,
         public salesforceBaseUrl: string,
         public orgDomainUrl: string,
-        public sessionId: string) {
-    }
+        public sessionId: string,
+    ) {}
 }
 
 class Context {
@@ -146,25 +145,18 @@ class Context {
 
         const sfApi = new jsforce.Connection({
             instanceUrl: userCtx.salesforceBaseUrl,
-            accessToken : userCtx.sessionId,
-            version: context.apiVersion
+            accessToken: userCtx.sessionId,
+            version: context.apiVersion,
         });
 
         const result = await sfApi.query(`SELECT Username FROM User WHERE Id = '${userCtx.userId}'`);
         const record: any = result.records[0];
         logger.shout(`Identity via access token: ${record.Username}`);
 
-        const newCtx = new Context(
-            context.apiVersion,
-            userCtx,
-            sfApi,
-            logger
-        );
+        const newCtx = new Context(context.apiVersion, userCtx, sfApi, logger);
 
         delete payload.Context__c;
         delete payload.context;
-
-
 
         return newCtx;
     }
@@ -173,16 +165,12 @@ class Context {
         public apiVersion: string,
         public userContext: UserContext,
         public sfApi: jsforce.Connection,
-        public logger: Logger) {
-    }
+        public logger: Logger,
+    ) {}
 }
 
 class Event {
-    constructor(
-        public name: String,
-        public context: Context,
-        public payload: any) {
-    }
+    constructor(public name: String, public context: Context, public payload: any) {}
 
     getReplayId(): any {
         return this.payload.event.replayId;
@@ -198,7 +186,6 @@ class Event {
 }
 
 interface SfFunction {
-
     getName(): string;
 
     init(config: Config, logger: Logger): Promise<any>;
@@ -206,12 +193,4 @@ interface SfFunction {
     invoke(event: Event): Promise<any>;
 }
 
-export {
-    Config,
-    Logger,
-    logInit,
-    UserContext,
-    Context,
-    Event,
-    SfFunction
-}
+export { Config, Logger, logInit, UserContext, Context, Event, SfFunction };

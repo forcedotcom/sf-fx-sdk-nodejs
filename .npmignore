@@ -1,1 +1,4 @@
 lib/
+tsconfig.json
+tslint.json
+.prettierrc

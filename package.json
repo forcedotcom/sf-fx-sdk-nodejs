@@ -7,11 +7,18 @@
   "directories": {
     "lib": "lib"
   },
+  "files": [ "dist/**/*" ],
   "scripts": {
     "build": "tsc",
-    "lint": "tslint -c tslint.json 'src/**/*.ts'",
+    "format": "prettier --write \"lib/**/*.ts\" \"lib/**/*.js\"",
+    "lint": "tslint -c tslint.json 'lib/**/*.ts'",
+    "prepare" : "npm run build",
+    "prepublishOnly" : "npm test && npm run lint",
+    "preversion" : "npm run lint",
+    "postversion" : "git push && git push --tags",
     "start": "npm run dist/index",
-    "test": "mocha --reporter spec"
+    "test": "mocha --reporter spec",
+    "version" : "npm run format && git add -A src"
   },
   "repository": {
     "type": "git",
