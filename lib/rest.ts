@@ -34,6 +34,14 @@ export default class RestManager {
 
         restifyPromise.install(server, options); // Options is not required
 
+        server.get(
+            '/',
+            async (req: any, res: any, next: Function): Promise<any> => {
+                res.send(200, `Function '${this.fx.getName()}' is ready for service!`);
+                return next(false);
+            },
+        );
+
         server.post(
             '/invoke',
             async (req: any, res: any, next: Function): Promise<any> => {
