@@ -32,6 +32,10 @@ class RestManager {
             errorTransformer: alwaysBlameTheUserErrorTransformer,
         };
         restifyPromise.install(server, options); // Options is not required
+        server.get('/', async (req, res, next) => {
+            res.send(200, `Function '${this.fx.getName()}' is ready for service!`);
+            return next(false);
+        });
         server.post('/invoke', async (req, res, next) => {
             const payload = req.body;
             try {

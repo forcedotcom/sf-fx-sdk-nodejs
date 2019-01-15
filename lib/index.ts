@@ -2,15 +2,19 @@ import * as sdk from './sf-sdk';
 import EventManager from './events';
 import RestManager from './rest';
 
-const valueSeparator = /[,\s]+/;
-
-async function run(fx: sdk.SfFunction) {
+async function invoke(fx: sdk.SfFunction) {
     const config = new sdk.Config();
     const logger = sdk.logInit(config.isVerbose());
 
     await fx.init(config, logger);
+
+    // initialize http request handlers
     new RestManager(config, logger, fx);
-    new EventManager(config, logger, fx);
+
+    // initialize message consumer and producer clients
+    if (config.hasMessagingConfig()) {
+        new EventManager(config, logger, fx);
+    }
 }
 
-export { run, sdk };
+export { invoke, sdk };

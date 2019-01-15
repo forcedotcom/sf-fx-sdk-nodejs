@@ -31,6 +31,12 @@ class Config {
     getEventGroupId() {
         return this.env.KAFKA_GROUP_ID;
     }
+    hasMessagingConfig() {
+        return this.hasValue(this.getBrokerUrls()) && this.hasValue(this.getEventNames());
+    }
+    hasValue(value) {
+        return typeof value !== 'undefined' && value !== null;
+    }
 }
 exports.default = Config;
 exports.Config = Config;

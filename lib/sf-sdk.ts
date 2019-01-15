@@ -1,8 +1,8 @@
 import * as dotenv from 'dotenv';
 import * as jsforce from 'jsforce';
-import { nameFromLevel } from 'bunyan';
 
 export default class Config {
+
     private env;
 
     constructor() {
@@ -40,6 +40,14 @@ export default class Config {
 
     public getEventGroupId(): string {
         return this.env.KAFKA_GROUP_ID;
+    }
+
+    public hasMessagingConfig(): boolean {
+        return this.hasValue(this.getBrokerUrls()) && this.hasValue(this.getEventNames());
+    }
+
+    private hasValue(value: any): boolean {
+        return typeof value !== 'undefined' && value !== null;
     }
 }
 
