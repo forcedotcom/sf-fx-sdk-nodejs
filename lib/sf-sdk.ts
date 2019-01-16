@@ -34,12 +34,12 @@ export default class Config {
         return this.env.KAFKA_PREFIX;
     }
 
-    public getEventNames(): string {
-        return this.env.CONSUME_KAFKA_TOPIC_NAMES;
-    }
-
     public getEventGroupId(): string {
         return this.env.KAFKA_GROUP_ID;
+    }
+
+    public getEventNames(): string {
+        return this.env.CONSUME_TOPIC_NAMES;
     }
 
     public hasMessagingConfig(): boolean {
