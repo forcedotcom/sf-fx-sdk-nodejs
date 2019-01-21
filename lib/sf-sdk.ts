@@ -30,6 +30,10 @@ export default class Config {
         return this.env.KAFKA_URL;
     }
 
+    public getBrokerTimeout(): number {
+        return this.env.KAFKA_TIMEOUT || 20000;
+    }
+
     public getEventPrefix(): string {
         return this.env.KAFKA_PREFIX;
     }

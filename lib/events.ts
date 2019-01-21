@@ -3,7 +3,6 @@ import * as sdk from './sf-sdk';
 
 const valueSeparator = /[,\s]+/;
 const defaultKafkaGroupId = 'salesforce-data-connector';
-const connectTimeout = 20000; // sec
 
 export default class EventManager {
     public brokers: string;
@@ -62,19 +61,22 @@ export default class EventManager {
             )}; group: ${groupId}`,
         );
 
-        const connectTimoutId = setTimeout(() => {
+        const connectTimeout = this.config.getBrokerTimeout();
+        const connectTimoutFx = setTimeout(() => {
             const message = `Failed to connect Kafka consumer (${connectTimeout}-ms timeout)`;
             throw new Error(message);
         }, connectTimeout);
         this.consumer.connect();
 
         this.consumer.on('ready', (id, metadata) => {
-            this.consumer.subscribe(kafkaTopics);
-            this.consumer.consume();
             this.consumer.on('error', err => {
                 this.logger.log(`!      Error in Kafka consumer: ${err.stack}`);
             });
-            clearTimeout(connectTimoutId);
+
+            this.consumer.subscribe(kafkaTopics);
+            this.consumer.consume();
+
+            clearTimeout(connectTimoutFx);
             this.logger.log(`✅ Kafka is ready: ${id.name}`);
         });
 
