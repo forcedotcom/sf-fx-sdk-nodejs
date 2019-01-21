@@ -3,7 +3,7 @@ import * as sdk from './sf-sdk';
 
 const valueSeparator = /[,\s]+/;
 const defaultKafkaGroupId = 'salesforce-data-connector';
-const connectTimeout = 10000;
+const connectTimeout = 20000; // sec
 
 export default class EventManager {
     public brokers: string;

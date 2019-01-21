@@ -9,6 +9,8 @@
         ],
         "types": ["node"],
         "sourceMap": true,
+        "declaration":true,
+        "declarationDir": "./dist",
         "moduleResolution": "node",
         "emitDecoratorMetadata": true,
         "experimentalDecorators": true,

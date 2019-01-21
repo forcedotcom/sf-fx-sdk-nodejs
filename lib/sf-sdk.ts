@@ -157,10 +157,6 @@ class Context {
             version: context.apiVersion,
         });
 
-        const result = await sfApi.query(`SELECT Username FROM User WHERE Id = '${userCtx.userId}'`);
-        const record: any = result.records[0];
-        logger.shout(`Identity via access token: ${record.Username}`);
-
         const newCtx = new Context(context.apiVersion, userCtx, sfApi, logger);
 
         delete payload.Context__c;

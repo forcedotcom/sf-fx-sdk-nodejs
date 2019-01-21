@@ -25,11 +25,11 @@ class Config {
     getEventPrefix() {
         return this.env.KAFKA_PREFIX;
     }
-    getEventNames() {
-        return this.env.CONSUME_KAFKA_TOPIC_NAMES;
-    }
     getEventGroupId() {
         return this.env.KAFKA_GROUP_ID;
+    }
+    getEventNames() {
+        return this.env.CONSUME_TOPIC_NAMES;
     }
     hasMessagingConfig() {
         return this.hasValue(this.getBrokerUrls()) && this.hasValue(this.getEventNames());
@@ -122,9 +122,6 @@ class Context {
             accessToken: userCtx.sessionId,
             version: context.apiVersion,
         });
-        const result = await sfApi.query(`SELECT Username FROM User WHERE Id = '${userCtx.userId}'`);
-        const record = result.records[0];
-        logger.shout(`Identity via access token: ${record.Username}`);
         const newCtx = new Context(context.apiVersion, userCtx, sfApi, logger);
         delete payload.Context__c;
         delete payload.context;
