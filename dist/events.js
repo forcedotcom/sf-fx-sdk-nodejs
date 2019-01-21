@@ -4,7 +4,7 @@ const kafka = require("node-rdkafka");
 const sdk = require("./sf-sdk");
 const valueSeparator = /[,\s]+/;
 const defaultKafkaGroupId = 'salesforce-data-connector';
-const connectTimeout = 10000;
+const connectTimeout = 20000; // sec
 class EventManager {
     constructor(config, logger, fx) {
         this.config = config;
