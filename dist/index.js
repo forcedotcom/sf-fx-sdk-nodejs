@@ -14,6 +14,9 @@ async function invoke(fx) {
     if (config.hasMessagingConfig()) {
         new events_1.default(config, logger, fx);
     }
+    else {
+        logger.shout('Skipping event setup: configuration not provided or is incomplete.');
+    }
 }
 exports.invoke = invoke;
 //# sourceMappingURL=index.js.map

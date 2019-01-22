@@ -1,10 +1,11 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const kafka = require("node-rdkafka");
+const fs = require("fs");
+const path = require("path");
 const sdk = require("./sf-sdk");
 const valueSeparator = /[,\s]+/;
 const defaultKafkaGroupId = 'salesforce-data-connector';
-const connectTimeout = 20000; // sec
 class EventManager {
     constructor(config, logger, fx) {
         this.config = config;
@@ -23,6 +24,13 @@ class EventManager {
     }
     initConsumer() {
         this.logger.log('Initializing Kafka consumer');
+        fs.mkdirSync('.certs');
+        const trustedCert = path.join('.certs', 'KAFKA_TRUSTED_CERT');
+        fs.writeFileSync(trustedCert, this.config.getBrokerTrustedCert());
+        const clientCert = path.join('.certs', 'KAFKA_CLIENT_CERT');
+        fs.writeFileSync(clientCert, this.config.getBrokerClientCert());
+        const clientCertKey = path.join('.certs', 'KAFKA_CLIENT_CERT_KEY');
+        fs.writeFileSync(clientCertKey, this.config.getBrokerClientCertKey());
         const groupId = `${this.config.getEventPrefix()}${this.config.getEventGroupId() || defaultKafkaGroupId}`;
         const kafkaConfig = {
             'api.version.request': true,
@@ -33,9 +41,9 @@ class EventManager {
             'metadata.broker.list': this.brokers,
             'security.protocol': 'SSL',
             // SSL certs written by `.profile` script.
-            'ssl.ca.location': 'tmp/env/KAFKA_TRUSTED_CERT',
-            'ssl.certificate.location': 'tmp/env/KAFKA_CLIENT_CERT',
-            'ssl.key.location': 'tmp/env/KAFKA_CLIENT_CERT_KEY',
+            'ssl.ca.location': trustedCert,
+            'ssl.certificate.location': clientCert,
+            'ssl.key.location': '.certs/KAFKA_CLIENT_CERT_KEY',
         };
         if (this.config.isFinest()) {
             kafkaConfig['debug'] = 'all';
@@ -49,18 +57,19 @@ class EventManager {
         const prefix = this.config.getEventPrefix();
         const kafkaTopics = topicNames.map(topic => `${prefix}${topic}`);
         this.logger.shout(`Consuming Kafka ${kafkaTopics.length === 1 ? 'topic' : 'topics'}: ${kafkaTopics.join(', ')}; group: ${groupId}`);
-        const connectTimoutId = setTimeout(() => {
+        const connectTimeout = this.config.getBrokerTimeout();
+        const connectTimoutFx = setTimeout(() => {
             const message = `Failed to connect Kafka consumer (${connectTimeout}-ms timeout)`;
             throw new Error(message);
         }, connectTimeout);
         this.consumer.connect();
         this.consumer.on('ready', (id, metadata) => {
-            this.consumer.subscribe(kafkaTopics);
-            this.consumer.consume();
             this.consumer.on('error', err => {
                 this.logger.log(`!      Error in Kafka consumer: ${err.stack}`);
             });
-            clearTimeout(connectTimoutId);
+            this.consumer.subscribe(kafkaTopics);
+            this.consumer.consume();
+            clearTimeout(connectTimoutFx);
             this.logger.log(`✅ Kafka is ready: ${id.name}`);
         });
         this.consumer.on('data', async (data) => {

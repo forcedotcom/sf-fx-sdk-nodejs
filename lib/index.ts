@@ -14,6 +14,8 @@ async function invoke(fx: sdk.SfFunction) {
     // initialize message consumer and producer clients
     if (config.hasMessagingConfig()) {
         new EventManager(config, logger, fx);
+    } else {
+        logger.shout('Skipping event setup: configuration not provided or is incomplete.');
     }
 }
 

@@ -1,4 +1,6 @@
 import * as kafka from 'node-rdkafka';
+import * as fs from 'fs';
+import * as path from 'path';
 import * as sdk from './sf-sdk';
 
 const valueSeparator = /[,\s]+/;
@@ -27,6 +29,14 @@ export default class EventManager {
     private initConsumer() {
         this.logger.log('Initializing Kafka consumer');
 
+        fs.mkdirSync('.certs');
+        const trustedCert = path.join('.certs', 'KAFKA_TRUSTED_CERT');
+        fs.writeFileSync(trustedCert, this.config.getBrokerTrustedCert());
+        const clientCert = path.join('.certs', 'KAFKA_CLIENT_CERT');
+        fs.writeFileSync(clientCert, this.config.getBrokerClientCert());
+        const clientCertKey = path.join('.certs', 'KAFKA_CLIENT_CERT_KEY');
+        fs.writeFileSync(clientCertKey, this.config.getBrokerClientCertKey());
+
         const groupId = `${this.config.getEventPrefix()}${this.config.getEventGroupId() || defaultKafkaGroupId}`;
         const kafkaConfig = {
             'api.version.request': true,
@@ -37,9 +47,9 @@ export default class EventManager {
             'metadata.broker.list': this.brokers,
             'security.protocol': 'SSL',
             // SSL certs written by `.profile` script.
-            'ssl.ca.location': 'tmp/env/KAFKA_TRUSTED_CERT',
-            'ssl.certificate.location': 'tmp/env/KAFKA_CLIENT_CERT',
-            'ssl.key.location': 'tmp/env/KAFKA_CLIENT_CERT_KEY',
+            'ssl.ca.location': trustedCert,
+            'ssl.certificate.location': clientCert,
+            'ssl.key.location': '.certs/KAFKA_CLIENT_CERT_KEY',
         };
         if (this.config.isFinest()) {
             kafkaConfig['debug'] = 'all';

@@ -7,6 +7,10 @@ export default class Config {
     getPort(): string;
     getDyno(): string;
     getBrokerUrls(): string;
+    getBrokerTimeout(): number;
+    getBrokerClientCert(): string;
+    getBrokerClientCertKey(): string;
+    getBrokerTrustedCert(): string;
     getEventPrefix(): string;
     getEventGroupId(): string;
     getEventNames(): string;

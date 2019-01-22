@@ -31,7 +31,19 @@ export default class Config {
     }
 
     public getBrokerTimeout(): number {
-        return this.env.KAFKA_TIMEOUT || 20000;
+        return this.env.KAFKA_TIMEOUT || 10000;
+    }
+
+    public getBrokerClientCert(): string {
+        return this.env.KAFKA_CLIENT_CERT;
+    }
+
+    public getBrokerClientCertKey(): string {
+        return this.env.KAFKA_CLIENT_CERT_KEY;
+    }
+
+    public getBrokerTrustedCert(): string {
+        return this.env.KAFKA_TRUSTED_CERT;
     }
 
     public getEventPrefix(): string {
@@ -47,7 +59,11 @@ export default class Config {
     }
 
     public hasMessagingConfig(): boolean {
-        return this.hasValue(this.getBrokerUrls()) && this.hasValue(this.getEventNames());
+        return this.hasValue(this.getBrokerUrls())
+            && this.hasValue(this.getEventNames())
+            && this.hasValue(this.getBrokerClientCert())
+            && this.hasValue(this.getBrokerClientCertKey())
+            && this.hasValue(this.getBrokerTrustedCert());
     }
 
     private hasValue(value: any): boolean {
