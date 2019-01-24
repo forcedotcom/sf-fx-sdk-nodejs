@@ -41,7 +41,7 @@ export default class EventManager {
         this.logger.debug(`Wrote ${clientCert}`);
         const clientCertKey = path.join(certsDir, 'KAFKA_CLIENT_CERT_KEY');
         fs.writeFileSync(clientCertKey, this.config.getBrokerClientCertKey());
-        this.logger.debug(`Wrote ${clientCert}`);
+        this.logger.debug(`Wrote ${clientCertKey}`);
 
         const groupId = `${this.config.getEventPrefix()}${this.config.getEventGroupId() || defaultKafkaGroupId}`;
         const kafkaConfig = {
