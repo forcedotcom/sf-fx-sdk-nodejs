@@ -1,5 +1,5 @@
 {
-    "defaultSeverity": "error",
+    "defaultSeverity": "warn",
     "extends": [
         "tslint:recommended",
         "tslint-config-prettier"
@@ -12,6 +12,5 @@
         "quotemark": [true, "single"]
     },
     "rulesDirectory": [
-        "tslint-plugin-prettier"
     ]
 }

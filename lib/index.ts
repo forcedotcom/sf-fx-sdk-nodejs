@@ -1,4 +1,8 @@
 import * as sdk from './sf-sdk';
+const compositeApi = require('./composite-api');
+const config = require('./Config')
+const sObject = require('./SObject');
+const unitOfWork = require('./unit-of-work');
 import EventManager from './events';
 import RestManager from './rest';
 
@@ -19,4 +23,4 @@ async function invoke(fx: sdk.SfFunction) {
     }
 }
 
-export { invoke, sdk };
+export { invoke, compositeApi, config, sdk, unitOfWork, sObject };

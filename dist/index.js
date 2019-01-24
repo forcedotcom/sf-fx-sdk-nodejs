@@ -2,6 +2,14 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const sdk = require("./sf-sdk");
 exports.sdk = sdk;
+const compositeApi = require('./composite-api');
+exports.compositeApi = compositeApi;
+const config = require('./Config');
+exports.config = config;
+const sObject = require('./SObject');
+exports.sObject = sObject;
+const unitOfWork = require('./unit-of-work');
+exports.unitOfWork = unitOfWork;
 const events_1 = require("./events");
 const rest_1 = require("./rest");
 async function invoke(fx) {

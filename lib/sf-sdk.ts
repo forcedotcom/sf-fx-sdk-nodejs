@@ -194,7 +194,7 @@ class Context {
 }
 
 class Event {
-    constructor(public name: String, public context: Context, public payload: any) {}
+    constructor(public name: string, public context: Context, public payload: any) {}
 
     getReplayId(): any {
         return this.payload.event.replayId;

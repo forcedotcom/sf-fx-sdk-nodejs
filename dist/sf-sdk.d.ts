@@ -45,10 +45,10 @@ declare class Context {
     constructor(apiVersion: string, userContext: UserContext, sfApi: jsforce.Connection, logger: Logger);
 }
 declare class Event {
-    name: String;
+    name: string;
     context: Context;
     payload: any;
-    constructor(name: String, context: Context, payload: any);
+    constructor(name: string, context: Context, payload: any);
     getReplayId(): any;
     getValue(key: string): any;
     isHttp(): boolean;
