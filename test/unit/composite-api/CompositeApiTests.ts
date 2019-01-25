@@ -66,7 +66,7 @@ describe('CompositeApi Tests', () => {
         }
       }
     })
-      .post('/services/data/v' + config.apiVersion + '/composite/')
+      .post(`/services/data/v${config.apiVersion}/composite/`)
       .reply(HttpCodes.OK, {});
 
     const compositeApi: ICompositeApi = CompositeApi.newCompositeApi(config);
@@ -85,7 +85,7 @@ describe('CompositeApi Tests', () => {
       reqheaders: {
       }
     })
-      .post('/services/data/v' + config.apiVersion + '/composite/')
+      .post(`/services/data/v${config.apiVersion}/composite/`)
       .reply(HttpCodes.OK, {
         'compositeResponse': [{
           'body': { 'id': '001xx000003EG3oAAG', 'success': true, 'errors': [] },
@@ -122,7 +122,7 @@ describe('CompositeApi Tests', () => {
       reqheaders: {
       }
     })
-      .post('/services/data/v' + config.apiVersion + '/composite/')
+      .post(`/services/data/v${config.apiVersion}/composite/`)
       .reply(HttpCodes.OK, {
         'compositeResponse': [{
           'body': { 'id': '001xx000003EG3oAAG', 'success': true, 'errors': [] },
@@ -154,7 +154,7 @@ describe('CompositeApi Tests', () => {
       reqheaders: {
       }
     })
-      .post('/services/data/v' + config.apiVersion + '/composite/')
+      .post(`/services/data/v${config.apiVersion}/composite/`)
       .reply(HttpCodes.OK, {
         'compositeResponse': [{
           'body': { 'id': '001xx000003EG3oAAG', 'success': true, 'errors': [] },
@@ -189,7 +189,7 @@ describe('CompositeApi Tests', () => {
       reqheaders: {
       }
     })
-      .post('/services/data/v' + config.apiVersion + '/composite/')
+      .post(`/services/data/v${config.apiVersion}/composite/`)
       .reply(HttpCodes.OK, {
         'compositeResponse': [{
           'body': { 'id': '001xx000003EG3oAAG', 'success': true, 'errors': [] },
@@ -220,7 +220,7 @@ describe('CompositeApi Tests', () => {
       reqheaders: {
       }
     })
-      .post('/services/data/v' + config.apiVersion + '/composite/')
+      .post(`/services/data/v${config.apiVersion}/composite/`)
       .reply(HttpCodes.OK, {
         'compositeResponse': [{
           'body': [{ 'message': 'Required fields are missing: [Name]', 'errorCode': 'REQUIRED_FIELD_MISSING', 'fields': ['Name'] }],
@@ -256,7 +256,7 @@ describe('CompositeApi Tests', () => {
       reqheaders: {
       }
     })
-      .post('/services/data/v' + config.apiVersion + '/composite/')
+      .post(`/services/data/v${config.apiVersion}/composite/`)
       .reply(HttpCodes.OK, {
         'compositeResponse': [{
           'body': [{ 'message': 'Required fields are missing: [Name]', 'errorCode': 'REQUIRED_FIELD_MISSING', 'fields': ['Name'] }],
@@ -289,7 +289,7 @@ describe('CompositeApi Tests', () => {
       reqheaders: {
       }
     })
-      .post('/services/data/v' + config.apiVersion + '/composite/')
+      .post(`/services/data/v${config.apiVersion}/composite/`)
       .reply(HttpCodes.OK, {
         'compositeResponse': [{
           'body': { 'id': '001xx000003EG3oAAG', 'success': true, 'errors': [] },
