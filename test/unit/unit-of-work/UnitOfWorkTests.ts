@@ -3,6 +3,7 @@ import { stub, restore } from 'sinon';
 import 'mocha';
 import nock = require('nock');
 import { v4 as uuid } from 'uuid';
+import { HttpCodes } from 'typed-rest-client/HttpClient';
 
 import { IConfig, ISObject, IUnitOfWork, IUnitOfWorkResponse, IUnitOfWorkResult, Method } from '../../../lib/Interfaces';
 import { CompositeApi, Config, SObject, UnitOfWork } from '../../../lib';
@@ -11,6 +12,9 @@ const instanceUrl: string = 'http://localhost:3000';
 const apiVersion: string = '45.0';
 const sessionId: string = 'sessionId1234';
 const myConfig: IConfig = new Config(instanceUrl, apiVersion, sessionId);
+
+const httpCodeCreated:number = 201;
+const httpCodeNoContent:number = 204;
 
 describe('UnitOfWork Tests', () => {
     afterEach(() => {
@@ -24,12 +28,12 @@ describe('UnitOfWork Tests', () => {
 
         nock(instanceUrl)
             .post('/services/data/v' + myConfig.apiVersion + '/composite/')
-            .reply(CompositeApi.HttpCodes.OK, {
+            .reply(HttpCodes.OK, {
                 'compositeResponse':
                     [{
                         'body': { 'id': '001xx000003EG4jAAG', 'success': true, 'errors': [] },
                         'httpHeaders': { 'Location': '/services/data/v45.0/sobjects/Account/001xx000003EG4jAAG' },
-                        'httpStatusCode': CompositeApi.HttpCodes.Created,
+                        'httpStatusCode': httpCodeCreated,
                         'referenceId': account.referenceId
                     }]
             });
@@ -66,11 +70,11 @@ describe('UnitOfWork Tests', () => {
 
         nock(instanceUrl)
             .post('/services/data/v' + myConfig.apiVersion + '/composite/')
-            .reply(CompositeApi.HttpCodes.OK, {
+            .reply(HttpCodes.OK, {
                 'compositeResponse': [{
                     'body': null,
                     'httpHeaders': {},
-                    'httpStatusCode': CompositeApi.HttpCodes.NoContent,
+                    'httpStatusCode': httpCodeNoContent,
                     'referenceId': mockedReferenceId
                 }]
             });
@@ -110,18 +114,18 @@ describe('UnitOfWork Tests', () => {
 
         nock(instanceUrl)
             .post('/services/data/v' + myConfig.apiVersion + '/composite/')
-            .reply(CompositeApi.HttpCodes.OK, {
+            .reply(HttpCodes.OK, {
                 'compositeResponse': [
                     {
                         'body': { 'id': '001xx000003EG6oAAG', 'success': true, 'errors': [] },
                         'httpHeaders': { 'Location': '/services/data/v45.0/sobjects/Account/001xx000003EG6oAAG' },
-                        'httpStatusCode': CompositeApi.HttpCodes.Created,
+                        'httpStatusCode': httpCodeCreated,
                         'referenceId': account.referenceId
                     },
                     {
                         'body': null,
                         'httpHeaders': {},
-                        'httpStatusCode': CompositeApi.HttpCodes.NoContent,
+                        'httpStatusCode': httpCodeNoContent,
                         'referenceId': mockedReferenceId
                     }]
             });
@@ -161,11 +165,11 @@ describe('UnitOfWork Tests', () => {
 
         nock(instanceUrl)
             .post('/services/data/v' + myConfig.apiVersion + '/composite/')
-            .reply(CompositeApi.HttpCodes.OK, {
+            .reply(HttpCodes.OK, {
                 'compositeResponse': [{
                     'body': null,
                     'httpHeaders': {},
-                    'httpStatusCode': CompositeApi.HttpCodes.NoContent,
+                    'httpStatusCode': httpCodeNoContent,
                     'referenceId': mockedReferenceId
                 }]
             }

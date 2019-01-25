@@ -1,39 +1,8 @@
-import * as hm from 'typed-rest-client/Handlers';
-import * as httpm from 'typed-rest-client/HttpClient';
-import * as trcIfm from 'typed-rest-client/Interfaces';
+import { BearerCredentialHandler } from 'typed-rest-client/Handlers';
+import { HttpClient, HttpClientResponse, HttpCodes } from 'typed-rest-client/HttpClient';
+import { IHeaders} from 'typed-rest-client/Interfaces';
 
 import { ICompositeApi, ICompositeRequest, ICompositeResponse, ICompositeSubrequest, ICompositeSubresponse, IConfig, IError } from '../Interfaces';
-
-export enum HttpCodes {
-    OK = 200,
-    Created = 201,
-    NoContent = 204,
-    MultipleChoices = 300,
-    MovedPermanently = 301,
-    ResourceMoved = 302,
-    SeeOther = 303,
-    NotModified = 304,
-    UseProxy = 305,
-    SwitchProxy = 306,
-    TemporaryRedirect = 307,
-    PermanentRedirect = 308,
-    BadRequest = 400,
-    Unauthorized = 401,
-    PaymentRequired = 402,
-    Forbidden = 403,
-    NotFound = 404,
-    MethodNotAllowed = 405,
-    NotAcceptable = 406,
-    ProxyAuthenticationRequired = 407,
-    RequestTimeout = 408,
-    Conflict = 409,
-    Gone = 410,
-    InternalServerError = 500,
-    NotImplemented = 501,
-    BadGateway = 502,
-    ServiceUnavailable = 503,
-    GatewayTimeout = 504,
-}
 
 class CompositeSubresponse implements ICompositeSubresponse {
     private static HEADER_LOCATION: string = 'Location';
@@ -143,14 +112,14 @@ class CompositeApi implements ICompositeApi {
     }
 
     public async invoke(compositeRequest: ICompositeRequest): Promise<ICompositeResponse> {
-        const bearerCredentialHandler: hm.BearerCredentialHandler =
-            new hm.BearerCredentialHandler(this._config.sessionId);
-        const httpClient: httpm.HttpClient = new httpm.HttpClient('sf-fx-node', [bearerCredentialHandler]);
+        const bearerCredentialHandler: BearerCredentialHandler =
+            new BearerCredentialHandler(this._config.sessionId);
+        const httpClient: HttpClient = new HttpClient('sf-fx-node', [bearerCredentialHandler]);
         const path: string = `/services/data/v${this._config.apiVersion}/composite/`;
-        const headers: trcIfm.IHeaders = { 'Content-Type': 'application/json' };
+        const headers: IHeaders = { 'Content-Type': 'application/json' };
         const data: string = JSON.stringify(compositeRequest);
 
-        const response: httpm.HttpClientResponse =
+        const response: HttpClientResponse =
             await httpClient.post(this._config.instanceUrl + path, data, headers);
         if (response.message.statusCode === HttpCodes.OK) {
             const body: string = await response.readBody();

@@ -1,10 +1,9 @@
-import { HttpCodes, newCompositeApi } from './CompositeApi';
+import { newCompositeApi } from './CompositeApi';
 import { newCompositeRequest } from './CompositeRequest';
 import { deleteBuilder, describeBuilder, httpGETBuilder, insertBuilder, patchBuilder, putBuilder } from './CompositeSubrequest';
 
 // tslint:disable-next-line:variable-name
 export const CompositeApi = {
-    HttpCodes,
     deleteBuilder,
     describeBuilder,
     httpGETBuilder,

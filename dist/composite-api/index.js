@@ -5,7 +5,6 @@ const CompositeRequest_1 = require("./CompositeRequest");
 const CompositeSubrequest_1 = require("./CompositeSubrequest");
 // tslint:disable-next-line:variable-name
 exports.CompositeApi = {
-    HttpCodes: CompositeApi_1.HttpCodes,
     deleteBuilder: CompositeSubrequest_1.deleteBuilder,
     describeBuilder: CompositeSubrequest_1.describeBuilder,
     httpGETBuilder: CompositeSubrequest_1.httpGETBuilder,

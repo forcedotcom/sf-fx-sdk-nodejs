@@ -1,45 +1,14 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const hm = require("typed-rest-client/Handlers");
-const httpm = require("typed-rest-client/HttpClient");
-var HttpCodes;
-(function (HttpCodes) {
-    HttpCodes[HttpCodes["OK"] = 200] = "OK";
-    HttpCodes[HttpCodes["Created"] = 201] = "Created";
-    HttpCodes[HttpCodes["NoContent"] = 204] = "NoContent";
-    HttpCodes[HttpCodes["MultipleChoices"] = 300] = "MultipleChoices";
-    HttpCodes[HttpCodes["MovedPermanently"] = 301] = "MovedPermanently";
-    HttpCodes[HttpCodes["ResourceMoved"] = 302] = "ResourceMoved";
-    HttpCodes[HttpCodes["SeeOther"] = 303] = "SeeOther";
-    HttpCodes[HttpCodes["NotModified"] = 304] = "NotModified";
-    HttpCodes[HttpCodes["UseProxy"] = 305] = "UseProxy";
-    HttpCodes[HttpCodes["SwitchProxy"] = 306] = "SwitchProxy";
-    HttpCodes[HttpCodes["TemporaryRedirect"] = 307] = "TemporaryRedirect";
-    HttpCodes[HttpCodes["PermanentRedirect"] = 308] = "PermanentRedirect";
-    HttpCodes[HttpCodes["BadRequest"] = 400] = "BadRequest";
-    HttpCodes[HttpCodes["Unauthorized"] = 401] = "Unauthorized";
-    HttpCodes[HttpCodes["PaymentRequired"] = 402] = "PaymentRequired";
-    HttpCodes[HttpCodes["Forbidden"] = 403] = "Forbidden";
-    HttpCodes[HttpCodes["NotFound"] = 404] = "NotFound";
-    HttpCodes[HttpCodes["MethodNotAllowed"] = 405] = "MethodNotAllowed";
-    HttpCodes[HttpCodes["NotAcceptable"] = 406] = "NotAcceptable";
-    HttpCodes[HttpCodes["ProxyAuthenticationRequired"] = 407] = "ProxyAuthenticationRequired";
-    HttpCodes[HttpCodes["RequestTimeout"] = 408] = "RequestTimeout";
-    HttpCodes[HttpCodes["Conflict"] = 409] = "Conflict";
-    HttpCodes[HttpCodes["Gone"] = 410] = "Gone";
-    HttpCodes[HttpCodes["InternalServerError"] = 500] = "InternalServerError";
-    HttpCodes[HttpCodes["NotImplemented"] = 501] = "NotImplemented";
-    HttpCodes[HttpCodes["BadGateway"] = 502] = "BadGateway";
-    HttpCodes[HttpCodes["ServiceUnavailable"] = 503] = "ServiceUnavailable";
-    HttpCodes[HttpCodes["GatewayTimeout"] = 504] = "GatewayTimeout";
-})(HttpCodes = exports.HttpCodes || (exports.HttpCodes = {}));
+const Handlers_1 = require("typed-rest-client/Handlers");
+const HttpClient_1 = require("typed-rest-client/HttpClient");
 class CompositeSubresponse {
     constructor(compositeSubresponse) {
         this.httpHeaders = compositeSubresponse.httpHeaders;
         this.httpStatusCode = compositeSubresponse.httpStatusCode;
         this.referenceId = compositeSubresponse.referenceId;
         // The response body has different meaning depending if there was an error
-        if (compositeSubresponse.httpStatusCode < HttpCodes.BadRequest) {
+        if (compositeSubresponse.httpStatusCode < HttpClient_1.HttpCodes.BadRequest) {
             this._body = compositeSubresponse.body;
         }
         else {
@@ -53,7 +22,7 @@ class CompositeSubresponse {
         }
     }
     get body() {
-        if (this.httpStatusCode < HttpCodes.BadRequest) {
+        if (this.httpStatusCode < HttpClient_1.HttpCodes.BadRequest) {
             return this._body;
         }
         else {
@@ -61,7 +30,7 @@ class CompositeSubresponse {
         }
     }
     get errors() {
-        if (this.httpStatusCode >= HttpCodes.BadRequest) {
+        if (this.httpStatusCode >= HttpClient_1.HttpCodes.BadRequest) {
             return this._errors;
         }
         else {
@@ -77,7 +46,7 @@ class CompositeSubresponse {
         }
     }
     get isSuccess() {
-        return (this.httpStatusCode && this.httpStatusCode < HttpCodes.BadRequest);
+        return (this.httpStatusCode && this.httpStatusCode < HttpClient_1.HttpCodes.BadRequest);
     }
     get location() {
         if (this.httpHeaders && this.httpHeaders[CompositeSubresponse.HEADER_LOCATION]) {
@@ -118,13 +87,13 @@ class CompositeApi {
         this._config = config;
     }
     async invoke(compositeRequest) {
-        const bearerCredentialHandler = new hm.BearerCredentialHandler(this._config.sessionId);
-        const httpClient = new httpm.HttpClient('sf-fx-node', [bearerCredentialHandler]);
+        const bearerCredentialHandler = new Handlers_1.BearerCredentialHandler(this._config.sessionId);
+        const httpClient = new HttpClient_1.HttpClient('sf-fx-node', [bearerCredentialHandler]);
         const path = `/services/data/v${this._config.apiVersion}/composite/`;
         const headers = { 'Content-Type': 'application/json' };
         const data = JSON.stringify(compositeRequest);
         const response = await httpClient.post(this._config.instanceUrl + path, data, headers);
-        if (response.message.statusCode === HttpCodes.OK) {
+        if (response.message.statusCode === HttpClient_1.HttpCodes.OK) {
             const body = await response.readBody();
             const compositeResponse = new CompositeResponse(body);
             return compositeResponse;

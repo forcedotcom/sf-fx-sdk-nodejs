@@ -1,7 +1,10 @@
+import { fail } from 'assert';
 import { expect } from 'chai';
 import 'mocha';
 import nock = require('nock');
-import { fail } from 'assert';
+import { HttpCodes } from 'typed-rest-client/HttpClient';
+
+const httpCodeCreated:number = 201;
 
 import {
   ICompositeApi, IConfig, ICompositeRequest, ICompositeResponse, ICompositeSubresponse, ICompositeSubrequest,
@@ -33,12 +36,12 @@ describe('CompositeApi Tests', () => {
     let capturedCompositeRequest: ICompositeRequest;
 
     nock(instanceUrl)
-      .post('/services/data/v' + config.apiVersion + '/composite/',
+      .post(`/services/data/v${config.apiVersion}/composite/`,
         function (body: any) {
           capturedCompositeRequest = body;
           return true;
         })
-      .reply(CompositeApi.HttpCodes.OK, {});
+      .reply(HttpCodes.OK, {});
 
     const compositeApi: ICompositeApi = CompositeApi.newCompositeApi(config);
     await compositeApi.invoke(compositeRequest);
@@ -64,7 +67,7 @@ describe('CompositeApi Tests', () => {
       }
     })
       .post('/services/data/v' + config.apiVersion + '/composite/')
-      .reply(CompositeApi.HttpCodes.OK, {});
+      .reply(HttpCodes.OK, {});
 
     const compositeApi: ICompositeApi = CompositeApi.newCompositeApi(config);
     await compositeApi.invoke(compositeRequest);
@@ -83,11 +86,11 @@ describe('CompositeApi Tests', () => {
       }
     })
       .post('/services/data/v' + config.apiVersion + '/composite/')
-      .reply(CompositeApi.HttpCodes.OK, {
+      .reply(HttpCodes.OK, {
         'compositeResponse': [{
           'body': { 'id': '001xx000003EG3oAAG', 'success': true, 'errors': [] },
           'httpHeaders': { 'Location': '/services/data/v45.0/sobjects/Account/001xx000003EG3oAAG' },
-          'httpStatusCode': CompositeApi.HttpCodes.Created,
+          'httpStatusCode': httpCodeCreated,
           'referenceId': compositeSubRequest.referenceId
         }]
       });
@@ -107,7 +110,7 @@ describe('CompositeApi Tests', () => {
     expect(compositeSubResponseFromIndex).to.deep.equal(compositeSubResponse);
 
     expect(compositeSubResponse.referenceId).to.equal(compositeSubRequest.referenceId);
-    expect(compositeSubResponse.httpStatusCode).to.equal(CompositeApi.HttpCodes.Created);
+    expect(compositeSubResponse.httpStatusCode).to.equal(httpCodeCreated);
   });
 
   it('Composite Api Correctly Parses response headers', async () => {
@@ -120,11 +123,11 @@ describe('CompositeApi Tests', () => {
       }
     })
       .post('/services/data/v' + config.apiVersion + '/composite/')
-      .reply(CompositeApi.HttpCodes.OK, {
+      .reply(HttpCodes.OK, {
         'compositeResponse': [{
           'body': { 'id': '001xx000003EG3oAAG', 'success': true, 'errors': [] },
           'httpHeaders': { 'Location': '/services/data/v45.0/sobjects/Account/001xx000003EG3oAAG' },
-          'httpStatusCode': CompositeApi.HttpCodes.Created,
+          'httpStatusCode': httpCodeCreated,
           'referenceId': compositeSubRequest.referenceId
         }]
       });
@@ -152,11 +155,11 @@ describe('CompositeApi Tests', () => {
       }
     })
       .post('/services/data/v' + config.apiVersion + '/composite/')
-      .reply(CompositeApi.HttpCodes.OK, {
+      .reply(HttpCodes.OK, {
         'compositeResponse': [{
           'body': { 'id': '001xx000003EG3oAAG', 'success': true, 'errors': [] },
           'httpHeaders': { 'Location': '/services/data/v45.0/sobjects/Account/001xx000003EG3oAAG' },
-          'httpStatusCode': CompositeApi.HttpCodes.Created,
+          'httpStatusCode': httpCodeCreated,
           'referenceId': compositeSubRequest.referenceId
         }]
       });
@@ -187,11 +190,11 @@ describe('CompositeApi Tests', () => {
       }
     })
       .post('/services/data/v' + config.apiVersion + '/composite/')
-      .reply(CompositeApi.HttpCodes.OK, {
+      .reply(HttpCodes.OK, {
         'compositeResponse': [{
           'body': { 'id': '001xx000003EG3oAAG', 'success': true, 'errors': [] },
           'httpHeaders': { 'Location': '/services/data/v45.0/sobjects/Account/001xx000003EG3oAAG' },
-          'httpStatusCode': CompositeApi.HttpCodes.Created,
+          'httpStatusCode': httpCodeCreated,
           'referenceId': compositeSubRequest.referenceId
         }]
       });
@@ -218,10 +221,10 @@ describe('CompositeApi Tests', () => {
       }
     })
       .post('/services/data/v' + config.apiVersion + '/composite/')
-      .reply(CompositeApi.HttpCodes.OK, {
+      .reply(HttpCodes.OK, {
         'compositeResponse': [{
           'body': [{ 'message': 'Required fields are missing: [Name]', 'errorCode': 'REQUIRED_FIELD_MISSING', 'fields': ['Name'] }],
-          'httpHeaders': {}, 'httpStatusCode': CompositeApi.HttpCodes.BadRequest,
+          'httpHeaders': {}, 'httpStatusCode': HttpCodes.BadRequest,
           'referenceId': compositeSubRequest.referenceId
         }]
       }
@@ -254,11 +257,11 @@ describe('CompositeApi Tests', () => {
       }
     })
       .post('/services/data/v' + config.apiVersion + '/composite/')
-      .reply(CompositeApi.HttpCodes.OK, {
+      .reply(HttpCodes.OK, {
         'compositeResponse': [{
           'body': [{ 'message': 'Required fields are missing: [Name]', 'errorCode': 'REQUIRED_FIELD_MISSING', 'fields': ['Name'] }],
           'httpHeaders': {},
-          'httpStatusCode': CompositeApi.HttpCodes.BadRequest,
+          'httpStatusCode': HttpCodes.BadRequest,
           'referenceId': compositeSubRequest.referenceId
         }]
       }
@@ -287,11 +290,11 @@ describe('CompositeApi Tests', () => {
       }
     })
       .post('/services/data/v' + config.apiVersion + '/composite/')
-      .reply(CompositeApi.HttpCodes.OK, {
+      .reply(HttpCodes.OK, {
         'compositeResponse': [{
           'body': { 'id': '001xx000003EG3oAAG', 'success': true, 'errors': [] },
           'httpHeaders': { 'Location': '/services/data/v45.0/sobjects/Account/001xx000003EG3oAAG' },
-          'httpStatusCode': CompositeApi.HttpCodes.Created,
+          'httpStatusCode': httpCodeCreated,
           'referenceId': compositeSubRequest.referenceId
         }]
       });
