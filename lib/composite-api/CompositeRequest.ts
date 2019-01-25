@@ -1,11 +1,11 @@
 import * as _ from 'lodash';
 
-import * as sfxif from '../Interfaces';
+import { ICompositeRequest, ICompositeSubrequest } from '../Interfaces';
 
-class CompositeRequest implements sfxif.ICompositeRequest {
+class CompositeRequest implements ICompositeRequest {
     private allOrNone: boolean;
     // Named to match the composite api schema. This is actually an array of ICompositeSubrequest
-    private compositeRequest: Array<sfxif.ICompositeSubrequest>;
+    private compositeRequest: ICompositeSubrequest[];
 
     constructor() {
         this.allOrNone = true;
@@ -20,17 +20,17 @@ class CompositeRequest implements sfxif.ICompositeRequest {
         return this.allOrNone;
     }
 
-    public addSubrequest(compositeSubrequest: sfxif.ICompositeSubrequest): void {
+    public addSubrequest(compositeSubrequest: ICompositeSubrequest): void {
         this.compositeRequest.push(compositeSubrequest);
     }
 
-    public get subrequests(): ReadonlyArray<sfxif.ICompositeSubrequest> {
-        let ro: ReadonlyArray<sfxif.ICompositeSubrequest> = this.compositeRequest;
+    public get subrequests(): ReadonlyArray<ICompositeSubrequest> {
+        const ro: ReadonlyArray<ICompositeSubrequest> = this.compositeRequest;
         return ro;
     }
 
-    public getSubrequest(referenceId: string): sfxif.ICompositeSubrequest {
-        for (let compositeSubrequest of this.compositeRequest) {
+    public getSubrequest(referenceId: string): ICompositeSubrequest {
+        for (const compositeSubrequest of this.compositeRequest) {
             if (compositeSubrequest.referenceId === referenceId) {
                 return compositeSubrequest;
             }
@@ -40,6 +40,6 @@ class CompositeRequest implements sfxif.ICompositeRequest {
     }
 }
 
-export function newCompositeRequest():sfxif.ICompositeRequest {
+export function newCompositeRequest():ICompositeRequest {
     return new CompositeRequest();
 }

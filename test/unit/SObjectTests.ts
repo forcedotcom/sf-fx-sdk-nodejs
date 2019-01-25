@@ -1,35 +1,35 @@
 import { assert, expect } from 'chai';
 import 'mocha';
 
-import * as sfxif from '../../lib/Interfaces';
-const index = require('../../lib')
+import { ISObject } from '../../lib/Interfaces';
+import { SObject } from '../../lib';
 
 describe('SObject Tests', () => {
-    let sObject: sfxif.ISObject = null;
+    let sObject: ISObject = null;
 
     beforeEach(function () {
-        sObject = new index.sObject.SObject('Account');
+        sObject = new SObject('Account');
     });
 
     it('sObjectType is Account', () => {
-        expect(sObject.getSObjectType()).to.equal('Account');
+        expect(sObject.sObjectType).to.equal('Account');
     });
 
     it('uuid exists', () => {
-        expect(sObject.getUuid()).to.exist;
-        expect(sObject.getUuid()).to.have.lengthOf(36);
+        expect(sObject.uuid).to.exist;
+        expect(sObject.uuid).to.have.lengthOf(36);
     });
 
     it('id is set/get', () => {
         const expectedId: string = 'an_id';
 
-        sObject.id(expectedId);
-        expect(sObject.getId()).to.equal(expectedId);
+        sObject.withId(expectedId);
+        expect(sObject.id).to.equal(expectedId);
     });
 
     it('getReferenceId starts with sObjectType Name', () => {
-        expect(sObject.getReferenceId()).to.match(/^Account_/);
-        expect(sObject.getReferenceId()).to.have.lengthOf(40);
+        expect(sObject.referenceId).to.match(/^Account_/);
+        expect(sObject.referenceId).to.have.lengthOf(40);
     });
 
     it('setValue with single value', () => {
@@ -38,7 +38,7 @@ describe('SObject Tests', () => {
 
         sObject.setValue(key, value);
 
-        const values: { [key: string]: any } = sObject.getValues();
+        const values: { [key: string]: any } = sObject.values;
         expect(values).to.exist;
 
         const keys: string[] = Object.keys(values);
@@ -57,7 +57,7 @@ describe('SObject Tests', () => {
         sObject.setValue(key1, value1);
         sObject.setValue(key2, value2);
 
-        const values: { [key: string]: any } = sObject.getValues();
+        const values: { [key: string]: any } = sObject.values;
         expect(values).to.exist;
 
         const keys: string[] = Object.keys(values);

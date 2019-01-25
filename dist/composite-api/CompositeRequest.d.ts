@@ -1,2 +1,2 @@
-import * as sfxif from '../Interfaces';
-export declare function newCompositeRequest(): sfxif.ICompositeRequest;
+import { ICompositeRequest } from '../Interfaces';
+export declare function newCompositeRequest(): ICompositeRequest;

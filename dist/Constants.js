@@ -1,4 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.CURRENT_API_VERSION = "45.0";
+class Constants {
+}
+Constants.CURRENT_API_VERSION = '45.0';
+exports.Constants = Constants;
+;
 //# sourceMappingURL=Constants.js.map

@@ -1,21 +1,24 @@
 export enum Method {
-    DELETE = "DELETE",
-    GET = "GET",
-    PATCH = "PATCH",
-    POST = "POST",
-    PUT = "PUT"
+    DELETE = 'DELETE',
+    GET = 'GET',
+    PATCH = 'PATCH',
+    POST = 'POST',
+    PUT = 'PUT'
 }
 
+export interface IValues { [key: string]: any; };
+
+
 export interface ISObject {
-    getSObjectType(): string;
-    getUuid(): string;
-    id(id: string): ISObject;
-    getId(): string;
-    getValues(): { [key: string]: any };
-    setValue(key: string, value: any): any;
+    readonly fkId: string;
+    readonly id: string;
+    readonly referenceId: string;
+    readonly sObjectType: string;
+    readonly uuid: string;
+    readonly values: IValues;
     named(name: string): ISObject;
-    getReferenceId(): string;
-    getFkId(): string;
+    setValue(key: string, value: any): any;
+    withId(id: string): ISObject;
 }
 
 export interface ICompositeSubrequest {
@@ -32,8 +35,8 @@ export interface ICompositeSubrequestBuilder {
     id(id: string): ICompositeSubrequestBuilder;
     sObjectType(sObjectType: string): ICompositeSubrequestBuilder;
     sObject(sObject: ISObject): ICompositeSubrequestBuilder;
-    value(key: string, value: any): ICompositeSubrequestBuilder;
-    values(values: { [key: string]: any }): ICompositeSubrequestBuilder;
+    addValue(key: string, value: any): ICompositeSubrequestBuilder;
+    addValues(values: { [key: string]: any }): ICompositeSubrequestBuilder;
     named(name: string): ICompositeSubrequestBuilder;
     apiVersion(apiVersion: string): ICompositeSubrequestBuilder;
     header(key: string, value: string): ICompositeSubrequestBuilder;
@@ -42,10 +45,10 @@ export interface ICompositeSubrequestBuilder {
 }
 
 export interface ICompositeRequest {
-    setAllOrNone(allOrNone: boolean): void;
-    addSubrequest(compositeSubrequest: ICompositeSubrequest): void;
     readonly isAllOrNone: boolean;
     readonly subrequests: ReadonlyArray<ICompositeSubrequest>;
+    addSubrequest(compositeSubrequest: ICompositeSubrequest): void;
+    setAllOrNone(allOrNone: boolean): void;
     getSubrequest(referenceId: string): ICompositeSubrequest;
 }
 

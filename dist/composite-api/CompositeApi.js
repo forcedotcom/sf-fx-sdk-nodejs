@@ -45,9 +45,9 @@ class CompositeSubresponse {
         else {
             const errors = [];
             if (compositeSubresponse.body) {
-                for (var i = 0; i < compositeSubresponse.body.length; i++) {
-                    errors.push(compositeSubresponse.body[i]);
-                }
+                compositeSubresponse.body.forEach((element) => {
+                    errors.push(element);
+                });
             }
             this._errors = errors;
         }
@@ -65,7 +65,7 @@ class CompositeSubresponse {
             return this._errors;
         }
         else {
-            throw new Error("Errors is not valid when there hasn't been an error. Call #errors installed.");
+            throw new Error(`Errors is not valid when there hasn't been an error. Call #errors installed.`);
         }
     }
     get id() {
@@ -90,27 +90,27 @@ class CompositeSubresponse {
 }
 CompositeSubresponse.HEADER_LOCATION = 'Location';
 CompositeSubresponse.KEY_ID = 'id';
-CompositeSubresponse.KEY_SUCCESS = 'success';
+;
 class CompositeResponse {
+    constructor(json) {
+        const compositeResponseJsonObject = JSON.parse(json);
+        const compositeSubResponses = compositeResponseJsonObject.compositeResponse;
+        if (compositeSubResponses) {
+            compositeSubResponses.forEach((element, index) => {
+                // Replace the json object with one that contains the location method
+                compositeSubResponses[index] = new CompositeSubresponse(element);
+            });
+        }
+        this.compositeSubresponses = compositeSubResponses;
+    }
     getCompositeSubresponse(compositeSubrequest) {
         const referenceId = compositeSubrequest.referenceId;
-        for (let compositeSubResponse of this.compositeSubresponses) {
+        for (const compositeSubResponse of this.compositeSubresponses) {
             if (compositeSubResponse.referenceId === referenceId) {
                 return compositeSubResponse;
             }
         }
         throw new Error('Unknown referenceId: ' + referenceId);
-    }
-    constructor(json) {
-        const jsonAsObj = JSON.parse(json);
-        let compositeSubResponses = jsonAsObj['compositeResponse'];
-        if (compositeSubResponses) {
-            for (var i = 0; i < compositeSubResponses.length; i++) {
-                // Replace the json object with one that contains the location method
-                compositeSubResponses[i] = new CompositeSubresponse(compositeSubResponses[i]);
-            }
-        }
-        this.compositeSubresponses = compositeSubResponses;
     }
 }
 class CompositeApi {
@@ -120,8 +120,8 @@ class CompositeApi {
     async invoke(compositeRequest) {
         const bearerCredentialHandler = new hm.BearerCredentialHandler(this._config.sessionId);
         const httpClient = new httpm.HttpClient('sf-fx-node', [bearerCredentialHandler]);
-        const path = '/services/data/v' + this._config.apiVersion + '/composite/';
-        const headers = { "Content-Type": "application/json" };
+        const path = `/services/data/v${this._config.apiVersion}/composite/`;
+        const headers = { 'Content-Type': 'application/json' };
         const data = JSON.stringify(compositeRequest);
         const response = await httpClient.post(this._config.instanceUrl + path, data, headers);
         if (response.message.statusCode === HttpCodes.OK) {

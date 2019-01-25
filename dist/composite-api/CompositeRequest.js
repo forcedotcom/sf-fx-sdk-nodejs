@@ -15,11 +15,11 @@ class CompositeRequest {
         this.compositeRequest.push(compositeSubrequest);
     }
     get subrequests() {
-        let ro = this.compositeRequest;
+        const ro = this.compositeRequest;
         return ro;
     }
     getSubrequest(referenceId) {
-        for (let compositeSubrequest of this.compositeRequest) {
+        for (const compositeSubrequest of this.compositeRequest) {
             if (compositeSubrequest.referenceId === referenceId) {
                 return compositeSubrequest;
             }

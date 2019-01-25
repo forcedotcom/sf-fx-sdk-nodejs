@@ -2,49 +2,39 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const uuid_1 = require("uuid");
 class SObject {
+    static generateReferenceId(type) {
+        return `${type}_` + uuid_1.v4().replace(/-/g, '');
+    }
     constructor(sObjectType) {
-        this._sObjectType = sObjectType;
-        this._uuid = uuid_1.v4();
+        this.referenceId = SObject.generateReferenceId(sObjectType);
+        this.sObjectType = sObjectType;
+        this.uuid = uuid_1.v4();
         this._values = {};
-        this._referenceId = SObject.generateReferenceId(sObjectType);
-    }
-    getSObjectType() {
-        return this._sObjectType;
-    }
-    getUuid() {
-        return this._uuid;
-    }
-    id(id) {
-        this._id = id;
-        return this;
-    }
-    getId() {
-        return this._id;
-    }
-    getValues() {
-        // TODO: ReadOnly
-        return this._values;
-    }
-    setValue(key, value) {
-        this._values[key] = value;
     }
     named(name) {
         this.setValue('Name', name);
         return this;
     }
-    getReferenceId() {
-        return this._referenceId;
+    setValue(key, value) {
+        this._values[key] = value;
     }
-    getFkId() {
-        if (this.getId()) {
-            return this.getId();
+    withId(id) {
+        this._id = id;
+        return this;
+    }
+    get id() {
+        return this._id;
+    }
+    get values() {
+        return this._values;
+    }
+    get fkId() {
+        if (this._id) {
+            return this._id;
         }
         else {
-            return '@{' + this.getReferenceId() + '.id}';
+            return `@{${this.referenceId}.id}`;
         }
-    }
-    static generateReferenceId(type) {
-        return type + "_" + uuid_1.v4().replace(/-/g, '');
     }
 }
 exports.SObject = SObject;

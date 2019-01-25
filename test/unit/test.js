@@ -1,12 +1,12 @@
 import { expect } from 'chai';
 import 'mocha';
-const index = require('../../dist/index.js');
+import { invoke, sdk } from '../../dist/index.js';
 
 describe('salesforce-fdk test', () => {
     it('should export invoke', () => {
-        expect(index.invoke).to.not.be.undefined;
+        expect(invoke).to.not.be.undefined;
     });
     it('should export sdk', () => {
-        expect(index.sdk).to.not.be.undefined;
+        expect(sdk).to.not.be.undefined;
     });
 });

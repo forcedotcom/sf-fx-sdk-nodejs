@@ -1,3 +1,6 @@
 import { newUnitOfWork } from './UnitOfWork';
 
-exports.newUnitOfWork = newUnitOfWork;
+// tslint:disable-next-line:variable-name
+export const UnitOfWork = {
+    newUnitOfWork
+};

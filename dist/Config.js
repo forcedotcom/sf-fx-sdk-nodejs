@@ -7,8 +7,5 @@ class Config {
         this.sessionId = sessionId;
     }
 }
-function newConfig(instanceUrl, apiVersion, sessionId) {
-    return new Config(instanceUrl, apiVersion, sessionId);
-}
-exports.newConfig = newConfig;
+exports.Config = Config;
 //# sourceMappingURL=Config.js.map

@@ -34,7 +34,7 @@ declare class UserContext {
     orgDomainUrl: string;
     sessionId: string;
     static create(context: any): UserContext;
-    constructor(orgId: string, username: string, userId: string, salesforceBaseUrl: string, orgDomainUrl: string, sessionId: string);
+    private constructor();
 }
 declare class Context {
     apiVersion: string;
@@ -42,7 +42,7 @@ declare class Context {
     sfApi: jsforce.Connection;
     logger: Logger;
     static create(payload: any, logger: Logger): Promise<Context>;
-    constructor(apiVersion: string, userContext: UserContext, sfApi: jsforce.Connection, logger: Logger);
+    private constructor();
 }
 declare class Event {
     name: string;

@@ -1,111 +1,133 @@
 import * as _ from 'lodash';
 
-import * as sfxif from '../Interfaces';
-import * as so from '../SObject';
-import * as sfcontants from '../Constants';
+import { ICompositeSubrequest, ICompositeSubrequestBuilder, ISObject, Method } from '../Interfaces';
+// Not sure why this doesn't think it's sorted correctly
+// tslint:disable-next-line:ordered-imports
+import { Constants, SObject } from '..';
 
-class CompositeSubrequest implements sfxif.ICompositeSubrequest {
-    readonly httpHeaders: { [key: string]: string };
-    readonly method: sfxif.Method;
-    readonly referenceId: string;
-    readonly url: string;
-    readonly body: { [key: string]: any };
-    readonly sObjectType: string;
-    readonly apiVersion: string;
+class CompositeSubrequest implements ICompositeSubrequest {
+    public readonly httpHeaders: { [key: string]: string };
+    public readonly method: Method;
+    public readonly referenceId: string;
+    public readonly url: string;
+    public readonly body: { [key: string]: any };
+    public readonly sObjectType: string;
+    public readonly apiVersion: string;
 
     public constructor(builder: CompositeSubrequestBuilder) {
-        this.httpHeaders = builder._httpHeaders;
-        this.method = builder._method;
-        this.referenceId = builder._referenceId;
-        this.url = builder._url;
-        this.body = builder._values;
-        this.sObjectType = builder._sObjectType;
-        this.apiVersion = builder._apiVersion;
+        this.httpHeaders = builder.httpHeaders;
+        this.method = builder.method;
+        this.body = builder.values;
+        this.apiVersion = builder.getApiVersion();
+        this.referenceId = builder.getReferenceId();
+        this.sObjectType = builder.getSObjectType();
+        this.url = builder.getUrl();
     }
 
     public toJSON(): object {
-        let result: object = _.omit(this, ["sObjectType", "apiVersion"]);
+        const result: object = _.omit(this, ['sObjectType', 'apiVersion']);
         return result;
     }
 }
 
-abstract class CompositeSubrequestBuilder implements sfxif.ICompositeSubrequestBuilder {
-    readonly _method: sfxif.Method;
-    readonly _httpHeaders: { [key: string]: string };
-    readonly _values: { [key: string]: any };
-    _referenceId: string;
-    _apiVersion: string;
-    _url: string;
-    _id: string;
-    _sObjectType: string;
-    _rootReferenceId: string;
+abstract class CompositeSubrequestBuilder implements ICompositeSubrequestBuilder {
+    public readonly method: Method;
+    public readonly httpHeaders: { [key: string]: string };
+    public readonly values: { [key: string]: any };
+    protected _referenceId: string;
+    protected _rootReferenceId: string;
+    private _apiVersion: string;
+    private _id: string;
+    private _sObjectType: string;
+    private _url: string;
 
-    protected constructor(method: sfxif.Method, values: { [key: string]: any } = {}) {
-        this._method = method;
-        this._apiVersion = sfcontants.CURRENT_API_VERSION;
-        this._values = values;
-        this._httpHeaders = {};
+    protected constructor(method: Method, values: { [key: string]: any } = {}) {
+        this._apiVersion = Constants.CURRENT_API_VERSION;
+        this.httpHeaders = {};
+        this.method = method;
+        this.values = values;
     }
 
-    public id(id: string): sfxif.ICompositeSubrequestBuilder {
+    public getApiVersion(): string {
+        return this._apiVersion;
+    }
+
+    public getId():string {
+        return this._id;
+    }
+
+    public getReferenceId():string {
+        return this._referenceId;
+    }
+
+
+    public getSObjectType(): string {
+        return this._sObjectType;
+    }
+
+    public getUrl():string {
+        return this._url;
+    }
+
+    public id(id: string): ICompositeSubrequestBuilder {
         this._id = id;
         return this;
     }
 
-    public sObjectType(sObjectType: string): sfxif.ICompositeSubrequestBuilder {
+    public sObjectType(sObjectType: string): ICompositeSubrequestBuilder {
         this._sObjectType = sObjectType;
         return this;
     }
 
-    public sObject(sObject: sfxif.ISObject): sfxif.ICompositeSubrequestBuilder {
-        this.sObjectType(sObject.getSObjectType());
-        this.id(sObject.getId());
-        this.values(sObject.getValues());
+    public sObject(sObject: ISObject): ICompositeSubrequestBuilder {
+        this.sObjectType(sObject.sObjectType);
+        this.id(sObject.id);
+        this.addValues(sObject.values);
         return this;
     }
 
-    public value(key: string, value: any): sfxif.ICompositeSubrequestBuilder {
-        this._values[key] = value;
+    public addValue(key: string, value: any): ICompositeSubrequestBuilder {
+        this.values[key] = value;
         return this;
     }
 
-    public values(values: { [key: string]: any; }): sfxif.ICompositeSubrequestBuilder {
+    public addValues(values: { [key: string]: any; }): ICompositeSubrequestBuilder {
         Object.keys(values).forEach((key) => {
-            this.value(key, values[key]);
+            this.addValue(key, values[key]);
         });
         return this;
     }
 
-    public named(name: string): sfxif.ICompositeSubrequestBuilder {
-        this.value('Name', name);
+    public named(name: string): ICompositeSubrequestBuilder {
+        this.addValue('Name', name);
         return this;
     }
 
-    public apiVersion(apiVersion: string): sfxif.ICompositeSubrequestBuilder {
+    public apiVersion(apiVersion: string): ICompositeSubrequestBuilder {
         this._apiVersion = apiVersion;
         return this;
     }
 
-    public header(key: string, value: string): sfxif.ICompositeSubrequestBuilder {
-        this._httpHeaders[key] = value;
+    public header(key: string, value: string): ICompositeSubrequestBuilder {
+        this.httpHeaders[key] = value;
         return this;
     }
 
-    public headers(headers: { [key: string]: string; }): sfxif.ICompositeSubrequestBuilder {
+    public headers(headers: { [key: string]: string; }): ICompositeSubrequestBuilder {
         Object.keys(headers).forEach((key) => {
             this.header(key, headers[key]);
         });
         return this;
     }
 
-    public build(): sfxif.ICompositeSubrequest {
+    public build(): ICompositeSubrequest {
         if (!this._sObjectType) {
-            throw new Error("Type is required");
+            throw new Error('Type is required');
         }
 
         // TODO: What is the preferred way to check for null
         if (!this._referenceId) {
-            this._referenceId = so.SObject.generateReferenceId(this._sObjectType);
+            this._referenceId = SObject.generateReferenceId(this._sObjectType);
         }
 
         this._url = this._internalGetUrl();
@@ -114,7 +136,7 @@ abstract class CompositeSubrequestBuilder implements sfxif.ICompositeSubrequestB
     }
 
     protected _getBaseUrl(): string {
-        return '/services/data/v' + this._apiVersion + '/sobjects/' + this._sObjectType;
+        return `/services/data/v${this._apiVersion}/sobjects/${this._sObjectType}`;
     }
 
     protected _getExistingUrl(): string {
@@ -133,17 +155,17 @@ abstract class CompositeSubrequestBuilder implements sfxif.ICompositeSubrequestB
 }
 
 abstract class NoBodyCompositeSubrequestBuilder extends CompositeSubrequestBuilder {
-    constructor(method: sfxif.Method) {
+    constructor(method: Method) {
         super(method, undefined/*This request can't accept any values*/);
     }
 
-    public value(key: string, value: any): sfxif.ICompositeSubrequestBuilder {
-        throw new Error("This request doesn't have a body");
+    public addValue(key: string, value: any): ICompositeSubrequestBuilder {
+        throw new Error(`This request doesn't have a body`);
     }
 
-    public values(values: { [key: string]: any; }): sfxif.ICompositeSubrequestBuilder {
+    public addValues(values: { [key: string]: any; }): ICompositeSubrequestBuilder {
         if (Object.keys(values).length > 0) {
-            throw new Error("This request doesn't have a body");
+            throw new Error(`This request doesn't have a body`);
         }
         return this;
     }
@@ -151,18 +173,18 @@ abstract class NoBodyCompositeSubrequestBuilder extends CompositeSubrequestBuild
 
 class InsertCompositeSubrequestBuilder extends CompositeSubrequestBuilder {
     public constructor() {
-        super(sfxif.Method.POST);
+        super(Method.POST);
     }
 
-    public id(id: string): sfxif.ICompositeSubrequestBuilder {
+    public id(id: string): ICompositeSubrequestBuilder {
         if (id) {
-            throw new Error("This request doesn't support an id");
+            throw new Error(`This request doesn't support an id`);
         }
         return this;
     }
 
-    public sObject(sObject: sfxif.ISObject): sfxif.ICompositeSubrequestBuilder {
-        this._referenceId = sObject.getReferenceId();
+    public sObject(sObject: ISObject): ICompositeSubrequestBuilder {
+        this._referenceId = sObject.referenceId;
         super.sObject(sObject);
         return this;
     }
@@ -174,7 +196,7 @@ class InsertCompositeSubrequestBuilder extends CompositeSubrequestBuilder {
 
 class DeleteCompositeSubrequestBuilder extends NoBodyCompositeSubrequestBuilder {
     public constructor() {
-        super(sfxif.Method.DELETE);
+        super(Method.DELETE);
     }
 
     protected _internalGetUrl(): string {
@@ -184,23 +206,23 @@ class DeleteCompositeSubrequestBuilder extends NoBodyCompositeSubrequestBuilder 
 
 class DescribeCompositeSubrequestBuilder extends NoBodyCompositeSubrequestBuilder {
     public constructor() {
-        super(sfxif.Method.GET);
+        super(Method.GET);
     }
 
-    public sObject(sObject: sfxif.ISObject): sfxif.ICompositeSubrequestBuilder {
-        this._referenceId = sObject.getReferenceId();
+    public sObject(sObject: ISObject): ICompositeSubrequestBuilder {
+        this._referenceId = sObject.referenceId;
         super.sObject(sObject);
         return this;
     }
 
     protected _internalGetUrl(): string {
-        return this._getBaseUrl() + "/describe";
+        return `${this._getBaseUrl()}/describe`;
     }
 }
 
 class HttpGETCompositeSubrequestBuilder extends NoBodyCompositeSubrequestBuilder {
     public constructor() {
-        super(sfxif.Method.GET);
+        super(Method.GET);
     }
 
     protected _internalGetUrl(): string {
@@ -210,11 +232,11 @@ class HttpGETCompositeSubrequestBuilder extends NoBodyCompositeSubrequestBuilder
 
 class PatchCompositeSubrequestBuilder extends CompositeSubrequestBuilder {
     public constructor() {
-        super(sfxif.Method.PATCH);
+        super(Method.PATCH);
     }
 
-    public sObject(sObject: sfxif.ISObject): sfxif.ICompositeSubrequestBuilder {
-        this._rootReferenceId = sObject.getReferenceId();
+    public sObject(sObject: ISObject): ICompositeSubrequestBuilder {
+        this._rootReferenceId = sObject.referenceId;
         super.sObject(sObject);
         return this;
     }
@@ -226,11 +248,11 @@ class PatchCompositeSubrequestBuilder extends CompositeSubrequestBuilder {
 
 class PutCompositeSubrequestBuilder extends CompositeSubrequestBuilder {
     public constructor() {
-        super(sfxif.Method.PUT);
+        super(Method.PUT);
     }
 
-    public sObject(sObject: sfxif.ISObject): sfxif.ICompositeSubrequestBuilder {
-        this._rootReferenceId = sObject.getReferenceId();
+    public sObject(sObject: ISObject): ICompositeSubrequestBuilder {
+        this._rootReferenceId = sObject.referenceId;
         super.sObject(sObject);
         return this;
     }
@@ -240,26 +262,26 @@ class PutCompositeSubrequestBuilder extends CompositeSubrequestBuilder {
     }
 }
 
-export function deleteBuilder(): sfxif.ICompositeSubrequestBuilder {
+export function deleteBuilder(): ICompositeSubrequestBuilder {
     return new DeleteCompositeSubrequestBuilder();
 }
 
-export function describeBuilder(): sfxif.ICompositeSubrequestBuilder {
+export function describeBuilder(): ICompositeSubrequestBuilder {
     return new DescribeCompositeSubrequestBuilder();
 }
 
-export function httpGETBuilder(): sfxif.ICompositeSubrequestBuilder {
+export function httpGETBuilder(): ICompositeSubrequestBuilder {
     return new HttpGETCompositeSubrequestBuilder();
 }
 
-export function insertBuilder(): sfxif.ICompositeSubrequestBuilder {
+export function insertBuilder(): ICompositeSubrequestBuilder {
     return new InsertCompositeSubrequestBuilder();
 }
 
-export function patchBuilder(): sfxif.ICompositeSubrequestBuilder {
+export function patchBuilder(): ICompositeSubrequestBuilder {
     return new PatchCompositeSubrequestBuilder();
 }
 
-export function putBuilder(): sfxif.ICompositeSubrequestBuilder {
+export function putBuilder(): ICompositeSubrequestBuilder {
     return new PutCompositeSubrequestBuilder();
 }

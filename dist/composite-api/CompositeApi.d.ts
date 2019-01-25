@@ -1,4 +1,4 @@
-import * as sfxif from '../Interfaces';
+import { ICompositeApi, IConfig } from '../Interfaces';
 export declare enum HttpCodes {
     OK = 200,
     Created = 201,
@@ -29,4 +29,4 @@ export declare enum HttpCodes {
     ServiceUnavailable = 503,
     GatewayTimeout = 504
 }
-export declare function newCompositeApi(config: sfxif.IConfig): sfxif.ICompositeApi;
+export declare function newCompositeApi(config: IConfig): ICompositeApi;

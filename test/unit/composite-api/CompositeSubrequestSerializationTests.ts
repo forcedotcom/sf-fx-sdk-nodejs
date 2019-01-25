@@ -2,17 +2,17 @@ import { expect } from 'chai';
 import 'mocha';
 import { beforeEach } from 'mocha';
 
-import * as sfxif from '../../../lib/Interfaces';
-const index = require('../../../lib')
+import { ICompositeSubrequest, ICompositeSubrequestBuilder} from '../../../lib/Interfaces';
+import { CompositeApi } from '../../../lib';
 
 describe('CompositeSubrequest Serialization Tests', () => {
-    let builder:sfxif.ICompositeSubrequestBuilder = null;
+    let builder:ICompositeSubrequestBuilder = null;
 
     beforeEach(function() {
-        builder = index.compositeApi.insertBuilder().sObjectType('Account');
+        builder = CompositeApi.insertBuilder().sObjectType('Account');
     });
 
-    const convertToAndFromJson = (compositSubRequest:sfxif.ICompositeSubrequest):object => {
+    const convertToAndFromJson = (compositSubRequest:ICompositeSubrequest):object => {
         return JSON.parse(JSON.stringify(compositSubRequest));
     };
 
@@ -57,8 +57,8 @@ describe('CompositeSubrequest Serialization Tests', () => {
         const value1: string = 'value1';
         const key2: string = 'key2';
         const value2: string = 'value2';
-        builder.value(key1, value1);
-        builder.value(key2, value2);
+        builder.addValue(key1, value1);
+        builder.addValue(key2, value2);
         const jsonObject:object = convertToAndFromJson(builder.build());
 
         const body:{ [key: string]: string } = jsonObject['body'];

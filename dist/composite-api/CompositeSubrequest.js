@@ -1,30 +1,46 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const _ = require("lodash");
-const sfxif = require("../Interfaces");
-const so = require("../SObject");
-const sfcontants = require("../Constants");
+const Interfaces_1 = require("../Interfaces");
+// Not sure why this doesn't think it's sorted correctly
+// tslint:disable-next-line:ordered-imports
+const __1 = require("..");
 class CompositeSubrequest {
     constructor(builder) {
-        this.httpHeaders = builder._httpHeaders;
-        this.method = builder._method;
-        this.referenceId = builder._referenceId;
-        this.url = builder._url;
-        this.body = builder._values;
-        this.sObjectType = builder._sObjectType;
-        this.apiVersion = builder._apiVersion;
+        this.httpHeaders = builder.httpHeaders;
+        this.method = builder.method;
+        this.body = builder.values;
+        this.apiVersion = builder.getApiVersion();
+        this.referenceId = builder.getReferenceId();
+        this.sObjectType = builder.getSObjectType();
+        this.url = builder.getUrl();
     }
     toJSON() {
-        let result = _.omit(this, ["sObjectType", "apiVersion"]);
+        const result = _.omit(this, ['sObjectType', 'apiVersion']);
         return result;
     }
 }
 class CompositeSubrequestBuilder {
     constructor(method, values = {}) {
-        this._method = method;
-        this._apiVersion = sfcontants.CURRENT_API_VERSION;
-        this._values = values;
-        this._httpHeaders = {};
+        this._apiVersion = __1.Constants.CURRENT_API_VERSION;
+        this.httpHeaders = {};
+        this.method = method;
+        this.values = values;
+    }
+    getApiVersion() {
+        return this._apiVersion;
+    }
+    getId() {
+        return this._id;
+    }
+    getReferenceId() {
+        return this._referenceId;
+    }
+    getSObjectType() {
+        return this._sObjectType;
+    }
+    getUrl() {
+        return this._url;
     }
     id(id) {
         this._id = id;
@@ -35,23 +51,23 @@ class CompositeSubrequestBuilder {
         return this;
     }
     sObject(sObject) {
-        this.sObjectType(sObject.getSObjectType());
-        this.id(sObject.getId());
-        this.values(sObject.getValues());
+        this.sObjectType(sObject.sObjectType);
+        this.id(sObject.id);
+        this.addValues(sObject.values);
         return this;
     }
-    value(key, value) {
-        this._values[key] = value;
+    addValue(key, value) {
+        this.values[key] = value;
         return this;
     }
-    values(values) {
+    addValues(values) {
         Object.keys(values).forEach((key) => {
-            this.value(key, values[key]);
+            this.addValue(key, values[key]);
         });
         return this;
     }
     named(name) {
-        this.value('Name', name);
+        this.addValue('Name', name);
         return this;
     }
     apiVersion(apiVersion) {
@@ -59,7 +75,7 @@ class CompositeSubrequestBuilder {
         return this;
     }
     header(key, value) {
-        this._httpHeaders[key] = value;
+        this.httpHeaders[key] = value;
         return this;
     }
     headers(headers) {
@@ -70,17 +86,17 @@ class CompositeSubrequestBuilder {
     }
     build() {
         if (!this._sObjectType) {
-            throw new Error("Type is required");
+            throw new Error('Type is required');
         }
         // TODO: What is the preferred way to check for null
         if (!this._referenceId) {
-            this._referenceId = so.SObject.generateReferenceId(this._sObjectType);
+            this._referenceId = __1.SObject.generateReferenceId(this._sObjectType);
         }
         this._url = this._internalGetUrl();
         return new CompositeSubrequest(this);
     }
     _getBaseUrl() {
-        return '/services/data/v' + this._apiVersion + '/sobjects/' + this._sObjectType;
+        return `/services/data/v${this._apiVersion}/sobjects/${this._sObjectType}`;
     }
     _getExistingUrl() {
         let url = this._getBaseUrl() + '/';
@@ -100,28 +116,28 @@ class NoBodyCompositeSubrequestBuilder extends CompositeSubrequestBuilder {
     constructor(method) {
         super(method, undefined /*This request can't accept any values*/);
     }
-    value(key, value) {
-        throw new Error("This request doesn't have a body");
+    addValue(key, value) {
+        throw new Error(`This request doesn't have a body`);
     }
-    values(values) {
+    addValues(values) {
         if (Object.keys(values).length > 0) {
-            throw new Error("This request doesn't have a body");
+            throw new Error(`This request doesn't have a body`);
         }
         return this;
     }
 }
 class InsertCompositeSubrequestBuilder extends CompositeSubrequestBuilder {
     constructor() {
-        super(sfxif.Method.POST);
+        super(Interfaces_1.Method.POST);
     }
     id(id) {
         if (id) {
-            throw new Error("This request doesn't support an id");
+            throw new Error(`This request doesn't support an id`);
         }
         return this;
     }
     sObject(sObject) {
-        this._referenceId = sObject.getReferenceId();
+        this._referenceId = sObject.referenceId;
         super.sObject(sObject);
         return this;
     }
@@ -131,7 +147,7 @@ class InsertCompositeSubrequestBuilder extends CompositeSubrequestBuilder {
 }
 class DeleteCompositeSubrequestBuilder extends NoBodyCompositeSubrequestBuilder {
     constructor() {
-        super(sfxif.Method.DELETE);
+        super(Interfaces_1.Method.DELETE);
     }
     _internalGetUrl() {
         return this._getExistingUrl();
@@ -139,20 +155,20 @@ class DeleteCompositeSubrequestBuilder extends NoBodyCompositeSubrequestBuilder 
 }
 class DescribeCompositeSubrequestBuilder extends NoBodyCompositeSubrequestBuilder {
     constructor() {
-        super(sfxif.Method.GET);
+        super(Interfaces_1.Method.GET);
     }
     sObject(sObject) {
-        this._referenceId = sObject.getReferenceId();
+        this._referenceId = sObject.referenceId;
         super.sObject(sObject);
         return this;
     }
     _internalGetUrl() {
-        return this._getBaseUrl() + "/describe";
+        return `${this._getBaseUrl()}/describe`;
     }
 }
 class HttpGETCompositeSubrequestBuilder extends NoBodyCompositeSubrequestBuilder {
     constructor() {
-        super(sfxif.Method.GET);
+        super(Interfaces_1.Method.GET);
     }
     _internalGetUrl() {
         return this._getExistingUrl();
@@ -160,10 +176,10 @@ class HttpGETCompositeSubrequestBuilder extends NoBodyCompositeSubrequestBuilder
 }
 class PatchCompositeSubrequestBuilder extends CompositeSubrequestBuilder {
     constructor() {
-        super(sfxif.Method.PATCH);
+        super(Interfaces_1.Method.PATCH);
     }
     sObject(sObject) {
-        this._rootReferenceId = sObject.getReferenceId();
+        this._rootReferenceId = sObject.referenceId;
         super.sObject(sObject);
         return this;
     }
@@ -173,10 +189,10 @@ class PatchCompositeSubrequestBuilder extends CompositeSubrequestBuilder {
 }
 class PutCompositeSubrequestBuilder extends CompositeSubrequestBuilder {
     constructor() {
-        super(sfxif.Method.PUT);
+        super(Interfaces_1.Method.PUT);
     }
     sObject(sObject) {
-        this._rootReferenceId = sObject.getReferenceId();
+        this._rootReferenceId = sObject.referenceId;
         super.sObject(sObject);
         return this;
     }

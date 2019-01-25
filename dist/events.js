@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const kafka = require("node-rdkafka");
 const fs = require("fs");
+const kafka = require("node-rdkafka");
 const path = require("path");
 const sdk = require("./sf-sdk");
 const valueSeparator = /[,\s]+/;
@@ -24,23 +24,26 @@ class EventManager {
     }
     initConsumer() {
         this.logger.log('Initializing Kafka consumer');
-        const certDir = '.cert';
-        if (!fs.existsSync(certDir)) {
-            fs.mkdirSync(certDir);
+        const certsDir = '.certs';
+        if (!fs.existsSync(certsDir)) {
+            fs.mkdirSync(certsDir);
         }
-        const trustedCert = path.join('.certs', 'KAFKA_TRUSTED_CERT');
+        const trustedCert = path.join(certsDir, 'KAFKA_TRUSTED_CERT');
         fs.writeFileSync(trustedCert, this.config.getBrokerTrustedCert());
-        const clientCert = path.join('.certs', 'KAFKA_CLIENT_CERT');
+        this.logger.debug(`Wrote ${trustedCert}`);
+        const clientCert = path.join(certsDir, 'KAFKA_CLIENT_CERT');
         fs.writeFileSync(clientCert, this.config.getBrokerClientCert());
-        const clientCertKey = path.join('.certs', 'KAFKA_CLIENT_CERT_KEY');
+        this.logger.debug(`Wrote ${clientCert}`);
+        const clientCertKey = path.join(certsDir, 'KAFKA_CLIENT_CERT_KEY');
         fs.writeFileSync(clientCertKey, this.config.getBrokerClientCertKey());
+        this.logger.debug(`Wrote ${clientCertKey}`);
         const groupId = `${this.config.getEventPrefix()}${this.config.getEventGroupId() || defaultKafkaGroupId}`;
         const kafkaConfig = {
             'api.version.request': true,
-            event_cb: true,
             'client.id': `${defaultKafkaGroupId}/${this.config.getDyno() || 'localhost'}`,
-            'group.id': groupId,
             'enable.auto.commit': false,
+            event_cb: true,
+            'group.id': groupId,
             'metadata.broker.list': this.brokers,
             'security.protocol': 'SSL',
             // SSL certs written above to .cert/
@@ -110,7 +113,7 @@ class EventManager {
                 // REVIEWME: function should determine if we commit
                 // the message or not
                 let didCommit = false;
-                let commitOnce = () => {
+                const commitOnce = () => {
                     if (!didCommit) {
                         this.consumer.commitMessage(data);
                         didCommit = true;

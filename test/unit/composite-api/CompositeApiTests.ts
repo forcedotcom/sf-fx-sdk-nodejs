@@ -1,33 +1,36 @@
-import { assert, expect } from 'chai';
+import { expect } from 'chai';
 import 'mocha';
 import nock = require('nock');
 import { fail } from 'assert';
 
-import * as sfxif from '../../../lib/Interfaces';
-const index = require('../../../lib')
+import {
+  ICompositeApi, IConfig, ICompositeRequest, ICompositeResponse, ICompositeSubresponse, ICompositeSubrequest,
+  IError
+} from '../../../lib/Interfaces';
+import { CompositeApi, Config } from '../../../lib';
 
 describe('CompositeApi Tests', () => {
   const instanceUrl: string = 'http://localhost:3000';
   const apiVersion: string = '45.0';
   const sessionId: string = 'sessionId1234';
-  const config: sfxif.IConfig = index.config.newConfig(instanceUrl, apiVersion, sessionId);
+  const config: IConfig = new Config(instanceUrl, apiVersion, sessionId);
 
   afterEach(() => {
     nock.cleanAll();
   });
 
   it('CompositeApi construction', () => {
-    const compositeApi: sfxif.ICompositeApi = index.compositeApi.newCompositeApi(config);
+    const compositeApi: ICompositeApi = CompositeApi.newCompositeApi(config);
 
     expect(compositeApi).to.exist;
   });
 
   it('Composite Request is passed through as body', async () => {
-    const compositeRequest: sfxif.ICompositeRequest = index.compositeApi.newCompositeRequest();
-    const compositeSubRequest: sfxif.ICompositeSubrequest = index.compositeApi.insertBuilder().sObjectType('Account').named('MyAccount ' + new Date()).build();
+    const compositeRequest: ICompositeRequest = CompositeApi.newCompositeRequest();
+    const compositeSubRequest: ICompositeSubrequest = CompositeApi.insertBuilder().sObjectType('Account').named('MyAccount ' + new Date()).build();
     compositeRequest.addSubrequest(compositeSubRequest);
 
-    let capturedCompositeRequest: sfxif.ICompositeRequest;
+    let capturedCompositeRequest: ICompositeRequest;
 
     nock(instanceUrl)
       .post('/services/data/v' + config.apiVersion + '/composite/',
@@ -35,9 +38,9 @@ describe('CompositeApi Tests', () => {
           capturedCompositeRequest = body;
           return true;
         })
-      .reply(index.compositeApi.HttpCodes.OK, {});
+      .reply(CompositeApi.HttpCodes.OK, {});
 
-    const compositeApi: sfxif.ICompositeApi = index.compositeApi.newCompositeApi(config);
+    const compositeApi: ICompositeApi = CompositeApi.newCompositeApi(config);
     await compositeApi.invoke(compositeRequest);
 
     expect(capturedCompositeRequest).to.exist;
@@ -46,8 +49,8 @@ describe('CompositeApi Tests', () => {
   });
 
   it('Composite Api passes through session id', async () => {
-    const compositeRequest: sfxif.ICompositeRequest = index.compositeApi.newCompositeRequest();
-    const compositeSubRequest: sfxif.ICompositeSubrequest = index.compositeApi.insertBuilder().sObjectType('Account').named('MyAccount ' + new Date()).build();
+    const compositeRequest: ICompositeRequest = CompositeApi.newCompositeRequest();
+    const compositeSubRequest: ICompositeSubrequest = CompositeApi.insertBuilder().sObjectType('Account').named('MyAccount ' + new Date()).build();
     compositeRequest.addSubrequest(compositeSubRequest);
 
     let capturedAuthorizationHeader: string;
@@ -61,9 +64,9 @@ describe('CompositeApi Tests', () => {
       }
     })
       .post('/services/data/v' + config.apiVersion + '/composite/')
-      .reply(index.compositeApi.HttpCodes.OK, {});
+      .reply(CompositeApi.HttpCodes.OK, {});
 
-    const compositeApi: sfxif.ICompositeApi = index.compositeApi.newCompositeApi(config);
+    const compositeApi: ICompositeApi = CompositeApi.newCompositeApi(config);
     await compositeApi.invoke(compositeRequest);
 
     expect(capturedAuthorizationHeader).to.exist;
@@ -71,8 +74,8 @@ describe('CompositeApi Tests', () => {
   });
 
   it('Composite Api Correctly Parses response', async () => {
-    const compositeRequest: sfxif.ICompositeRequest = index.compositeApi.newCompositeRequest();
-    const compositeSubRequest: sfxif.ICompositeSubrequest = index.compositeApi.insertBuilder().sObjectType('Account').named('MyAccount ' + new Date()).build();
+    const compositeRequest: ICompositeRequest = CompositeApi.newCompositeRequest();
+    const compositeSubRequest: ICompositeSubrequest = CompositeApi.insertBuilder().sObjectType('Account').named('MyAccount ' + new Date()).build();
     compositeRequest.addSubrequest(compositeSubRequest);
 
     nock(instanceUrl, {
@@ -80,36 +83,36 @@ describe('CompositeApi Tests', () => {
       }
     })
       .post('/services/data/v' + config.apiVersion + '/composite/')
-      .reply(index.compositeApi.HttpCodes.OK, {
-        "compositeResponse": [{
-          "body": { "id": "001xx000003EG3oAAG", "success": true, "errors": [] },
-          "httpHeaders": { "Location": "/services/data/v45.0/sobjects/Account/001xx000003EG3oAAG" },
-          "httpStatusCode": index.compositeApi.HttpCodes.Created,
-          "referenceId": compositeSubRequest.referenceId
+      .reply(CompositeApi.HttpCodes.OK, {
+        'compositeResponse': [{
+          'body': { 'id': '001xx000003EG3oAAG', 'success': true, 'errors': [] },
+          'httpHeaders': { 'Location': '/services/data/v45.0/sobjects/Account/001xx000003EG3oAAG' },
+          'httpStatusCode': CompositeApi.HttpCodes.Created,
+          'referenceId': compositeSubRequest.referenceId
         }]
       });
 
-    const compositeApi: sfxif.ICompositeApi = index.compositeApi.newCompositeApi(config);
-    const compositeResponse: sfxif.ICompositeResponse = await compositeApi.invoke(compositeRequest);
+    const compositeApi: ICompositeApi = CompositeApi.newCompositeApi(config);
+    const compositeResponse: ICompositeResponse = await compositeApi.invoke(compositeRequest);
 
     expect(compositeResponse).to.exist;
     expect(compositeResponse.compositeSubresponses).to.exist;
     expect(compositeResponse.compositeSubresponses).lengthOf(1);
 
-    const compositeSubResponseFromIndex: sfxif.ICompositeSubresponse = compositeResponse.compositeSubresponses[0];
-    const compositeSubResponse: sfxif.ICompositeSubresponse = compositeResponse.getCompositeSubresponse(compositeSubRequest);
+    const compositeSubResponseFromIndex: ICompositeSubresponse = compositeResponse.compositeSubresponses[0];
+    const compositeSubResponse: ICompositeSubresponse = compositeResponse.getCompositeSubresponse(compositeSubRequest);
     expect(compositeSubResponseFromIndex).to.exist;
     expect(compositeSubResponse).to.exist;
 
     expect(compositeSubResponseFromIndex).to.deep.equal(compositeSubResponse);
 
     expect(compositeSubResponse.referenceId).to.equal(compositeSubRequest.referenceId);
-    expect(compositeSubResponse.httpStatusCode).to.equal(index.compositeApi.HttpCodes.Created);
+    expect(compositeSubResponse.httpStatusCode).to.equal(CompositeApi.HttpCodes.Created);
   });
 
   it('Composite Api Correctly Parses response headers', async () => {
-    const compositeRequest: sfxif.ICompositeRequest = index.compositeApi.newCompositeRequest();
-    const compositeSubRequest: sfxif.ICompositeSubrequest = index.compositeApi.insertBuilder().sObjectType('Account').named('MyAccount ' + new Date()).build();
+    const compositeRequest: ICompositeRequest = CompositeApi.newCompositeRequest();
+    const compositeSubRequest: ICompositeSubrequest = CompositeApi.insertBuilder().sObjectType('Account').named('MyAccount ' + new Date()).build();
     compositeRequest.addSubrequest(compositeSubRequest);
 
     nock(instanceUrl, {
@@ -117,18 +120,18 @@ describe('CompositeApi Tests', () => {
       }
     })
       .post('/services/data/v' + config.apiVersion + '/composite/')
-      .reply(index.compositeApi.HttpCodes.OK, {
-        "compositeResponse": [{
-          "body": { "id": "001xx000003EG3oAAG", "success": true, "errors": [] },
-          "httpHeaders": { "Location": "/services/data/v45.0/sobjects/Account/001xx000003EG3oAAG" },
-          "httpStatusCode": index.compositeApi.HttpCodes.Created,
-          "referenceId": compositeSubRequest.referenceId
+      .reply(CompositeApi.HttpCodes.OK, {
+        'compositeResponse': [{
+          'body': { 'id': '001xx000003EG3oAAG', 'success': true, 'errors': [] },
+          'httpHeaders': { 'Location': '/services/data/v45.0/sobjects/Account/001xx000003EG3oAAG' },
+          'httpStatusCode': CompositeApi.HttpCodes.Created,
+          'referenceId': compositeSubRequest.referenceId
         }]
       });
 
-    const compositeApi: sfxif.ICompositeApi = index.compositeApi.newCompositeApi(config);
-    const compositeResponse: sfxif.ICompositeResponse = await compositeApi.invoke(compositeRequest);
-    const compositeSubResponse: sfxif.ICompositeSubresponse = compositeResponse.getCompositeSubresponse(compositeSubRequest);
+    const compositeApi: ICompositeApi = CompositeApi.newCompositeApi(config);
+    const compositeResponse: ICompositeResponse = await compositeApi.invoke(compositeRequest);
+    const compositeSubResponse: ICompositeSubresponse = compositeResponse.getCompositeSubresponse(compositeSubRequest);
 
     // Verify Location as header and helper
     const headers: { [key: string]: string } = compositeSubResponse.httpHeaders;
@@ -140,8 +143,8 @@ describe('CompositeApi Tests', () => {
   });
 
   it('Composite Api Correctly Parses response body', async () => {
-    const compositeRequest: sfxif.ICompositeRequest = index.compositeApi.newCompositeRequest();
-    const compositeSubRequest: sfxif.ICompositeSubrequest = index.compositeApi.insertBuilder().sObjectType('Account').named('MyAccount ' + new Date()).build();
+    const compositeRequest: ICompositeRequest = CompositeApi.newCompositeRequest();
+    const compositeSubRequest: ICompositeSubrequest = CompositeApi.insertBuilder().sObjectType('Account').named('MyAccount ' + new Date()).build();
     compositeRequest.addSubrequest(compositeSubRequest);
 
     nock(instanceUrl, {
@@ -149,18 +152,18 @@ describe('CompositeApi Tests', () => {
       }
     })
       .post('/services/data/v' + config.apiVersion + '/composite/')
-      .reply(index.compositeApi.HttpCodes.OK, {
-        "compositeResponse": [{
-          "body": { "id": "001xx000003EG3oAAG", "success": true, "errors": [] },
-          "httpHeaders": { "Location": "/services/data/v45.0/sobjects/Account/001xx000003EG3oAAG" },
-          "httpStatusCode": index.compositeApi.HttpCodes.Created,
-          "referenceId": compositeSubRequest.referenceId
+      .reply(CompositeApi.HttpCodes.OK, {
+        'compositeResponse': [{
+          'body': { 'id': '001xx000003EG3oAAG', 'success': true, 'errors': [] },
+          'httpHeaders': { 'Location': '/services/data/v45.0/sobjects/Account/001xx000003EG3oAAG' },
+          'httpStatusCode': CompositeApi.HttpCodes.Created,
+          'referenceId': compositeSubRequest.referenceId
         }]
       });
 
-    const compositeApi: sfxif.ICompositeApi = index.compositeApi.newCompositeApi(config);
-    const compositeResponse: sfxif.ICompositeResponse = await compositeApi.invoke(compositeRequest);
-    const compositeSubResponse: sfxif.ICompositeSubresponse = compositeResponse.getCompositeSubresponse(compositeSubRequest);
+    const compositeApi: ICompositeApi = CompositeApi.newCompositeApi(config);
+    const compositeResponse: ICompositeResponse = await compositeApi.invoke(compositeRequest);
+    const compositeSubResponse: ICompositeSubresponse = compositeResponse.getCompositeSubresponse(compositeSubRequest);
 
     // Verify the body directly
     const body: { [key: string]: any } = compositeSubResponse.body;
@@ -175,8 +178,8 @@ describe('CompositeApi Tests', () => {
   });
 
   it('Composite Api throws exception if errors accessed on success', async () => {
-    const compositeRequest: sfxif.ICompositeRequest = index.compositeApi.newCompositeRequest();
-    const compositeSubRequest: sfxif.ICompositeSubrequest = index.compositeApi.insertBuilder().sObjectType('Account').named('MyAccount ' + new Date()).build();
+    const compositeRequest: ICompositeRequest = CompositeApi.newCompositeRequest();
+    const compositeSubRequest: ICompositeSubrequest = CompositeApi.insertBuilder().sObjectType('Account').named('MyAccount ' + new Date()).build();
     compositeRequest.addSubrequest(compositeSubRequest);
 
     nock(instanceUrl, {
@@ -184,30 +187,30 @@ describe('CompositeApi Tests', () => {
       }
     })
       .post('/services/data/v' + config.apiVersion + '/composite/')
-      .reply(index.compositeApi.HttpCodes.OK, {
-        "compositeResponse": [{
-          "body": { "id": "001xx000003EG3oAAG", "success": true, "errors": [] },
-          "httpHeaders": { "Location": "/services/data/v45.0/sobjects/Account/001xx000003EG3oAAG" },
-          "httpStatusCode": index.compositeApi.HttpCodes.Created,
-          "referenceId": compositeSubRequest.referenceId
+      .reply(CompositeApi.HttpCodes.OK, {
+        'compositeResponse': [{
+          'body': { 'id': '001xx000003EG3oAAG', 'success': true, 'errors': [] },
+          'httpHeaders': { 'Location': '/services/data/v45.0/sobjects/Account/001xx000003EG3oAAG' },
+          'httpStatusCode': CompositeApi.HttpCodes.Created,
+          'referenceId': compositeSubRequest.referenceId
         }]
       });
 
-    const compositeApi: sfxif.ICompositeApi = index.compositeApi.newCompositeApi(config);
-    const compositeResponse: sfxif.ICompositeResponse = await compositeApi.invoke(compositeRequest);
-    const compositeSubResponse: sfxif.ICompositeSubresponse = compositeResponse.getCompositeSubresponse(compositeSubRequest);
+    const compositeApi: ICompositeApi = CompositeApi.newCompositeApi(config);
+    const compositeResponse: ICompositeResponse = await compositeApi.invoke(compositeRequest);
+    const compositeSubResponse: ICompositeSubresponse = compositeResponse.getCompositeSubresponse(compositeSubRequest);
 
     try {
       compositeSubResponse.errors;
-      fail("errors accessor should have thrown")
+      fail('errors accessor should have thrown')
     } catch (e) {
-      expect(e.message).to.equal("Errors is not valid when there hasn't been an error. Call #errors installed.");
+      expect(e.message).to.equal(`Errors is not valid when there hasn't been an error. Call #errors installed.`);
     }
   });
 
   it('Composite Api Correctly Parses response body errors', async () => {
-    const compositeRequest: sfxif.ICompositeRequest = index.compositeApi.newCompositeRequest();
-    const compositeSubRequest: sfxif.ICompositeSubrequest = index.compositeApi.insertBuilder().sObjectType('Account').named('MyAccount ' + new Date()).build();
+    const compositeRequest: ICompositeRequest = CompositeApi.newCompositeRequest();
+    const compositeSubRequest: ICompositeSubrequest = CompositeApi.insertBuilder().sObjectType('Account').named('MyAccount ' + new Date()).build();
     compositeRequest.addSubrequest(compositeSubRequest);
 
     nock(instanceUrl, {
@@ -215,24 +218,24 @@ describe('CompositeApi Tests', () => {
       }
     })
       .post('/services/data/v' + config.apiVersion + '/composite/')
-      .reply(index.compositeApi.HttpCodes.OK, {
-        "compositeResponse": [{
-          "body": [{ "message": "Required fields are missing: [Name]", "errorCode": "REQUIRED_FIELD_MISSING", "fields": ["Name"] }],
-          "httpHeaders": {}, "httpStatusCode": index.compositeApi.HttpCodes.BadRequest,
-          "referenceId": compositeSubRequest.referenceId
+      .reply(CompositeApi.HttpCodes.OK, {
+        'compositeResponse': [{
+          'body': [{ 'message': 'Required fields are missing: [Name]', 'errorCode': 'REQUIRED_FIELD_MISSING', 'fields': ['Name'] }],
+          'httpHeaders': {}, 'httpStatusCode': CompositeApi.HttpCodes.BadRequest,
+          'referenceId': compositeSubRequest.referenceId
         }]
       }
       );
 
-    const compositeApi: sfxif.ICompositeApi = index.compositeApi.newCompositeApi(config);
-    const compositeResponse: sfxif.ICompositeResponse = await compositeApi.invoke(compositeRequest);
-    const compositeSubResponse: sfxif.ICompositeSubresponse = compositeResponse.getCompositeSubresponse(compositeSubRequest);
+    const compositeApi: ICompositeApi = CompositeApi.newCompositeApi(config);
+    const compositeResponse: ICompositeResponse = await compositeApi.invoke(compositeRequest);
+    const compositeSubResponse: ICompositeSubresponse = compositeResponse.getCompositeSubresponse(compositeSubRequest);
 
     // Verify the body directly
-    const errors: ReadonlyArray<sfxif.IError> = compositeSubResponse.errors;
+    const errors: ReadonlyArray<IError> = compositeSubResponse.errors;
     expect(errors).to.exist;
     expect(errors).lengthOf(1);
-    const error: sfxif.IError = errors[0];
+    const error: IError = errors[0];
     expect(error).to.exist;
     expect(error.message).to.equal('Required fields are missing: [Name]')
     expect(error.errorCode).to.equal('REQUIRED_FIELD_MISSING')
@@ -242,8 +245,8 @@ describe('CompositeApi Tests', () => {
   });
 
   it('Composite Api throws exception if body accessed on errors', async () => {
-    const compositeRequest: sfxif.ICompositeRequest = index.compositeApi.newCompositeRequest();
-    const compositeSubRequest: sfxif.ICompositeSubrequest = index.compositeApi.insertBuilder().sObjectType('Account').named('MyAccount ' + new Date()).build();
+    const compositeRequest: ICompositeRequest = CompositeApi.newCompositeRequest();
+    const compositeSubRequest: ICompositeSubrequest = CompositeApi.insertBuilder().sObjectType('Account').named('MyAccount ' + new Date()).build();
     compositeRequest.addSubrequest(compositeSubRequest);
 
     nock(instanceUrl, {
@@ -251,23 +254,23 @@ describe('CompositeApi Tests', () => {
       }
     })
       .post('/services/data/v' + config.apiVersion + '/composite/')
-      .reply(index.compositeApi.HttpCodes.OK, {
-        "compositeResponse": [{
-          "body": [{ "message": "Required fields are missing: [Name]", "errorCode": "REQUIRED_FIELD_MISSING", "fields": ["Name"] }],
-          "httpHeaders": {},
-          "httpStatusCode": index.compositeApi.HttpCodes.BadRequest,
-          "referenceId": compositeSubRequest.referenceId
+      .reply(CompositeApi.HttpCodes.OK, {
+        'compositeResponse': [{
+          'body': [{ 'message': 'Required fields are missing: [Name]', 'errorCode': 'REQUIRED_FIELD_MISSING', 'fields': ['Name'] }],
+          'httpHeaders': {},
+          'httpStatusCode': CompositeApi.HttpCodes.BadRequest,
+          'referenceId': compositeSubRequest.referenceId
         }]
       }
       );
 
-    const compositeApi: sfxif.ICompositeApi = index.compositeApi.newCompositeApi(config);
-    const compositeResponse: sfxif.ICompositeResponse = await compositeApi.invoke(compositeRequest);
-    const compositeSubResponse: sfxif.ICompositeSubresponse = compositeResponse.getCompositeSubresponse(compositeSubRequest);
+    const compositeApi: ICompositeApi = CompositeApi.newCompositeApi(config);
+    const compositeResponse: ICompositeResponse = await compositeApi.invoke(compositeRequest);
+    const compositeSubResponse: ICompositeSubresponse = compositeResponse.getCompositeSubresponse(compositeSubRequest);
 
     try {
       compositeSubResponse.body;
-      fail("body accessor should have thrown")
+      fail('body accessor should have thrown')
     } catch (e) {
       expect(e.message).to.equal('Body is not valid when there has been an error. Call #errors installed.');
     }
@@ -275,8 +278,8 @@ describe('CompositeApi Tests', () => {
 
 
   it('Composite Response throws error if request id is not found', async () => {
-    const compositeRequest: sfxif.ICompositeRequest = index.compositeApi.newCompositeRequest();
-    const compositeSubRequest: sfxif.ICompositeSubrequest = index.compositeApi.insertBuilder().sObjectType('Account').named('MyAccount ' + new Date()).build();
+    const compositeRequest: ICompositeRequest = CompositeApi.newCompositeRequest();
+    const compositeSubRequest: ICompositeSubrequest = CompositeApi.insertBuilder().sObjectType('Account').named('MyAccount ' + new Date()).build();
     compositeRequest.addSubrequest(compositeSubRequest);
 
     nock(instanceUrl, {
@@ -284,21 +287,21 @@ describe('CompositeApi Tests', () => {
       }
     })
       .post('/services/data/v' + config.apiVersion + '/composite/')
-      .reply(index.compositeApi.HttpCodes.OK, {
-        "compositeResponse": [{
-          "body": { "id": "001xx000003EG3oAAG", "success": true, "errors": [] },
-          "httpHeaders": { "Location": "/services/data/v45.0/sobjects/Account/001xx000003EG3oAAG" },
-          "httpStatusCode": index.compositeApi.HttpCodes.Created,
-          "referenceId": compositeSubRequest.referenceId
+      .reply(CompositeApi.HttpCodes.OK, {
+        'compositeResponse': [{
+          'body': { 'id': '001xx000003EG3oAAG', 'success': true, 'errors': [] },
+          'httpHeaders': { 'Location': '/services/data/v45.0/sobjects/Account/001xx000003EG3oAAG' },
+          'httpStatusCode': CompositeApi.HttpCodes.Created,
+          'referenceId': compositeSubRequest.referenceId
         }]
       });
 
-    const compositeApi: sfxif.ICompositeApi = index.compositeApi.newCompositeApi(config);
-    const compositeResponse: sfxif.ICompositeResponse = await compositeApi.invoke(compositeRequest);
+    const compositeApi: ICompositeApi = CompositeApi.newCompositeApi(config);
+    const compositeResponse: ICompositeResponse = await compositeApi.invoke(compositeRequest);
 
     expect(compositeResponse).to.exist;
 
-    const nonExistentCompositeSubRequest: sfxif.ICompositeSubrequest = index.compositeApi.insertBuilder().sObjectType('Account').named('MyAccount ' + new Date()).build();
+    const nonExistentCompositeSubRequest: ICompositeSubrequest = CompositeApi.insertBuilder().sObjectType('Account').named('MyAccount ' + new Date()).build();
     expect(compositeResponse.getCompositeSubresponse.bind(compositeResponse, nonExistentCompositeSubRequest)).throws('Unknown referenceId: ' + nonExistentCompositeSubRequest.referenceId);
   });
 });

@@ -1,5 +1,5 @@
-import * as kafka from 'node-rdkafka';
 import * as fs from 'fs';
+import * as kafka from 'node-rdkafka';
 import * as path from 'path';
 import * as sdk from './sf-sdk';
 
@@ -46,10 +46,10 @@ export default class EventManager {
         const groupId = `${this.config.getEventPrefix()}${this.config.getEventGroupId() || defaultKafkaGroupId}`;
         const kafkaConfig = {
             'api.version.request': true,
-            event_cb: true,
             'client.id': `${defaultKafkaGroupId}/${this.config.getDyno() || 'localhost'}`,
-            'group.id': groupId,
             'enable.auto.commit': false,
+            event_cb: true,
+            'group.id': groupId,
             'metadata.broker.list': this.brokers,
             'security.protocol': 'SSL',
             // SSL certs written above to .cert/
@@ -136,7 +136,7 @@ export default class EventManager {
                 // REVIEWME: function should determine if we commit
                 // the message or not
                 let didCommit = false;
-                let commitOnce = () => {
+                const commitOnce = () => {
                     if (!didCommit) {
                         this.consumer.commitMessage(data);
                         didCommit = true;

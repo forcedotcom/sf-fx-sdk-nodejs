@@ -1,8 +1,8 @@
 import * as hm from 'typed-rest-client/Handlers';
-import * as trcIfm from 'typed-rest-client/Interfaces';
 import * as httpm from 'typed-rest-client/HttpClient';
+import * as trcIfm from 'typed-rest-client/Interfaces';
 
-import * as sfxif from '../Interfaces';
+import { ICompositeApi, ICompositeRequest, ICompositeResponse, ICompositeSubrequest, ICompositeSubresponse, IConfig, IError } from '../Interfaces';
 
 export enum HttpCodes {
     OK = 200,
@@ -35,15 +35,14 @@ export enum HttpCodes {
     GatewayTimeout = 504,
 }
 
-class CompositeSubresponse implements sfxif.ICompositeSubresponse {
+class CompositeSubresponse implements ICompositeSubresponse {
     private static HEADER_LOCATION: string = 'Location';
     private static KEY_ID: string = 'id';
-    private static KEY_SUCCESS: string = 'success';
 
-    readonly httpHeaders: { [key: string]: string; };
-    readonly httpStatusCode: number;
-    readonly referenceId: string;
-    readonly _errors: ReadonlyArray<sfxif.IError>;
+    public readonly httpHeaders: { [key: string]: string; };
+    public readonly httpStatusCode: number;
+    public readonly referenceId: string;
+    private readonly _errors: ReadonlyArray<IError>;
     private readonly _body: { [key: string]: any; };
 
     public get body(): { [key: string]: any; } {
@@ -54,11 +53,11 @@ class CompositeSubresponse implements sfxif.ICompositeSubresponse {
         }
     }
 
-    public get errors(): ReadonlyArray<sfxif.IError> {
+    public get errors(): ReadonlyArray<IError> {
         if (this.httpStatusCode >= HttpCodes.BadRequest) {
             return this._errors;
         } else {
-            throw new Error("Errors is not valid when there hasn't been an error. Call #errors installed.");
+            throw new Error(`Errors is not valid when there hasn't been an error. Call #errors installed.`);
         }
     }
 
@@ -82,7 +81,7 @@ class CompositeSubresponse implements sfxif.ICompositeSubresponse {
         }
     }
 
-    constructor(compositeSubresponse: sfxif.ICompositeSubresponse) {
+    constructor(compositeSubresponse: ICompositeSubresponse) {
         this.httpHeaders = compositeSubresponse.httpHeaders;
         this.httpStatusCode = compositeSubresponse.httpStatusCode;
         this.referenceId = compositeSubresponse.referenceId;
@@ -90,24 +89,43 @@ class CompositeSubresponse implements sfxif.ICompositeSubresponse {
         if (compositeSubresponse.httpStatusCode < HttpCodes.BadRequest) {
             this._body = compositeSubresponse.body;
         } else {
-            const errors: Array<sfxif.IError> = [];
+            const errors: IError[] = [];
             if (compositeSubresponse.body) {
-                for (var i=0; i<compositeSubresponse.body.length; i++) {
-                    errors.push(<sfxif.IError>compositeSubresponse.body[i]);
-                }
+                compositeSubresponse.body.forEach((element: IError) => {
+                    errors.push(element);
+                });
             }
             this._errors = errors;
         }
     }
 }
 
-class CompositeResponse implements sfxif.ICompositeResponse {
-    public readonly compositeSubresponses: ReadonlyArray<sfxif.ICompositeSubresponse>;
+/**
+ * Used to avoid string access to json object below.
+ */
+interface CompositeResponseJsonObject {
+    compositeResponse:ICompositeSubresponse[];
+};
 
-    public getCompositeSubresponse(compositeSubrequest: sfxif.ICompositeSubrequest): sfxif.ICompositeSubresponse {
+class CompositeResponse implements ICompositeResponse {
+    public readonly compositeSubresponses: ReadonlyArray<ICompositeSubresponse>;
+
+    public constructor(json: string) {
+        const compositeResponseJsonObject:CompositeResponseJsonObject = JSON.parse(json) as CompositeResponseJsonObject;
+        const compositeSubResponses: ICompositeSubresponse[] = compositeResponseJsonObject.compositeResponse;
+        if (compositeSubResponses) {
+            compositeSubResponses.forEach((element: ICompositeSubresponse, index: number) => {
+                // Replace the json object with one that contains the location method
+                compositeSubResponses[index] = new CompositeSubresponse(element);
+            });
+        }
+        this.compositeSubresponses = compositeSubResponses as ReadonlyArray<ICompositeSubresponse>;
+    }
+
+    public getCompositeSubresponse(compositeSubrequest: ICompositeSubrequest): ICompositeSubresponse {
         const referenceId: string = compositeSubrequest.referenceId;
 
-        for (let compositeSubResponse of this.compositeSubresponses) {
+        for (const compositeSubResponse of this.compositeSubresponses) {
             if (compositeSubResponse.referenceId === referenceId) {
                 return compositeSubResponse;
             }
@@ -115,38 +133,28 @@ class CompositeResponse implements sfxif.ICompositeResponse {
 
         throw new Error('Unknown referenceId: ' + referenceId);
     }
-
-    constructor(json: string) {
-        const jsonAsObj: object = JSON.parse(json);
-        let compositeSubResponses: Array<sfxif.ICompositeSubresponse> = <Array<CompositeSubresponse>>jsonAsObj['compositeResponse'];
-        if (compositeSubResponses) {
-            for (var i = 0; i < compositeSubResponses.length; i++) {
-                // Replace the json object with one that contains the location method
-                compositeSubResponses[i] = new CompositeSubresponse(compositeSubResponses[i]);
-            }
-        }
-        this.compositeSubresponses = <ReadonlyArray<sfxif.ICompositeSubresponse>>compositeSubResponses;
-    }
 }
 
-class CompositeApi implements sfxif.ICompositeApi {
-    private _config: sfxif.IConfig;
+class CompositeApi implements ICompositeApi {
+    private _config: IConfig;
 
-    constructor(config: sfxif.IConfig) {
+    constructor(config: IConfig) {
         this._config = config;
     }
 
-    async invoke(compositeRequest: sfxif.ICompositeRequest): Promise<sfxif.ICompositeResponse> {
-        const bearerCredentialHandler: hm.BearerCredentialHandler = new hm.BearerCredentialHandler(this._config.sessionId);
+    public async invoke(compositeRequest: ICompositeRequest): Promise<ICompositeResponse> {
+        const bearerCredentialHandler: hm.BearerCredentialHandler =
+            new hm.BearerCredentialHandler(this._config.sessionId);
         const httpClient: httpm.HttpClient = new httpm.HttpClient('sf-fx-node', [bearerCredentialHandler]);
-        const path: string = '/services/data/v' + this._config.apiVersion + '/composite/';
-        const headers: trcIfm.IHeaders = { "Content-Type": "application/json" };
+        const path: string = `/services/data/v${this._config.apiVersion}/composite/`;
+        const headers: trcIfm.IHeaders = { 'Content-Type': 'application/json' };
         const data: string = JSON.stringify(compositeRequest);
 
-        const response: httpm.HttpClientResponse = await httpClient.post(this._config.instanceUrl + path, data, headers);
+        const response: httpm.HttpClientResponse =
+            await httpClient.post(this._config.instanceUrl + path, data, headers);
         if (response.message.statusCode === HttpCodes.OK) {
             const body: string = await response.readBody();
-            const compositeResponse: sfxif.ICompositeResponse = new CompositeResponse(body);
+            const compositeResponse: ICompositeResponse = new CompositeResponse(body);
 
             return compositeResponse;
         } else {
@@ -155,6 +163,6 @@ class CompositeApi implements sfxif.ICompositeApi {
     }
 }
 
-export function newCompositeApi(config: sfxif.IConfig): sfxif.ICompositeApi {
+export function newCompositeApi(config: IConfig): ICompositeApi {
     return new CompositeApi(config);
 }

@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const index = require('../index.ts');
+const __1 = require("..");
 ;
 ;
 class UnitOfWorkResult {
@@ -18,13 +18,13 @@ class UnitOfWorkResponse {
         this._compositeResponse = compositeResponse;
     }
     getResults(sObject) {
-        const results = new Array();
-        const referenceIds = this._uuidToReferenceIds[sObject.getUuid()];
+        const results = [];
+        const referenceIds = this._uuidToReferenceIds[sObject.uuid];
         if (referenceIds && referenceIds.size > 0) {
             const compositeSubresponses = this._compositeResponse.compositeSubresponses;
-            if (compositeSubresponses && compositeSubresponses.length > 0) {
-                for (let i = 0; i < compositeSubresponses.length; i++) {
-                    const compositeSubresponse = compositeSubresponses[i];
+            if (compositeSubresponses) {
+                // Use some so that it can short circuit after finding all relevant elements
+                compositeSubresponses.some((compositeSubresponse) => {
                     const referenceId = compositeSubresponse.referenceId;
                     if (referenceIds.has(referenceId)) {
                         const compositeSubrequest = this._referenceIdToCompositeSubrequests[referenceId];
@@ -40,11 +40,9 @@ class UnitOfWorkResponse {
                         }
                         results.push(new UnitOfWorkResult(method, id, success, errors));
                         // 1:1 relationship. Exit if we have found everything
-                        if (results.length === referenceIds.size) {
-                            break;
-                        }
+                        return (results.length === referenceIds.size);
                     }
-                }
+                });
             }
         }
         return results;
@@ -59,37 +57,37 @@ class UnitOfWorkResponse {
 class UnitOfWork {
     constructor(config) {
         this._config = config;
-        this._compositeRequest = index.compositeApi.newCompositeRequest();
+        this._compositeRequest = __1.CompositeApi.newCompositeRequest();
         this._uuidToReferenceIds = {};
         this._referenceIdToCompositeSubrequests = {};
     }
     registerNew(sObject) {
-        const insertBuilder = index.compositeApi.insertBuilder();
+        const insertBuilder = __1.CompositeApi.insertBuilder();
         const compositeSubrequest = insertBuilder.sObject(sObject).build();
         this.addCompositeSubrequest(sObject, compositeSubrequest);
     }
     registerModified(sObject) {
-        const patchBuilder = index.compositeApi.patchBuilder();
+        const patchBuilder = __1.CompositeApi.patchBuilder();
         const compositeSubrequest = patchBuilder.sObject(sObject).build();
         this.addCompositeSubrequest(sObject, compositeSubrequest);
     }
     registerDeleted(sObject) {
-        const id = sObject.getId();
+        const id = sObject.id;
         if (!id) {
             throw new Error('Id not provided');
         }
-        const deleteBuilder = index.compositeApi.deleteBuilder();
-        const compositeSubrequest = deleteBuilder.sObjectType(sObject.getSObjectType()).id(id).build();
+        const deleteBuilder = __1.CompositeApi.deleteBuilder();
+        const compositeSubrequest = deleteBuilder.sObjectType(sObject.sObjectType).id(id).build();
         this.addCompositeSubrequest(sObject, compositeSubrequest);
     }
     async commit() {
-        const compositeApi = index.compositeApi.newCompositeApi(this._config);
+        const compositeApi = __1.CompositeApi.newCompositeApi(this._config);
         const compositeResponse = await compositeApi.invoke(this._compositeRequest);
         return new UnitOfWorkResponse(this._uuidToReferenceIds, this._referenceIdToCompositeSubrequests, compositeResponse);
     }
     addCompositeSubrequest(sObject, compositeSubrequest) {
         const referenceId = compositeSubrequest.referenceId;
-        const uuid = sObject.getUuid();
+        const uuid = sObject.uuid;
         let referenceIds = this._uuidToReferenceIds[uuid];
         if (!referenceIds) {
             referenceIds = new Set();

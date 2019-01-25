@@ -134,8 +134,8 @@ class Context {
         }
         const userCtx = UserContext.create(context);
         const sfApi = new jsforce.Connection({
-            instanceUrl: userCtx.salesforceBaseUrl,
             accessToken: userCtx.sessionId,
+            instanceUrl: userCtx.salesforceBaseUrl,
             version: context.apiVersion,
         });
         const newCtx = new Context(context.apiVersion, userCtx, sfApi, logger);
