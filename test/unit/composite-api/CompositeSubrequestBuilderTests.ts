@@ -1,22 +1,29 @@
+/* tslint:disable: no-unused-expression */
 import { expect } from 'chai';
 import 'mocha';
 
-import { ICompositeSubrequest, ICompositeSubrequestBuilder, ISObject, Method } from '../../../lib/Interfaces';
 import { CompositeApi, SObject } from '../../../lib';
+import { ICompositeSubrequest, ICompositeSubrequestBuilder, ISObject, Method } from '../../../lib/Interfaces';
 
 describe('CompositeSubrequest Builder Tests', () => {
     /**
      * Return all known builders for generic test cases
      */
-    const getBuilderFactories = (): Array<Function> => {
-        return [CompositeApi.deleteBuilder, CompositeApi.describeBuilder, CompositeApi.httpGETBuilder, CompositeApi.insertBuilder, CompositeApi.patchBuilder, CompositeApi.putBuilder];
+    const getBuilderFactories = (): Function[] => {
+        return [
+            CompositeApi.deleteBuilder,
+            CompositeApi.describeBuilder,
+            CompositeApi.httpGETBuilder,
+            CompositeApi.insertBuilder,
+            CompositeApi.patchBuilder,
+            CompositeApi.putBuilder,
+        ];
     };
 
     const assertSetValuesSucceeds = (builderFactory: Function) => {
         it(builderFactory.name + ' set values with single value', () => {
             const key: string = 'key1';
             const value: string = 'a_string';
-
 
             const builder: ICompositeSubrequestBuilder = builderFactory().sObjectType('Account');
             expect(builder.addValue(key, value)).to.equal(builder);
@@ -36,7 +43,7 @@ describe('CompositeSubrequest Builder Tests', () => {
         it(builderFactory.name + ' set values with multiple values', () => {
             const key1: string = 'key1';
             const key2: string = 'key2';
-            const value1: string = 'a_string_1'
+            const value1: string = 'a_string_1';
             const value2: string = 'a_string_2';
             const expectedHeaders: { [key: string]: string } = { key1: value1, key2: value2 };
 
@@ -71,7 +78,7 @@ describe('CompositeSubrequest Builder Tests', () => {
             const keys: string[] = Object.keys(values);
             expect(keys.length).to.equal(1);
             expect(keys[0]).to.equal('Name');
-            expect(values['Name']).to.to.equal(name);
+            expect(values.Name).to.to.equal(name);
         });
     };
 
@@ -83,7 +90,7 @@ describe('CompositeSubrequest Builder Tests', () => {
 
         it(builderFactory.name + ' values throws', () => {
             const builder: ICompositeSubrequestBuilder = builderFactory();
-            expect(builder.addValues.bind(builder, { 'key': 'value' })).to.throw(`This request doesn't have a body`);
+            expect(builder.addValues.bind(builder, { key: 'value' })).to.throw(`This request doesn't have a body`);
         });
 
         // Name is syntactic sugar over the value method
@@ -94,10 +101,10 @@ describe('CompositeSubrequest Builder Tests', () => {
     };
 
     describe('Generic CompositeSubrequest Tests', () => {
-        const builderFactories: Array<Function> = getBuilderFactories();
+        const builderFactories: Function[] = getBuilderFactories();
 
         // TODO: Update with ID test
-        builderFactories.forEach((builderFactory) => {
+        builderFactories.forEach(builderFactory => {
             it(builderFactory.name + ' throws if sObjectType is missing', () => {
                 const builder: ICompositeSubrequestBuilder = builderFactory();
                 expect(builder.build.bind(builder)).to.throw('Type is required');
@@ -157,7 +164,7 @@ describe('CompositeSubrequest Builder Tests', () => {
             it(builderFactory.name + ' set header with multiple headers', () => {
                 const key1: string = 'key1';
                 const key2: string = 'key2';
-                const value1: string = 'a_string_1'
+                const value1: string = 'a_string_1';
                 const value2: string = 'a_string_2';
                 const expectedHeaders: { [key: string]: string } = { key1: value1, key2: value2 };
 
@@ -264,7 +271,9 @@ describe('CompositeSubrequest Builder Tests', () => {
             const compositeSubrequest: ICompositeSubrequest = builder.build();
             expect(compositeSubrequest).to.exist;
 
-            expect(compositeSubrequest.url).to.match(/^\/services\/data\/v[0-9][0-9]\.[0-9]\/sobjects\/Account\/describe$/);
+            expect(compositeSubrequest.url).to.match(
+                /^\/services\/data\/v[0-9][0-9]\.[0-9]\/sobjects\/Account\/describe$/,
+            );
         });
 
         assertSetValuesThrows(CompositeApi.describeBuilder);
@@ -324,7 +333,6 @@ describe('CompositeSubrequest Builder Tests', () => {
 
         assertSetValuesSucceeds(CompositeApi.patchBuilder);
     });
-
 
     describe('Put CompositeSubrequest Tests', () => {
         it('test put builder factory', () => {

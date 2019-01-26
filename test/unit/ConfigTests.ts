@@ -1,8 +1,9 @@
+/* tslint:disable: no-unused-expression */
 import { expect } from 'chai';
 import 'mocha';
 
-import { IConfig } from '../../lib/Interfaces';
 import { Config } from '../../lib';
+import { IConfig } from '../../lib/Interfaces';
 
 describe('Config Tests', () => {
   it('Config Properties', () => {

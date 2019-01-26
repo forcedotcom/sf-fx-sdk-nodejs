@@ -1,3 +1,4 @@
+/* tslint:disable: no-unused-expression */
 import { expect } from 'chai';
 import 'mocha';
 
@@ -15,7 +16,7 @@ describe('UnitOfWork Integration Tests', () => {
     it('Insert Account', async () => {
         const uow: IUnitOfWork = UnitOfWork.newUnitOfWork(config);
         const account: ISObject = new SObject('Account');
-        account.setValue('Name', 'MyAccount - uow - integration - ' + new Date());
+        account.setValue('Name', `MyAccount - uow - integration - ${new Date()}`);
 
         uow.registerNew(account);
 
@@ -35,7 +36,7 @@ describe('UnitOfWork Integration Tests', () => {
     it('Update Existing Account', async () => {
         const uow: IUnitOfWork = UnitOfWork.newUnitOfWork(config);
         const insertResponse:tu.IInsertResponse = await tu.insertAccount(config);
-        const newAccountName:string = 'Updated ' + insertResponse.name;
+        const newAccountName:string = `Updated ${insertResponse.name}`
         const account: ISObject = new SObject('Account').withId(insertResponse.id).named(newAccountName);
 
         uow.registerModified(account);
@@ -54,8 +55,8 @@ describe('UnitOfWork Integration Tests', () => {
     });
 
     it('Insert and Update Account', async () => {
-        const originalName = 'MyAccount - uow - integration - ' + new Date();
-        const newName = 'Updated ' + originalName;
+        const originalName = `MyAccount - uow - integration - ${new Date()}`
+        const newName = `Updated ${originalName}`;
         const account: ISObject = new SObject('Account');
         account.setValue('Name', originalName);
 
@@ -103,5 +104,39 @@ describe('UnitOfWork Integration Tests', () => {
         expect(uowResult.method).to.equal(Method.DELETE);
         // Id is not sent back on updates
         expect(uowResult.id).to.not.exist;
+    });
+
+    it('Insert Account and Contact', async () => {
+        const uow: IUnitOfWork = UnitOfWork.newUnitOfWork(config);
+        const account: ISObject = new SObject('Account');
+        account.setValue('Name', `MyAccount - uow - integration - ${new Date()}`);
+        uow.registerNew(account);
+
+        const contact: ISObject = new SObject('Contact');
+        contact.setValue('LastName', `LastName - ${new Date()}`);
+        contact.setValue('AccountId', account.fkId);
+        uow.registerNew(contact);
+
+        const uowResponse: IUnitOfWorkResponse = await uow.commit();
+
+        expect(uowResponse).to.exist;
+
+        const accountResults: ReadonlyArray<IUnitOfWorkResult> = uowResponse.getResults(account);
+        expect(accountResults).to.exist;
+        expect(accountResults).lengthOf(1);
+        const uowResultAccount: IUnitOfWorkResult = accountResults[0];
+        expect(uowResultAccount.isSuccess).to.be.true;
+        expect(uowResultAccount.method).to.equal(Method.POST);
+        expect(uowResultAccount.id).to.exist;
+        expect(uowResultAccount.id).to.match(/^001[A-Za-z0-9]{15}/);
+
+        const contactResults: ReadonlyArray<IUnitOfWorkResult> = uowResponse.getResults(contact);
+        expect(contactResults).to.exist;
+        expect(contactResults).lengthOf(1);
+        const uowResultContact: IUnitOfWorkResult = contactResults[0];
+        expect(uowResultContact.isSuccess).to.be.true;
+        expect(uowResultContact.method).to.equal(Method.POST);
+        expect(uowResultContact.id).to.exist;
+        expect(uowResultContact.id).to.match(/^003[A-Za-z0-9]{15}/);
     });
 });

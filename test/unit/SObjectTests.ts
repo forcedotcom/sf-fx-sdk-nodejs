@@ -1,8 +1,9 @@
+/* tslint:disable: no-unused-expression */
 import { assert, expect } from 'chai';
 import 'mocha';
 
-import { ISObject } from '../../lib/Interfaces';
 import { SObject } from '../../lib';
+import { ISObject } from '../../lib/Interfaces';
 
 describe('SObject Tests', () => {
     let sObject: ISObject = null;

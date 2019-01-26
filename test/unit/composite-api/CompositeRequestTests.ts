@@ -1,13 +1,14 @@
+/* tslint:disable: no-unused-expression */
 import { expect } from 'chai';
 import 'mocha';
 
-import { ICompositeRequest, ICompositeSubrequest, ISObject } from '../../../lib/Interfaces';
 import { CompositeApi, SObject } from '../../../lib';
+import { ICompositeRequest, ICompositeSubrequest, ISObject } from '../../../lib/Interfaces';
 
 describe('CompositeRequest Tests', () => {
     let compositeRequest:ICompositeRequest = null;
 
-    beforeEach(function() {
+    beforeEach(() => {
         compositeRequest = CompositeApi.newCompositeRequest();
     });
 
