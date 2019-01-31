@@ -82,37 +82,37 @@ interface Logger {
 }
 
 class NoOpLoggerImpl implements Logger {
-    log(msg: string, ...supportingData: any[]): void {}
-    shout(msg: string, ...supportingData: any[]): void {}
+    public log(msg: string, ...supportingData: any[]): void {}
+    public shout(msg: string, ...supportingData: any[]): void {}
 
-    debug(msg: string, ...supportingData: any[]): void {}
-    warn(msg: string, ...supportingData: any[]): void {}
-    error(msg: string, ...supportingData: any[]): void {}
-    info(msg: string, ...supportingData: any[]): void {}
+    public debug(msg: string, ...supportingData: any[]): void {}
+    public warn(msg: string, ...supportingData: any[]): void {}
+    public error(msg: string, ...supportingData: any[]): void {}
+    public info(msg: string, ...supportingData: any[]): void {}
 }
 
 class LoggerImpl implements Logger {
-    shout(msg: string, ...supportingData: any[]): void {
+    public shout(msg: string, ...supportingData: any[]): void {
         this.emitLogMessage('info', `-----> ${msg}`, supportingData);
     }
 
-    log(msg: string, ...supportingData: any[]): void {
+    public log(msg: string, ...supportingData: any[]): void {
         this.emitLogMessage('info', `       ${msg}`, supportingData);
     }
 
-    debug(msg: string, ...supportingData: any[]): void {
+    public debug(msg: string, ...supportingData: any[]): void {
         this.emitLogMessage('debug', msg, supportingData);
     }
 
-    warn(msg: string, ...supportingData: any[]): void {
+    public warn(msg: string, ...supportingData: any[]): void {
         this.emitLogMessage('warn', msg, supportingData);
     }
 
-    error(msg: string, ...supportingData: any[]): void {
+    public error(msg: string, ...supportingData: any[]): void {
         this.emitLogMessage('error', msg, supportingData);
     }
 
-    info(msg: string, ...supportingData: any[]): void {
+    public info(msg: string, ...supportingData: any[]): void {
         this.emitLogMessage('info', msg, supportingData);
     }
 
@@ -130,7 +130,7 @@ function logInit(verbose: boolean): Logger {
 }
 
 class UserContext {
-    static create(context: any): UserContext {
+    public static create(context: any): UserContext {
         const userContext = context.userContext;
         if (!userContext) {
             const message = `UserContext not provided: ${JSON.stringify(context)}`;
@@ -147,7 +147,7 @@ class UserContext {
         );
     }
 
-    constructor(
+    private constructor(
         public orgId: string,
         public username: string,
         public userId: string,
@@ -158,7 +158,7 @@ class UserContext {
 }
 
 class Context {
-    static async create(payload: any, logger: Logger): Promise<Context> {
+    public static async create(payload: any, logger: Logger): Promise<Context> {
         let context = payload.Context__c || payload.context;
         if (!context) {
             const message = `Context not provided: ${JSON.stringify(payload)}`;
@@ -172,8 +172,8 @@ class Context {
         const userCtx = UserContext.create(context);
 
         const sfApi = new jsforce.Connection({
-            instanceUrl: userCtx.salesforceBaseUrl,
             accessToken: userCtx.sessionId,
+            instanceUrl: userCtx.salesforceBaseUrl,
             version: context.apiVersion,
         });
 
@@ -185,7 +185,7 @@ class Context {
         return newCtx;
     }
 
-    constructor(
+    private constructor(
         public apiVersion: string,
         public userContext: UserContext,
         public sfApi: jsforce.Connection,
@@ -194,17 +194,17 @@ class Context {
 }
 
 class Event {
-    constructor(public name: String, public context: Context, public payload: any) {}
+    public constructor(public name: string, public context: Context, public payload: any) {}
 
-    getReplayId(): any {
+    public getReplayId(): any {
         return this.payload.event.replayId;
     }
 
-    getValue(key: string): any {
+    public getValue(key: string): any {
         return this.payload[key];
     }
 
-    isHttp() {
+    public isHttp() {
         return 'http' === this.name;
     }
 }

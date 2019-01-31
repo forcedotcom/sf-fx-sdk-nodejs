@@ -1,6 +1,6 @@
-import * as sdk from './sf-sdk';
 import * as restify from 'restify';
 import * as restifyPromise from 'restify-await-promise';
+import * as sdk from './sf-sdk';
 
 export default class RestManager {
     constructor(private config: sdk.Config, private logger: sdk.Logger, private fx: sdk.SfFunction) {
@@ -18,18 +18,18 @@ export default class RestManager {
         server.use(restify.plugins.queryParser());
         server.use(restify.plugins.bodyParser());
 
-        //Allows you to manipulate the errors before restify does its work
+        // Allows you to manipulate the errors before restify does its work
         const alwaysBlameTheUserErrorTransformer = {
-            transform: function(exceptionThrownByRoute) {
-                //Always blame the user
+            transform: (exceptionThrownByRoute) => {
+                // Always blame the user
                 exceptionThrownByRoute.statusCode = 400;
                 return exceptionThrownByRoute;
             },
         };
 
         const options = {
-            logger: this.logger, //Optional: Will automatically log exceptions
-            errorTransformer: alwaysBlameTheUserErrorTransformer, //Optional: Lets you add status codes
+            errorTransformer: alwaysBlameTheUserErrorTransformer, // Optional: Lets you add status codes
+            logger: this.logger, // Optional: Will automatically log exceptions
         };
 
         restifyPromise.install(server, options); // Options is not required

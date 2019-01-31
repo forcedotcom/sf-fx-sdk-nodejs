@@ -18,8 +18,11 @@
     "prepublishOnly": "npm test && npm run lint",
     "preversion": "npm run lint",
     "postversion": "git push && git push --tags",
-    "test": "mocha --reporter spec",
-    "version": "npm run format && git add -A src"
+    "test": "mocha -r ts-node/register 'test/unit/**/*.ts'",
+    "test-all": "mocha -r ts-node/register 'test/**/*.ts'",
+    "test-integration": "mocha -r ts-node/register 'test/integration/**/*.ts'",
+    "version": "npm run format && git add -A src",
+    "watch-ts": "tsc -w"
   },
   "repository": {
     "type": "git",
@@ -40,14 +43,21 @@
     "node-rdkafka": "~2.2.3",
     "restify": "^7.2.7",
     "restify-await-promise": "^2.1.0",
-    "tslib": "1.9.3"
+    "tslib": "1.9.3",
+    "typed-rest-client": "^1.0.11"
   },
   "devDependencies": {
+    "@types/mocha": "^5.2.5",
     "@types/node": "^10.12.18",
+    "@types/sinon": "^7.0.4",
     "chai": "^4.2.0",
     "mocha": "^5.2.0",
-    "prettier": "1.15.3",
+    "prettier": "^1.15.3",
+    "sinon": "^7.2.3",
     "ts-node": "7.0.0",
+    "tslint": "^5.12.1",
+    "tslint-config-prettier": "^1.17.0",
+    "tslint-plugin-prettier": "^2.0.1",
     "typescript": "3.2.2"
   }
 }

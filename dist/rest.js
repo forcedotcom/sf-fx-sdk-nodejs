@@ -1,8 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const sdk = require("./sf-sdk");
 const restify = require("restify");
 const restifyPromise = require("restify-await-promise");
+const sdk = require("./sf-sdk");
 class RestManager {
     constructor(config, logger, fx) {
         this.config = config;
@@ -19,17 +19,17 @@ class RestManager {
         server.pre(restify.plugins.pre.userAgentConnection());
         server.use(restify.plugins.queryParser());
         server.use(restify.plugins.bodyParser());
-        //Allows you to manipulate the errors before restify does its work
+        // Allows you to manipulate the errors before restify does its work
         const alwaysBlameTheUserErrorTransformer = {
-            transform: function (exceptionThrownByRoute) {
-                //Always blame the user
+            transform: (exceptionThrownByRoute) => {
+                // Always blame the user
                 exceptionThrownByRoute.statusCode = 400;
                 return exceptionThrownByRoute;
             },
         };
         const options = {
-            logger: this.logger,
             errorTransformer: alwaysBlameTheUserErrorTransformer,
+            logger: this.logger,
         };
         restifyPromise.install(server, options); // Options is not required
         server.get('/', async (req, res, next) => {
