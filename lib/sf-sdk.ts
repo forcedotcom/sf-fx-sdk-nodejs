@@ -1,8 +1,12 @@
 import * as dotenv from 'dotenv';
 import * as jsforce from 'jsforce';
 
-export default class Config {
+import { Config as ConfigImpl } from './Config';
+import { Constants } from './Constants';
+import { IConfig, IUnitOfWork } from './Interfaces';
+import { UnitOfWork } from './unit-of-work';
 
+export default class Config {
     private env;
 
     constructor() {
@@ -59,11 +63,13 @@ export default class Config {
     }
 
     public hasMessagingConfig(): boolean {
-        return this.hasValue(this.getBrokerUrls())
-            && this.hasValue(this.getEventNames())
-            && this.hasValue(this.getBrokerClientCert())
-            && this.hasValue(this.getBrokerClientCertKey())
-            && this.hasValue(this.getBrokerTrustedCert());
+        return (
+            this.hasValue(this.getBrokerUrls()) &&
+            this.hasValue(this.getEventNames()) &&
+            this.hasValue(this.getBrokerClientCert()) &&
+            this.hasValue(this.getBrokerClientCertKey()) &&
+            this.hasValue(this.getBrokerTrustedCert())
+        );
     }
 
     private hasValue(value: any): boolean {
@@ -171,13 +177,23 @@ class Context {
 
         const userCtx = UserContext.create(context);
 
+        const apiVersion = context.apiVersion || Constants.CURRENT_API_VERSION;
         const sfApi = new jsforce.Connection({
             accessToken: userCtx.sessionId,
             instanceUrl: userCtx.salesforceBaseUrl,
-            version: context.apiVersion,
+            version: apiVersion,
         });
 
-        const newCtx = new Context(context.apiVersion, userCtx, sfApi, logger);
+        const config: IConfig = new ConfigImpl(userCtx.salesforceBaseUrl, apiVersion, userCtx.sessionId);
+        const unitOfWork = UnitOfWork.newUnitOfWork(config);
+
+        const newCtx = new Context(
+            apiVersion,
+            userCtx,
+            sfApi,
+            logger,
+            unitOfWork
+        );
 
         delete payload.Context__c;
         delete payload.context;
@@ -190,6 +206,7 @@ class Context {
         public userContext: UserContext,
         public sfApi: jsforce.Connection,
         public logger: Logger,
+        public unitOfWork: IUnitOfWork,
     ) {}
 }
 

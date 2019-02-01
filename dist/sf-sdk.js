@@ -2,6 +2,9 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const dotenv = require("dotenv");
 const jsforce = require("jsforce");
+const Config_1 = require("./Config");
+const Constants_1 = require("./Constants");
+const unit_of_work_1 = require("./unit-of-work");
 class Config {
     constructor() {
         dotenv.config();
@@ -44,11 +47,11 @@ class Config {
         return this.env.CONSUME_TOPIC_NAMES;
     }
     hasMessagingConfig() {
-        return this.hasValue(this.getBrokerUrls())
-            && this.hasValue(this.getEventNames())
-            && this.hasValue(this.getBrokerClientCert())
-            && this.hasValue(this.getBrokerClientCertKey())
-            && this.hasValue(this.getBrokerTrustedCert());
+        return (this.hasValue(this.getBrokerUrls()) &&
+            this.hasValue(this.getEventNames()) &&
+            this.hasValue(this.getBrokerClientCert()) &&
+            this.hasValue(this.getBrokerClientCertKey()) &&
+            this.hasValue(this.getBrokerTrustedCert()));
     }
     hasValue(value) {
         return typeof value !== 'undefined' && value !== null;
@@ -117,11 +120,12 @@ class UserContext {
 }
 exports.UserContext = UserContext;
 class Context {
-    constructor(apiVersion, userContext, sfApi, logger) {
+    constructor(apiVersion, userContext, sfApi, logger, unitOfWork) {
         this.apiVersion = apiVersion;
         this.userContext = userContext;
         this.sfApi = sfApi;
         this.logger = logger;
+        this.unitOfWork = unitOfWork;
     }
     static async create(payload, logger) {
         let context = payload.Context__c || payload.context;
@@ -133,12 +137,15 @@ class Context {
             context = JSON.parse(context);
         }
         const userCtx = UserContext.create(context);
+        const apiVersion = context.apiVersion || Constants_1.Constants.CURRENT_API_VERSION;
         const sfApi = new jsforce.Connection({
             accessToken: userCtx.sessionId,
             instanceUrl: userCtx.salesforceBaseUrl,
-            version: context.apiVersion,
+            version: apiVersion,
         });
-        const newCtx = new Context(context.apiVersion, userCtx, sfApi, logger);
+        const config = new Config_1.Config(userCtx.salesforceBaseUrl, apiVersion, userCtx.sessionId);
+        const unitOfWork = unit_of_work_1.UnitOfWork.newUnitOfWork(config);
+        const newCtx = new Context(apiVersion, userCtx, sfApi, logger, unitOfWork);
         delete payload.Context__c;
         delete payload.context;
         return newCtx;

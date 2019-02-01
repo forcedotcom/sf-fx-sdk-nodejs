@@ -1,20 +1,42 @@
 /* tslint:disable: no-unused-expression */
 import { expect } from 'chai';
 import 'mocha';
+import { beforeEach } from 'mocha';
 
+import { Config, Constants, SObject, UnitOfWork } from '../../../lib';
 import { IConfig, ISObject, IUnitOfWork, IUnitOfWorkResponse, IUnitOfWorkResult, Method } from '../../../lib/Interfaces';
-import { Config, SObject, UnitOfWork } from '../../../lib';
 
+import * as sdk from '../../../lib/sf-sdk';
 import * as tu from '../../TestUtils';
 
 const instanceUrl: string = process.env.SFDC_URL || '<put your server url here>';
 const apiVersion: string = process.env.SFDC_API_VERSION || '45.0';
 const sessionId: string = process.env.SFDC_SID || '<Put your session id here>';
 const config: IConfig = new Config(instanceUrl, apiVersion, sessionId);
+let uow: IUnitOfWork;
 
 describe('UnitOfWork Integration Tests', () => {
+    beforeEach(async () => {
+        // This needs to be reinitialized each time becauase Context#create deletes it
+        const payload = {
+            Context__c: {
+                apiVersion: Constants.CURRENT_API_VERSION,
+                userContext: {
+                    orgDomainUrl: instanceUrl,
+                    orgId: '00D1U0000000000',
+                    salesforceBaseUrl: instanceUrl,
+                    sessionId,
+                    userId: '0051U0000000000',
+                    username: 'test@salesforce.com'
+                },
+            }
+        };
+        const logger = sdk.logInit(false /*verbose*/);
+        const context: sdk.Context = await sdk.Context.create(payload, logger);
+        uow = context.unitOfWork;        
+    });
+
     it('Insert Account', async () => {
-        const uow: IUnitOfWork = UnitOfWork.newUnitOfWork(config);
         const account: ISObject = new SObject('Account');
         account.setValue('Name', `MyAccount - uow - integration - ${new Date()}`);
 
@@ -34,7 +56,6 @@ describe('UnitOfWork Integration Tests', () => {
     });
 
     it('Update Existing Account', async () => {
-        const uow: IUnitOfWork = UnitOfWork.newUnitOfWork(config);
         const insertResponse:tu.IInsertResponse = await tu.insertAccount(config);
         const newAccountName:string = `Updated ${insertResponse.name}`
         const account: ISObject = new SObject('Account').withId(insertResponse.id).named(newAccountName);
@@ -60,7 +81,6 @@ describe('UnitOfWork Integration Tests', () => {
         const account: ISObject = new SObject('Account');
         account.setValue('Name', originalName);
 
-        const uow: IUnitOfWork = UnitOfWork.newUnitOfWork(config);
         uow.registerNew(account);
 
         account.named(newName);
@@ -87,7 +107,6 @@ describe('UnitOfWork Integration Tests', () => {
     });
 
     it('Delete Existing Account', async () => {
-        const uow: IUnitOfWork = UnitOfWork.newUnitOfWork(config);
         const insertResponse:tu.IInsertResponse = await tu.insertAccount(config);
         const account: ISObject = new SObject('Account').withId(insertResponse.id);
 
