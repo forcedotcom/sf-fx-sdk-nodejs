@@ -3,8 +3,8 @@ import { expect } from 'chai';
 import 'mocha';
 import { beforeEach } from 'mocha';
 
-import { Config, Constants, SObject, UnitOfWork } from '../../../lib';
-import { IConfig, ISObject, IUnitOfWork, IUnitOfWorkResponse, IUnitOfWorkResult, Method } from '../../../lib/Interfaces';
+import { ConnectionConfig, Constants, SObject, UnitOfWork } from '../../../lib';
+import { IConnectionConfig, ISObject, IUnitOfWork, IUnitOfWorkResponse, IUnitOfWorkResult, Method } from '../../../lib/Interfaces';
 
 import * as sdk from '../../../lib/sf-sdk';
 import * as tu from '../../TestUtils';
@@ -12,7 +12,7 @@ import * as tu from '../../TestUtils';
 const instanceUrl: string = process.env.SFDC_URL || '<put your server url here>';
 const apiVersion: string = process.env.SFDC_API_VERSION || '45.0';
 const sessionId: string = process.env.SFDC_SID || '<Put your session id here>';
-const config: IConfig = new Config(instanceUrl, apiVersion, sessionId);
+const connectionConfig: IConnectionConfig = new ConnectionConfig(instanceUrl, apiVersion, sessionId);
 let uow: IUnitOfWork;
 
 describe('UnitOfWork Integration Tests', () => {
@@ -56,7 +56,7 @@ describe('UnitOfWork Integration Tests', () => {
     });
 
     it('Update Existing Account', async () => {
-        const insertResponse:tu.IInsertResponse = await tu.insertAccount(config);
+        const insertResponse:tu.IInsertResponse = await tu.insertAccount(connectionConfig);
         const newAccountName:string = `Updated ${insertResponse.name}`
         const account: ISObject = new SObject('Account').withId(insertResponse.id).named(newAccountName);
 
@@ -107,7 +107,7 @@ describe('UnitOfWork Integration Tests', () => {
     });
 
     it('Delete Existing Account', async () => {
-        const insertResponse:tu.IInsertResponse = await tu.insertAccount(config);
+        const insertResponse:tu.IInsertResponse = await tu.insertAccount(connectionConfig);
         const account: ISObject = new SObject('Account').withId(insertResponse.id);
 
         uow.registerDeleted(account);
@@ -126,7 +126,7 @@ describe('UnitOfWork Integration Tests', () => {
     });
 
     it('Insert Account and Contact', async () => {
-        const uow: IUnitOfWork = UnitOfWork.newUnitOfWork(config);
+        const uow: IUnitOfWork = UnitOfWork.newUnitOfWork(connectionConfig);
         const account: ISObject = new SObject('Account');
         account.setValue('Name', `MyAccount - uow - integration - ${new Date()}`);
         uow.registerNew(account);

@@ -1,8 +1,9 @@
+/* tslint:disable: no-unused-expression */
 import { expect } from 'chai';
 import 'mocha';
 
 import { CompositeApi } from '../lib';
-import { ICompositeApi, ICompositeRequest, ICompositeResponse, ICompositeSubrequest, ICompositeSubresponse, IConfig } from '../lib/Interfaces';
+import { ICompositeApi, ICompositeRequest, ICompositeResponse, ICompositeSubrequest, ICompositeSubresponse, IConnectionConfig } from '../lib/Interfaces';
 
 const httpCodeCreated:number = 201;
 
@@ -11,9 +12,9 @@ export interface IInsertResponse {
     readonly name: string;
 }
 
-export async function insertAccount(config: IConfig): Promise<IInsertResponse> {
+export async function insertAccount(connectionConfig: IConnectionConfig): Promise<IInsertResponse> {
     const accountName: string = `Account ${new Date()}`;
-    const compositeApi: ICompositeApi = CompositeApi.newCompositeApi(config);
+    const compositeApi: ICompositeApi = CompositeApi.newCompositeApi(connectionConfig);
     const compositeRequest: ICompositeRequest = CompositeApi.newCompositeRequest();
     const compositeSubRequest: ICompositeSubrequest = 
     CompositeApi.insertBuilder().sObjectType('Account').named(accountName).build();

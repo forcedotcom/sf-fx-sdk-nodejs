@@ -84,7 +84,7 @@ export interface ICompositeResponse {
     readonly compositeSubresponses: ReadonlyArray<ICompositeSubresponse>;
     getCompositeSubresponse(compositeSubrequest: ICompositeSubrequest): ICompositeSubresponse;
 }
-export interface IConfig {
+export interface IConnectionConfig {
     readonly instanceUrl: string;
     readonly apiVersion: string;
     readonly sessionId: string;

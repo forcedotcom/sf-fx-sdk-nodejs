@@ -1,6 +1,6 @@
-import { IConfig } from './Interfaces';
+import { IConnectionConfig } from './Interfaces';
 
-export class Config implements IConfig {
+export class ConnectionConfig implements IConnectionConfig {
     constructor(
         public readonly instanceUrl: string,
         public readonly apiVersion: string,

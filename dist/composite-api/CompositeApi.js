@@ -83,16 +83,16 @@ class CompositeResponse {
     }
 }
 class CompositeApi {
-    constructor(config) {
-        this._config = config;
+    constructor(connectionConfig) {
+        this._connectionConfig = connectionConfig;
     }
     async invoke(compositeRequest) {
-        const bearerCredentialHandler = new Handlers_1.BearerCredentialHandler(this._config.sessionId);
+        const bearerCredentialHandler = new Handlers_1.BearerCredentialHandler(this._connectionConfig.sessionId);
         const httpClient = new HttpClient_1.HttpClient('sf-fx-node', [bearerCredentialHandler]);
-        const path = `/services/data/v${this._config.apiVersion}/composite/`;
+        const path = `/services/data/v${this._connectionConfig.apiVersion}/composite/`;
         const headers = { 'Content-Type': 'application/json' };
         const data = JSON.stringify(compositeRequest);
-        const response = await httpClient.post(this._config.instanceUrl + path, data, headers);
+        const response = await httpClient.post(this._connectionConfig.instanceUrl + path, data, headers);
         if (response.message.statusCode === HttpClient_1.HttpCodes.OK) {
             const body = await response.readBody();
             const compositeResponse = new CompositeResponse(body);
@@ -103,8 +103,8 @@ class CompositeApi {
         }
     }
 }
-function newCompositeApi(config) {
-    return new CompositeApi(config);
+function newCompositeApi(connectionConfig) {
+    return new CompositeApi(connectionConfig);
 }
 exports.newCompositeApi = newCompositeApi;
 //# sourceMappingURL=CompositeApi.js.map

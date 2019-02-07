@@ -1,9 +1,9 @@
 import * as dotenv from 'dotenv';
 import * as jsforce from 'jsforce';
 
-import { Config as ConfigImpl } from './Config';
+import { ConnectionConfig } from './ConnectionConfig';
 import { Constants } from './Constants';
-import { IConfig, IUnitOfWork } from './Interfaces';
+import { IConnectionConfig, IUnitOfWork } from './Interfaces';
 import { UnitOfWork } from './unit-of-work';
 
 export default class Config {
@@ -177,14 +177,15 @@ class Context {
 
         const userCtx = UserContext.create(context);
 
-        const apiVersion = context.apiVersion || Constants.CURRENT_API_VERSION;
+        const apiVersion = context.apiVersion || process.env.FX_API_VERSION || Constants.CURRENT_API_VERSION;
         const sfApi = new jsforce.Connection({
             accessToken: userCtx.sessionId,
             instanceUrl: userCtx.salesforceBaseUrl,
             version: apiVersion,
         });
 
-        const config: IConfig = new ConfigImpl(userCtx.salesforceBaseUrl, apiVersion, userCtx.sessionId);
+        const config: IConnectionConfig = 
+            new ConnectionConfig(userCtx.salesforceBaseUrl, apiVersion, userCtx.sessionId);
         const unitOfWork = UnitOfWork.newUnitOfWork(config);
 
         const newCtx = new Context(

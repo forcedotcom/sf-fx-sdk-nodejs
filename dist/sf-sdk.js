@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const dotenv = require("dotenv");
 const jsforce = require("jsforce");
-const Config_1 = require("./Config");
+const ConnectionConfig_1 = require("./ConnectionConfig");
 const Constants_1 = require("./Constants");
 const unit_of_work_1 = require("./unit-of-work");
 class Config {
@@ -137,13 +137,13 @@ class Context {
             context = JSON.parse(context);
         }
         const userCtx = UserContext.create(context);
-        const apiVersion = context.apiVersion || Constants_1.Constants.CURRENT_API_VERSION;
+        const apiVersion = context.apiVersion || process.env.FX_API_VERSION || Constants_1.Constants.CURRENT_API_VERSION;
         const sfApi = new jsforce.Connection({
             accessToken: userCtx.sessionId,
             instanceUrl: userCtx.salesforceBaseUrl,
             version: apiVersion,
         });
-        const config = new Config_1.Config(userCtx.salesforceBaseUrl, apiVersion, userCtx.sessionId);
+        const config = new ConnectionConfig_1.ConnectionConfig(userCtx.salesforceBaseUrl, apiVersion, userCtx.sessionId);
         const unitOfWork = unit_of_work_1.UnitOfWork.newUnitOfWork(config);
         const newCtx = new Context(apiVersion, userCtx, sfApi, logger, unitOfWork);
         delete payload.Context__c;
