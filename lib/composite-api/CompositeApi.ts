@@ -18,7 +18,7 @@ class CompositeSubresponse implements ICompositeSubresponse {
         if (this.httpStatusCode < HttpCodes.BadRequest) {
             return this._body;
         } else {
-            throw new Error('Body is not valid when there has been an error. Call #errors installed.');
+            return undefined;
         }
     }
 

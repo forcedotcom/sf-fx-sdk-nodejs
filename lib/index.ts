@@ -2,6 +2,7 @@ import { CompositeApi } from './composite-api';
 import { Config  } from './Config';
 import { Constants } from './Constants';
 import EventManager from './events';
+import * as SdkInterfaces from './Interfaces';
 import RestManager from './rest';
 import * as sdk from './sf-sdk';
 import { SObject } from './SObject';
@@ -26,4 +27,4 @@ async function invoke(fx: sdk.SfFunction) {
     }
 }
 
-export { invoke, CompositeApi, Config, Constants, sdk, UnitOfWork, SObject };
+export { invoke, CompositeApi, Config, Constants, sdk, UnitOfWork, SObject, SdkInterfaces };

@@ -59,11 +59,17 @@ export interface IError {
 }
 
 export interface ICompositeSubresponse {
+    /**
+     * This will return undefined if isSuccess is false
+     */
     readonly body: { [key: string]: any };
     readonly httpHeaders: { [key: string]: string };
     readonly httpStatusCode: number;
     readonly referenceId: string;
     readonly isSuccess: boolean;
+    /**
+     * This will return undefined if isSuccess is false or for PUT/PATCH operations.
+     */
     readonly id: string;
     readonly errors: ReadonlyArray<IError>;
     readonly location: string;

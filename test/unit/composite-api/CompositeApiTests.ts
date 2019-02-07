@@ -329,12 +329,7 @@ describe('CompositeApi Tests', () => {
             compositeSubRequest,
         );
 
-        try {
-            compositeSubResponse.body;
-            fail('body accessor should have thrown');
-        } catch (e) {
-            expect(e.message).to.equal('Body is not valid when there has been an error. Call #errors installed.');
-        }
+        expect(compositeSubResponse.body).to.not.exist;
     });
 
     it('Composite Response throws error if request id is not found', async () => {

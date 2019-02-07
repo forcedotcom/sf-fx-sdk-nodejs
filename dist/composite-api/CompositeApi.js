@@ -26,7 +26,7 @@ class CompositeSubresponse {
             return this._body;
         }
         else {
-            throw new Error('Body is not valid when there has been an error. Call #errors installed.');
+            return undefined;
         }
     }
     get errors() {
