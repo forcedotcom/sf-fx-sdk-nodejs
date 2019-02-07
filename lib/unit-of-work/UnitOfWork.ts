@@ -1,6 +1,6 @@
 import {
     ICompositeApi, ICompositeRequest, ICompositeResponse, ICompositeSubrequest, ICompositeSubrequestBuilder,
-    ICompositeSubresponse, IConfig, IError, ISObject, IUnitOfWork, IUnitOfWorkResponse, IUnitOfWorkResult, Method
+    ICompositeSubresponse, IConnectionConfig, IError, ISObject, IUnitOfWork, IUnitOfWorkResponse, IUnitOfWorkResult, Method
 } from '../Interfaces';
 
 import { CompositeApi } from '..';
@@ -83,11 +83,11 @@ class UnitOfWorkResponse implements IUnitOfWorkResponse {
 
 class UnitOfWork implements IUnitOfWork {
     private readonly _compositeRequest: ICompositeRequest;
-    private readonly _config: IConfig;
+    private readonly _config: IConnectionConfig;
     private readonly _uuidToReferenceIds: UuidToReferenceIds;
     private readonly _referenceIdToCompositeSubrequests: IReferenceIdToCompositeSubrequests;
 
-    constructor(config: IConfig) {
+    constructor(config: IConnectionConfig) {
         this._config = config;
         this._compositeRequest = CompositeApi.newCompositeRequest();
         this._uuidToReferenceIds = {};
@@ -144,6 +144,6 @@ class UnitOfWork implements IUnitOfWork {
     }
 }
 
-export function newUnitOfWork(config: IConfig) {
-    return new UnitOfWork(config);
+export function newUnitOfWork(connectionConfig: IConnectionConfig) {
+    return new UnitOfWork(connectionConfig);
 }

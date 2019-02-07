@@ -1,4 +1,5 @@
 import * as jsforce from 'jsforce';
+import { IUnitOfWork } from './Interfaces';
 export default class Config {
     private env;
     constructor();
@@ -41,6 +42,7 @@ declare class Context {
     userContext: UserContext;
     sfApi: jsforce.Connection;
     logger: Logger;
+    unitOfWork: IUnitOfWork;
     static create(payload: any, logger: Logger): Promise<Context>;
     private constructor();
 }

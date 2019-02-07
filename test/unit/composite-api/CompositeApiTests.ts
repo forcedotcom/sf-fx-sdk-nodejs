@@ -7,14 +7,14 @@ import { HttpCodes } from 'typed-rest-client/HttpClient';
 
 const httpCodeCreated: number = 201;
 
-import { CompositeApi, Config } from '../../../lib';
+import { CompositeApi, ConnectionConfig } from '../../../lib';
 import {
     ICompositeApi,
     ICompositeRequest,
     ICompositeResponse,
     ICompositeSubrequest,
     ICompositeSubresponse,
-    IConfig,
+    IConnectionConfig,
     IError,
 } from '../../../lib/Interfaces';
 
@@ -22,14 +22,14 @@ describe('CompositeApi Tests', () => {
     const instanceUrl: string = 'http://localhost:3000';
     const apiVersion: string = '45.0';
     const sessionId: string = 'sessionId1234';
-    const config: IConfig = new Config(instanceUrl, apiVersion, sessionId);
+    const connectionConfig: IConnectionConfig = new ConnectionConfig(instanceUrl, apiVersion, sessionId);
 
     afterEach(() => {
         nock.cleanAll();
     });
 
     it('CompositeApi construction', () => {
-        const compositeApi: ICompositeApi = CompositeApi.newCompositeApi(config);
+        const compositeApi: ICompositeApi = CompositeApi.newCompositeApi(connectionConfig);
 
         expect(compositeApi).to.exist;
     });
@@ -45,13 +45,13 @@ describe('CompositeApi Tests', () => {
         let capturedCompositeRequest: ICompositeRequest;
 
         nock(instanceUrl)
-            .post(`/services/data/v${config.apiVersion}/composite/`, function(body: any) {
+            .post(`/services/data/v${connectionConfig.apiVersion}/composite/`, function(body: any) {
                 capturedCompositeRequest = body;
                 return true;
             })
             .reply(HttpCodes.OK, {});
 
-        const compositeApi: ICompositeApi = CompositeApi.newCompositeApi(config);
+        const compositeApi: ICompositeApi = CompositeApi.newCompositeApi(connectionConfig);
         await compositeApi.invoke(compositeRequest);
 
         expect(capturedCompositeRequest).to.exist;
@@ -77,10 +77,10 @@ describe('CompositeApi Tests', () => {
                 },
             },
         })
-            .post(`/services/data/v${config.apiVersion}/composite/`)
+            .post(`/services/data/v${connectionConfig.apiVersion}/composite/`)
             .reply(HttpCodes.OK, {});
 
-        const compositeApi: ICompositeApi = CompositeApi.newCompositeApi(config);
+        const compositeApi: ICompositeApi = CompositeApi.newCompositeApi(connectionConfig);
         await compositeApi.invoke(compositeRequest);
 
         expect(capturedAuthorizationHeader).to.exist;
@@ -98,7 +98,7 @@ describe('CompositeApi Tests', () => {
         nock(instanceUrl, {
             reqheaders: {},
         })
-            .post(`/services/data/v${config.apiVersion}/composite/`)
+            .post(`/services/data/v${connectionConfig.apiVersion}/composite/`)
             .reply(HttpCodes.OK, {
                 compositeResponse: [
                     {
@@ -110,7 +110,7 @@ describe('CompositeApi Tests', () => {
                 ],
             });
 
-        const compositeApi: ICompositeApi = CompositeApi.newCompositeApi(config);
+        const compositeApi: ICompositeApi = CompositeApi.newCompositeApi(connectionConfig);
         const compositeResponse: ICompositeResponse = await compositeApi.invoke(compositeRequest);
 
         expect(compositeResponse).to.exist;
@@ -141,7 +141,7 @@ describe('CompositeApi Tests', () => {
         nock(instanceUrl, {
             reqheaders: {},
         })
-            .post(`/services/data/v${config.apiVersion}/composite/`)
+            .post(`/services/data/v${connectionConfig.apiVersion}/composite/`)
             .reply(HttpCodes.OK, {
                 compositeResponse: [
                     {
@@ -153,7 +153,7 @@ describe('CompositeApi Tests', () => {
                 ],
             });
 
-        const compositeApi: ICompositeApi = CompositeApi.newCompositeApi(config);
+        const compositeApi: ICompositeApi = CompositeApi.newCompositeApi(connectionConfig);
         const compositeResponse: ICompositeResponse = await compositeApi.invoke(compositeRequest);
         const compositeSubResponse: ICompositeSubresponse = compositeResponse.getCompositeSubresponse(
             compositeSubRequest,
@@ -179,7 +179,7 @@ describe('CompositeApi Tests', () => {
         nock(instanceUrl, {
             reqheaders: {},
         })
-            .post(`/services/data/v${config.apiVersion}/composite/`)
+            .post(`/services/data/v${connectionConfig.apiVersion}/composite/`)
             .reply(HttpCodes.OK, {
                 compositeResponse: [
                     {
@@ -191,7 +191,7 @@ describe('CompositeApi Tests', () => {
                 ],
             });
 
-        const compositeApi: ICompositeApi = CompositeApi.newCompositeApi(config);
+        const compositeApi: ICompositeApi = CompositeApi.newCompositeApi(connectionConfig);
         const compositeResponse: ICompositeResponse = await compositeApi.invoke(compositeRequest);
         const compositeSubResponse: ICompositeSubresponse = compositeResponse.getCompositeSubresponse(
             compositeSubRequest,
@@ -220,7 +220,7 @@ describe('CompositeApi Tests', () => {
         nock(instanceUrl, {
             reqheaders: {},
         })
-            .post(`/services/data/v${config.apiVersion}/composite/`)
+            .post(`/services/data/v${connectionConfig.apiVersion}/composite/`)
             .reply(HttpCodes.OK, {
                 compositeResponse: [
                     {
@@ -232,7 +232,7 @@ describe('CompositeApi Tests', () => {
                 ],
             });
 
-        const compositeApi: ICompositeApi = CompositeApi.newCompositeApi(config);
+        const compositeApi: ICompositeApi = CompositeApi.newCompositeApi(connectionConfig);
         const compositeResponse: ICompositeResponse = await compositeApi.invoke(compositeRequest);
         const compositeSubResponse: ICompositeSubresponse = compositeResponse.getCompositeSubresponse(
             compositeSubRequest,
@@ -257,7 +257,7 @@ describe('CompositeApi Tests', () => {
         nock(instanceUrl, {
             reqheaders: {},
         })
-            .post(`/services/data/v${config.apiVersion}/composite/`)
+            .post(`/services/data/v${connectionConfig.apiVersion}/composite/`)
             .reply(HttpCodes.OK, {
                 compositeResponse: [
                     {
@@ -275,7 +275,7 @@ describe('CompositeApi Tests', () => {
                 ],
             });
 
-        const compositeApi: ICompositeApi = CompositeApi.newCompositeApi(config);
+        const compositeApi: ICompositeApi = CompositeApi.newCompositeApi(connectionConfig);
         const compositeResponse: ICompositeResponse = await compositeApi.invoke(compositeRequest);
         const compositeSubResponse: ICompositeSubresponse = compositeResponse.getCompositeSubresponse(
             compositeSubRequest,
@@ -305,7 +305,7 @@ describe('CompositeApi Tests', () => {
         nock(instanceUrl, {
             reqheaders: {},
         })
-            .post(`/services/data/v${config.apiVersion}/composite/`)
+            .post(`/services/data/v${connectionConfig.apiVersion}/composite/`)
             .reply(HttpCodes.OK, {
                 compositeResponse: [
                     {
@@ -323,18 +323,13 @@ describe('CompositeApi Tests', () => {
                 ],
             });
 
-        const compositeApi: ICompositeApi = CompositeApi.newCompositeApi(config);
+        const compositeApi: ICompositeApi = CompositeApi.newCompositeApi(connectionConfig);
         const compositeResponse: ICompositeResponse = await compositeApi.invoke(compositeRequest);
         const compositeSubResponse: ICompositeSubresponse = compositeResponse.getCompositeSubresponse(
             compositeSubRequest,
         );
 
-        try {
-            compositeSubResponse.body;
-            fail('body accessor should have thrown');
-        } catch (e) {
-            expect(e.message).to.equal('Body is not valid when there has been an error. Call #errors installed.');
-        }
+        expect(compositeSubResponse.body).to.not.exist;
     });
 
     it('Composite Response throws error if request id is not found', async () => {
@@ -348,7 +343,7 @@ describe('CompositeApi Tests', () => {
         nock(instanceUrl, {
             reqheaders: {},
         })
-            .post(`/services/data/v${config.apiVersion}/composite/`)
+            .post(`/services/data/v${connectionConfig.apiVersion}/composite/`)
             .reply(HttpCodes.OK, {
                 compositeResponse: [
                     {
@@ -360,7 +355,7 @@ describe('CompositeApi Tests', () => {
                 ],
             });
 
-        const compositeApi: ICompositeApi = CompositeApi.newCompositeApi(config);
+        const compositeApi: ICompositeApi = CompositeApi.newCompositeApi(connectionConfig);
         const compositeResponse: ICompositeResponse = await compositeApi.invoke(compositeRequest);
 
         expect(compositeResponse).to.exist;

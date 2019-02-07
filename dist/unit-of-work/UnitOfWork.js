@@ -98,8 +98,8 @@ class UnitOfWork {
         this._referenceIdToCompositeSubrequests[referenceId] = compositeSubrequest;
     }
 }
-function newUnitOfWork(config) {
-    return new UnitOfWork(config);
+function newUnitOfWork(connectionConfig) {
+    return new UnitOfWork(connectionConfig);
 }
 exports.newUnitOfWork = newUnitOfWork;
 //# sourceMappingURL=UnitOfWork.js.map

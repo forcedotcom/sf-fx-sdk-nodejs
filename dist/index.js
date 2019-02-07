@@ -2,11 +2,13 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const composite_api_1 = require("./composite-api");
 exports.CompositeApi = composite_api_1.CompositeApi;
-const Config_1 = require("./Config");
-exports.Config = Config_1.Config;
+const ConnectionConfig_1 = require("./ConnectionConfig");
+exports.ConnectionConfig = ConnectionConfig_1.ConnectionConfig;
 const Constants_1 = require("./Constants");
 exports.Constants = Constants_1.Constants;
 const events_1 = require("./events");
+const SdkInterfaces = require("./Interfaces");
+exports.SdkInterfaces = SdkInterfaces;
 const rest_1 = require("./rest");
 const sdk = require("./sf-sdk");
 exports.sdk = sdk;

@@ -2,7 +2,7 @@ import { BearerCredentialHandler } from 'typed-rest-client/Handlers';
 import { HttpClient, HttpClientResponse, HttpCodes } from 'typed-rest-client/HttpClient';
 import { IHeaders} from 'typed-rest-client/Interfaces';
 
-import { ICompositeApi, ICompositeRequest, ICompositeResponse, ICompositeSubrequest, ICompositeSubresponse, IConfig, IError } from '../Interfaces';
+import { ICompositeApi, ICompositeRequest, ICompositeResponse, ICompositeSubrequest, ICompositeSubresponse, IConnectionConfig, IError } from '../Interfaces';
 
 class CompositeSubresponse implements ICompositeSubresponse {
     private static HEADER_LOCATION: string = 'Location';
@@ -18,7 +18,7 @@ class CompositeSubresponse implements ICompositeSubresponse {
         if (this.httpStatusCode < HttpCodes.BadRequest) {
             return this._body;
         } else {
-            throw new Error('Body is not valid when there has been an error. Call #errors installed.');
+            return undefined;
         }
     }
 
@@ -105,22 +105,22 @@ class CompositeResponse implements ICompositeResponse {
 }
 
 class CompositeApi implements ICompositeApi {
-    private _config: IConfig;
+    private _connectionConfig: IConnectionConfig;
 
-    constructor(config: IConfig) {
-        this._config = config;
+    constructor(connectionConfig: IConnectionConfig) {
+        this._connectionConfig = connectionConfig;
     }
 
     public async invoke(compositeRequest: ICompositeRequest): Promise<ICompositeResponse> {
         const bearerCredentialHandler: BearerCredentialHandler =
-            new BearerCredentialHandler(this._config.sessionId);
+            new BearerCredentialHandler(this._connectionConfig.sessionId);
         const httpClient: HttpClient = new HttpClient('sf-fx-node', [bearerCredentialHandler]);
-        const path: string = `/services/data/v${this._config.apiVersion}/composite/`;
+        const path: string = `/services/data/v${this._connectionConfig.apiVersion}/composite/`;
         const headers: IHeaders = { 'Content-Type': 'application/json' };
         const data: string = JSON.stringify(compositeRequest);
 
         const response: HttpClientResponse =
-            await httpClient.post(this._config.instanceUrl + path, data, headers);
+            await httpClient.post(this._connectionConfig.instanceUrl + path, data, headers);
         if (response.message.statusCode === HttpCodes.OK) {
             const body: string = await response.readBody();
             const compositeResponse: ICompositeResponse = new CompositeResponse(body);
@@ -132,6 +132,6 @@ class CompositeApi implements ICompositeApi {
     }
 }
 
-export function newCompositeApi(config: IConfig): ICompositeApi {
-    return new CompositeApi(config);
+export function newCompositeApi(connectionConfig: IConnectionConfig): ICompositeApi {
+    return new CompositeApi(connectionConfig);
 }

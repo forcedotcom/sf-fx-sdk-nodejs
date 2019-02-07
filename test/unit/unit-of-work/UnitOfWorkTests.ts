@@ -6,13 +6,13 @@ import { restore, stub } from 'sinon';
 import { HttpCodes } from 'typed-rest-client/HttpClient';
 import { v4 as uuid } from 'uuid';
 
-import { Config, SObject, UnitOfWork } from '../../../lib';
-import { IConfig, ISObject, IUnitOfWork, IUnitOfWorkResponse, IUnitOfWorkResult, Method } from '../../../lib/Interfaces';
+import { ConnectionConfig, SObject, UnitOfWork } from '../../../lib';
+import { IConnectionConfig, ISObject, IUnitOfWork, IUnitOfWorkResponse, IUnitOfWorkResult, Method } from '../../../lib/Interfaces';
 
 const instanceUrl: string = 'http://localhost:3000';
 const apiVersion: string = '45.0';
 const sessionId: string = 'sessionId1234';
-const config: IConfig = new Config(instanceUrl, apiVersion, sessionId);
+const connectionConfig: ConnectionConfig = new ConnectionConfig(instanceUrl, apiVersion, sessionId);
 
 const httpCodeCreated:number = 201;
 const httpCodeNoContent:number = 204;
@@ -28,7 +28,7 @@ describe('UnitOfWork Tests', () => {
         account.setValue('Name', 'MyAccount - uow - integration - ' + new Date());
 
         nock(instanceUrl)
-            .post('/services/data/v' + config.apiVersion + '/composite/')
+            .post('/services/data/v' + connectionConfig.apiVersion + '/composite/')
             .reply(HttpCodes.OK, {
                 'compositeResponse':
                     [{
@@ -39,7 +39,7 @@ describe('UnitOfWork Tests', () => {
                     }]
             });
 
-        const uow: IUnitOfWork = UnitOfWork.newUnitOfWork(config);
+        const uow: IUnitOfWork = UnitOfWork.newUnitOfWork(connectionConfig);
         
         uow.registerNew(account);
         const uowResponse: IUnitOfWorkResponse = await uow.commit();
@@ -66,11 +66,11 @@ describe('UnitOfWork Tests', () => {
             return mockedReferenceId;
         });
 
-        const uow: IUnitOfWork = UnitOfWork.newUnitOfWork(config);
+        const uow: IUnitOfWork = UnitOfWork.newUnitOfWork(connectionConfig);
         uow.registerModified(account);
 
         nock(instanceUrl)
-            .post('/services/data/v' + config.apiVersion + '/composite/')
+            .post('/services/data/v' + connectionConfig.apiVersion + '/composite/')
             .reply(HttpCodes.OK, {
                 'compositeResponse': [{
                     'body': null,
@@ -107,14 +107,14 @@ describe('UnitOfWork Tests', () => {
             return mockedReferenceId;
         });
 
-        const uow: IUnitOfWork = UnitOfWork.newUnitOfWork(config);
+        const uow: IUnitOfWork = UnitOfWork.newUnitOfWork(connectionConfig);
         uow.registerNew(account);
 
         account.named(newName);
         uow.registerModified(account);
 
         nock(instanceUrl)
-            .post('/services/data/v' + config.apiVersion + '/composite/')
+            .post('/services/data/v' + connectionConfig.apiVersion + '/composite/')
             .reply(HttpCodes.OK, {
                 'compositeResponse': [
                     {
@@ -161,11 +161,11 @@ describe('UnitOfWork Tests', () => {
             return mockedReferenceId;
         });
 
-        const uow: IUnitOfWork = UnitOfWork.newUnitOfWork(config);
+        const uow: IUnitOfWork = UnitOfWork.newUnitOfWork(connectionConfig);
         uow.registerDeleted(account);
 
         nock(instanceUrl)
-            .post('/services/data/v' + config.apiVersion + '/composite/')
+            .post('/services/data/v' + connectionConfig.apiVersion + '/composite/')
             .reply(HttpCodes.OK, {
                 'compositeResponse': [{
                     'body': null,
@@ -205,12 +205,12 @@ describe('UnitOfWork Tests', () => {
         contact.setValue('LastName', `LastName - ${new Date()}`);
         contact.setValue('AccountId', account.fkId);
 
-        const uow: IUnitOfWork = UnitOfWork.newUnitOfWork(config);
+        const uow: IUnitOfWork = UnitOfWork.newUnitOfWork(connectionConfig);
         uow.registerNew(account);
         uow.registerNew(contact);
 
         nock(instanceUrl)
-            .post('/services/data/v' + config.apiVersion + '/composite/')
+            .post('/services/data/v' + connectionConfig.apiVersion + '/composite/')
             .reply(HttpCodes.OK, {
                 'compositeResponse': [{
                     'body': { 'id': '001xx000003EG4jAAG', 'success': true, 'errors': [] },

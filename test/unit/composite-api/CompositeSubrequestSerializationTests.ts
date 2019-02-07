@@ -3,13 +3,13 @@ import { expect } from 'chai';
 import 'mocha';
 import { beforeEach } from 'mocha';
 
-import { ICompositeSubrequest, ICompositeSubrequestBuilder} from '../../../lib/Interfaces';
 import { CompositeApi } from '../../../lib';
+import { ICompositeSubrequest, ICompositeSubrequestBuilder} from '../../../lib/Interfaces';
 
 describe('CompositeSubrequest Serialization Tests', () => {
     let builder:ICompositeSubrequestBuilder = null;
 
-    beforeEach(function() {
+    beforeEach(() => {
         builder = CompositeApi.insertBuilder().sObjectType('Account');
     });
 

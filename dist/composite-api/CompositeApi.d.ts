@@ -1,2 +1,2 @@
-import { ICompositeApi, IConfig } from '../Interfaces';
-export declare function newCompositeApi(config: IConfig): ICompositeApi;
+import { ICompositeApi, IConnectionConfig } from '../Interfaces';
+export declare function newCompositeApi(connectionConfig: IConnectionConfig): ICompositeApi;
