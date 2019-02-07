@@ -249,4 +249,45 @@ describe('UnitOfWork Tests', () => {
         expect(uowResultContact.id).to.exist;
         expect(uowResultContact.id).to.match(/^003[A-Za-z0-9]{15}/);
     });   
+
+    it('Fails to Insert AccountError Case', async () => {
+        const account: ISObject = new SObject('Account');
+
+        nock(instanceUrl)
+            .post('/services/data/v' + config.apiVersion + '/composite/')
+            .reply(HttpCodes.OK, {
+                compositeResponse: [
+                    {
+                        body: [
+                            {
+                                message: 'Required fields are missing: [Name]',
+                                errorCode: 'REQUIRED_FIELD_MISSING',
+                                fields: ['Name'],
+                            },
+                        ],
+                        httpHeaders: {},
+                        httpStatusCode: HttpCodes.BadRequest,
+                        referenceId: account.referenceId,
+                    },
+                ],
+            });
+
+        const uow: IUnitOfWork = UnitOfWork.newUnitOfWork(config);
+        
+        uow.registerNew(account);
+        const uowResponse: IUnitOfWorkResponse = await uow.commit();
+
+        expect(uowResponse).to.exist;
+        const results: ReadonlyArray<IUnitOfWorkResult> = uowResponse.getResults(account);
+        expect(results).to.exist;
+        expect(results).lengthOf(1);
+        const uowResult: IUnitOfWorkResult = results[0];
+        expect(uowResult.isSuccess).to.be.false;
+        expect(uowResult.errors).to.not.be.null;
+        expect(uowResult.errors.length).to.be.equal(1);
+        expect(uowResult.errors[0].errorCode).to.be.equal('REQUIRED_FIELD_MISSING');
+        expect(uowResult.errors[0].fields.length).to.be.equal(1);
+        expect(uowResult.errors[0].fields[0]).to.be.equal('Name');
+        expect(uowResult.errors[0].message).to.be.equal('Required fields are missing: [Name]');
+    });
 });

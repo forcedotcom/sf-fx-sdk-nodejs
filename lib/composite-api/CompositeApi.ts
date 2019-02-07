@@ -31,7 +31,8 @@ class CompositeSubresponse implements ICompositeSubresponse {
     }
 
     public get id(): string {
-        if (this.body && this.body[CompositeSubresponse.KEY_ID]) {
+        // Prevent an exception by checking for success before accessing the body property
+        if (this.isSuccess && this.body && this.body[CompositeSubresponse.KEY_ID]) {
             return this.body[CompositeSubresponse.KEY_ID];
         } else {
             return undefined;
