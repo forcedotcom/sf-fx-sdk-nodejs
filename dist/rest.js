@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const restify = require("restify");
 const restifyPromise = require("restify-await-promise");
+const request = require("request");
 const sdk = require("./sf-sdk");
 class RestManager {
     constructor(config, logger, fx) {
@@ -9,6 +10,16 @@ class RestManager {
         this.logger = logger;
         this.fx = fx;
         this.initServer();
+    }
+    get_auth_rest_url() {
+        return `https://cs46.salesforce.com/services/oauth2/authorize?` +
+            `response_type=code&` +
+            `client_id=${process.env.FUNCTION_CONSUMER_KEY}&` +
+            `client_secret=${process.env.FUNCTION_CONSUMER_SECRET}&` +
+            `redirect_uri=${encodeURIComponent(process.env.FUNCTION_CALLBACK)}`;
+    }
+    get_auth_token_url() {
+        return 'https://cs46.salesforce.com/services/oauth2/token';
     }
     initServer() {
         const logger = this.logger;
@@ -48,6 +59,31 @@ class RestManager {
                 res.send(500, err.message);
             }
             return next(false);
+        });
+        server.get('/oauthrequest', async (req, res, next) => {
+            res.redirect(this.get_auth_rest_url());
+        });
+        server.get('/oauthcallback', async (req, res, next) => {
+            request({
+                url: this.get_auth_token_url(),
+                method: 'POST',
+                form: {
+                    grant_type: "authorization_code",
+                    client_id: process.env.FUNCTION_CONSUMER_KEY,
+                    client_secret: process.env.FUNCTION_CONSUMER_SECRET,
+                    redirect_uri: process.env.FUNCTION_CALLBACK,
+                    code: req.query.code,
+                    format: "json"
+                }
+            }, async (err, res, next) => {
+                if (err) {
+                    res.send(err);
+                    return next(false);
+                }
+                const oauth = JSON.parse(res.body);
+                this.fx.setOAuthToken(oauth);
+                return next(false);
+            });
         });
         server.listen(this.config.getPort(), () => {
             logger.log(`${server.name} listening at ${server.url}`);

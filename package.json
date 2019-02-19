@@ -41,6 +41,7 @@
     "jsforce": "^1.9.0",
     "jsforce-connection": "^2.1.0",
     "node-rdkafka": "~2.2.3",
+    "request": "^2.88.0",
     "restify": "^7.2.7",
     "restify-await-promise": "^2.1.0",
     "tslib": "1.9.3",

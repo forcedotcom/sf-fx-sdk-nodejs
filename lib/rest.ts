@@ -1,11 +1,26 @@
 import * as restify from 'restify';
 import * as restifyPromise from 'restify-await-promise';
+import * as request from 'request';
 import * as sdk from './sf-sdk';
 
 export default class RestManager {
     constructor(private config: sdk.Config, private logger: sdk.Logger, private fx: sdk.SfFunction) {
         this.initServer();
     }
+
+
+    private get_auth_rest_url() {
+        return `https://cs46.salesforce.com/services/oauth2/authorize?` +
+               `response_type=code&` +
+               `client_id=${process.env.FUNCTION_CONSUMER_KEY}&` +
+               `client_secret=${process.env.FUNCTION_CONSUMER_SECRET}&` +
+               `redirect_uri=${encodeURIComponent(process.env.FUNCTION_CALLBACK)}`;
+    }
+
+    private get_auth_token_url() {
+        return 'https://cs46.salesforce.com/services/oauth2/token';
+    }
+            
 
     private initServer(): void {
         const logger = this.logger;
@@ -58,6 +73,42 @@ export default class RestManager {
 
                 return next(false);
             },
+        );
+
+        server.get(
+            '/oauthrequest',
+            async (req: any, res: any, next: Function): Promise<any> => {
+                res.redirect(this.get_auth_rest_url());
+            }
+        )
+
+        server.get(
+            '/oauthcallback',
+            async (req: any, res: any, next: Function): Promise<any> => {
+                request({
+                    url: this.get_auth_token_url(),
+                    method: 'POST',
+                    form: {
+                        grant_type: "authorization_code",
+                        client_id: process.env.FUNCTION_CONSUMER_KEY,
+                        client_secret: process.env.FUNCTION_CONSUMER_SECRET,
+                        redirect_uri: process.env.FUNCTION_CALLBACK,
+                        code: req.query.code,
+                        format: "json"
+                    }
+                }, 
+                async (err: any, res: any, next: Function): Promise<any> => {
+                    if (err) {
+                        res.send(err);
+                        return next(false);
+                    }
+
+                    const oauth: sdk.OAuthJSON = JSON.parse(res.body);
+                    this.fx.setOAuthToken(oauth)
+
+                    return next(false);
+                });
+            }
         );
 
         server.listen(this.config.getPort(), () => {

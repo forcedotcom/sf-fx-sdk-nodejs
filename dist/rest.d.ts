@@ -4,5 +4,7 @@ export default class RestManager {
     private logger;
     private fx;
     constructor(config: sdk.Config, logger: sdk.Logger, fx: sdk.SfFunction);
+    private get_auth_rest_url;
+    private get_auth_token_url;
     private initServer;
 }

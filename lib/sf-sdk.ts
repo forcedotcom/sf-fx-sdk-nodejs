@@ -227,12 +227,19 @@ class Event {
     }
 }
 
+export interface OAuthJSON {
+    instance_url: string,
+    access_token: string
+}
+
 interface SfFunction {
     getName(): string;
 
     init(config: Config, logger: Logger): Promise<any>;
 
     invoke(event: Event): Promise<any>;
+
+    setOAuthToken(oauth: OAuthJSON);
 }
 
 export { Config, Logger, logInit, UserContext, Context, Event, SfFunction };
