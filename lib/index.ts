@@ -27,4 +27,13 @@ async function invoke(fx: sdk.SfFunction) {
     }
 }
 
-export { invoke, CompositeApi, ConnectionConfig, Constants, sdk, UnitOfWork, SObject, SdkInterfaces };
+export {
+    invoke,
+    CompositeApi,
+    ConnectionConfig,
+    Constants,
+    sdk,
+    UnitOfWork,
+    SObject,
+    SdkInterfaces
+};

@@ -37,7 +37,8 @@ class EventManager {
         const clientCertKey = path.join(certsDir, 'KAFKA_CLIENT_CERT_KEY');
         fs.writeFileSync(clientCertKey, this.config.getBrokerClientCertKey());
         this.logger.debug(`Wrote ${clientCertKey}`);
-        const groupId = `${this.config.getEventPrefix()}${this.config.getEventGroupId() || defaultKafkaGroupId}`;
+        const prefix = this.config.getEventPrefix() || '';
+        const groupId = `${prefix}${this.config.getEventGroupId() || defaultKafkaGroupId}`;
         const kafkaConfig = {
             'api.version.request': true,
             'client.id': `${defaultKafkaGroupId}/${this.config.getDyno() || 'localhost'}`,
@@ -63,7 +64,6 @@ class EventManager {
         // TODO: query provider to get a list of available topics and cross-ref
         // against given subscribe-to topics to ensure (a) topic's viability  and
         // (b) correct casing (topics are case-sensitive)
-        const prefix = this.config.getEventPrefix();
         const kafkaTopics = topicNames.map(topic => 
         // connect event topics are lowercase
         `${prefix}${topic.toLowerCase()}`);
