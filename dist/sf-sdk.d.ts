@@ -12,6 +12,7 @@ export default class Config {
     getBrokerClientCert(): string;
     getBrokerClientCertKey(): string;
     getBrokerTrustedCert(): string;
+    hasCertConfig(): boolean;
     getEventPrefix(): string;
     getEventGroupId(): string;
     getEventNames(): string;

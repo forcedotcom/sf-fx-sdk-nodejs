@@ -16,7 +16,7 @@ export default class RestManager {
         });
         server.pre(restify.plugins.pre.userAgentConnection());
         server.use(restify.plugins.queryParser());
-        server.use(restify.plugins.bodyParser());
+        server.use(restify.plugins.jsonBodyParser());
 
         // Allows you to manipulate the errors before restify does its work
         const alwaysBlameTheUserErrorTransformer = {
@@ -45,9 +45,8 @@ export default class RestManager {
         server.post(
             '/invoke',
             async (req: any, res: any, next: Function): Promise<any> => {
-                const payload = req.body;
-
                 try {
+                    const payload = JSON.parse(req.body);
                     const context = await sdk.Context.create(payload, logger);
                     const name = 'http';
                     const result = await this.fx.invoke(new sdk.Event(name, context, payload));

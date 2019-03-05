@@ -50,6 +50,14 @@ export default class Config {
         return this.env.KAFKA_TRUSTED_CERT;
     }
 
+    public hasCertConfig(): boolean {
+        return (
+            this.hasValue(this.getBrokerClientCert()) &&
+            this.hasValue(this.getBrokerClientCertKey()) &&
+            this.hasValue(this.getBrokerTrustedCert())
+        );
+    }
+
     public getEventPrefix(): string {
         return this.env.KAFKA_PREFIX;
     }
@@ -66,9 +74,7 @@ export default class Config {
         return (
             this.hasValue(this.getBrokerUrls()) &&
             this.hasValue(this.getEventNames()) &&
-            this.hasValue(this.getBrokerClientCert()) &&
-            this.hasValue(this.getBrokerClientCertKey()) &&
-            this.hasValue(this.getBrokerTrustedCert())
+            this.hasCertConfig()
         );
     }
 
@@ -184,7 +190,7 @@ class Context {
             version: apiVersion,
         });
 
-        const config: IConnectionConfig = 
+        const config: IConnectionConfig =
             new ConnectionConfig(userCtx.salesforceBaseUrl, apiVersion, userCtx.sessionId);
         const unitOfWork = UnitOfWork.newUnitOfWork(config);
 

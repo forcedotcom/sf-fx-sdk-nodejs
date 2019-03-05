@@ -37,6 +37,11 @@ class Config {
     getBrokerTrustedCert() {
         return this.env.KAFKA_TRUSTED_CERT;
     }
+    hasCertConfig() {
+        return (this.hasValue(this.getBrokerClientCert()) &&
+            this.hasValue(this.getBrokerClientCertKey()) &&
+            this.hasValue(this.getBrokerTrustedCert()));
+    }
     getEventPrefix() {
         return this.env.KAFKA_PREFIX;
     }
@@ -49,9 +54,7 @@ class Config {
     hasMessagingConfig() {
         return (this.hasValue(this.getBrokerUrls()) &&
             this.hasValue(this.getEventNames()) &&
-            this.hasValue(this.getBrokerClientCert()) &&
-            this.hasValue(this.getBrokerClientCertKey()) &&
-            this.hasValue(this.getBrokerTrustedCert()));
+            this.hasCertConfig());
     }
     hasValue(value) {
         return typeof value !== 'undefined' && value !== null;
