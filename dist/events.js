@@ -22,13 +22,16 @@ class EventManager {
         }
         this.brokers = brokerUrls
             .split(/\s*,\s*/)
-            .map(v => /^kafka\+ssl:\/\/(.+)/.exec(v)[1])
+            .map(v => {
+            const parts = /^kafka\+ssl:\/\/(.+)/.exec(v);
+            return parts != null && parts.length > 0 ? parts[1] : v;
+        })
             .join(',');
         this.logger.log(`kafka+ssl brokers ${this.brokers}`);
         this.initConsumer();
     }
     initConsumer() {
-        this.logger.log('Initializing Kafka consumer');
+        this.logger.log('Initializing Kafka consumer...');
         const prefix = this.config.getEventPrefix() || '';
         const groupId = `${prefix}${this.config.getEventGroupId() || defaultKafkaGroupId}`;
         let kafkaConfig = {
@@ -41,6 +44,7 @@ class EventManager {
         };
         const hasCertConfigs = this.config.hasCertConfig();
         if (hasCertConfigs) {
+            this.logger.log('Found cert config');
             const certsDir = '.certs';
             if (!fs.existsSync(certsDir)) {
                 fs.mkdirSync(certsDir);
@@ -78,7 +82,9 @@ class EventManager {
         // connect event topics are lowercase
         `${prefix}${topic.toLowerCase()}`);
         this.logger.shout(`Consuming Kafka ${kafkaTopics.length === 1 ? 'topic' : 'topics'}: ${kafkaTopics.join(', ')}; group: ${groupId}`);
-        this.logger.log(`Ensure that group '${groupId}' is an active consumer group`);
+        // REVIEWME: this is only needed for shared kafka clusters, but customers may
+        // not know about share vs. dedicated so, ignoring for now...
+        //this.logger.log(`Ensure that group '${groupId}' is an active consumer group`);
         const connectTimeout = this.config.getBrokerTimeout();
         const connectTimoutFx = setTimeout(() => {
             const message = `Failed to connect Kafka consumer (${connectTimeout}-ms timeout)`;
