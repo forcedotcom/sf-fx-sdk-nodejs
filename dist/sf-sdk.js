@@ -53,8 +53,7 @@ class Config {
     }
     hasMessagingConfig() {
         return (this.hasValue(this.getBrokerUrls()) &&
-            this.hasValue(this.getEventNames()) &&
-            this.hasCertConfig());
+            this.hasValue(this.getEventNames()));
     }
     hasValue(value) {
         return typeof value !== 'undefined' && value !== null;

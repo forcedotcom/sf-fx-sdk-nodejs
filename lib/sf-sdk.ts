@@ -73,8 +73,7 @@ export default class Config {
     public hasMessagingConfig(): boolean {
         return (
             this.hasValue(this.getBrokerUrls()) &&
-            this.hasValue(this.getEventNames()) &&
-            this.hasCertConfig()
+            this.hasValue(this.getEventNames())
         );
     }
 
