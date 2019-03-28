@@ -6,7 +6,6 @@ const ConnectionConfig_1 = require("./ConnectionConfig");
 exports.ConnectionConfig = ConnectionConfig_1.ConnectionConfig;
 const Constants_1 = require("./Constants");
 exports.Constants = Constants_1.Constants;
-const events_1 = require("./events");
 const SdkInterfaces = require("./Interfaces");
 exports.SdkInterfaces = SdkInterfaces;
 const rest_1 = require("./rest");
@@ -23,14 +22,6 @@ async function invoke(fx) {
     // initialize http request handlers
     // tslint:disable-next-line:no-unused-expression
     new rest_1.default(config, logger, fx);
-    // initialize message consumer and producer clients
-    if (config.hasMessagingConfig()) {
-        // tslint:disable-next-line:no-unused-expression
-        new events_1.default(config, logger, fx);
-    }
-    else {
-        logger.shout('Skipping event setup: configuration not provided or is incomplete.');
-    }
 }
 exports.invoke = invoke;
 //# sourceMappingURL=index.js.map

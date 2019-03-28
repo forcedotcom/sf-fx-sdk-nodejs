@@ -38,6 +38,7 @@ class RestManager {
         });
         server.post('/invoke', async (req, res, next) => {
             const payload = req.body;
+            console.log(typeof payload);
             try {
                 const context = await sdk.Context.create(payload, logger);
                 const name = 'http';
