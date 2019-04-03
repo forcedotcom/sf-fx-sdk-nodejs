@@ -44,7 +44,7 @@ class EventManager {
         };
         const hasCertConfigs = this.config.hasCertConfig();
         if (hasCertConfigs) {
-            this.logger.log('Found cert config');
+            this.logger.log('Applying cert config');
             const certsDir = '.certs';
             if (!fs.existsSync(certsDir)) {
                 fs.mkdirSync(certsDir);
@@ -58,7 +58,7 @@ class EventManager {
             const clientCertKey = path.join(certsDir, 'KAFKA_CLIENT_CERT_KEY');
             fs.writeFileSync(clientCertKey, this.config.getBrokerClientCertKey());
             this.logger.debug(`Wrote ${clientCertKey}`);
-            kafkaConfig = kafkaConfig.assign(kafkaConfig, {
+            kafkaConfig = Object.assign(kafkaConfig, {
                 'security.protocol': 'SSL',
                 // SSL certs written above to .cert/
                 'ssl.ca.location': trustedCert,

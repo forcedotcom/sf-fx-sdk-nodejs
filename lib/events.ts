@@ -67,7 +67,7 @@ export default class EventManager {
             fs.writeFileSync(clientCertKey, this.config.getBrokerClientCertKey());
             this.logger.debug(`Wrote ${clientCertKey}`);
 
-            kafkaConfig = kafkaConfig.assign(kafkaConfig, {
+            kafkaConfig = Object.assign(kafkaConfig, {
                 'security.protocol': 'SSL',
                 // SSL certs written above to .cert/
                 'ssl.ca.location': trustedCert,
