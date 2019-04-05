@@ -23,42 +23,6 @@ class Config {
     getDyno() {
         return this.env.DYNO;
     }
-    getBrokerUrls() {
-        return this.env.KAFKA_URL;
-    }
-    getBrokerTimeout() {
-        return this.env.KAFKA_TIMEOUT || 10000;
-    }
-    getBrokerClientCert() {
-        return this.env.KAFKA_CLIENT_CERT;
-    }
-    getBrokerClientCertKey() {
-        return this.env.KAFKA_CLIENT_CERT_KEY;
-    }
-    getBrokerTrustedCert() {
-        return this.env.KAFKA_TRUSTED_CERT;
-    }
-    hasCertConfig() {
-        return (this.hasValue(this.getBrokerClientCert()) &&
-            this.hasValue(this.getBrokerClientCertKey()) &&
-            this.hasValue(this.getBrokerTrustedCert()));
-    }
-    getEventPrefix() {
-        return this.env.KAFKA_PREFIX;
-    }
-    getEventGroupId() {
-        return this.env.KAFKA_GROUP_ID;
-    }
-    getEventNames() {
-        return this.env.CONSUME_TOPIC_NAMES;
-    }
-    hasMessagingConfig() {
-        return (this.hasValue(this.getBrokerUrls()) &&
-            this.hasValue(this.getEventNames()));
-    }
-    hasValue(value) {
-        return typeof value !== 'undefined' && value !== null;
-    }
 }
 exports.default = Config;
 exports.Config = Config;

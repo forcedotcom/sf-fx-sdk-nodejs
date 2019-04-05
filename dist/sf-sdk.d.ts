@@ -7,17 +7,6 @@ export default class Config {
     isFinest(): boolean;
     getPort(): string;
     getDyno(): string;
-    getBrokerUrls(): string;
-    getBrokerTimeout(): number;
-    getBrokerClientCert(): string;
-    getBrokerClientCertKey(): string;
-    getBrokerTrustedCert(): string;
-    hasCertConfig(): boolean;
-    getEventPrefix(): string;
-    getEventGroupId(): string;
-    getEventNames(): string;
-    hasMessagingConfig(): boolean;
-    private hasValue;
 }
 interface Logger {
     log(msg: string, ...supportingData: any[]): void;

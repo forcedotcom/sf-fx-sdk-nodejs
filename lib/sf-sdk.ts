@@ -1,5 +1,4 @@
 import * as dotenv from 'dotenv';
-import * as jsforce from 'jsforce';
 
 import { ConnectionConfig } from './ConnectionConfig';
 import { Constants } from './Constants';
@@ -30,57 +29,6 @@ export default class Config {
 
     public getDyno(): string {
         return this.env.DYNO;
-    }
-
-    public getBrokerUrls(): string {
-        return this.env.KAFKA_URL;
-    }
-
-    public getBrokerTimeout(): number {
-        return this.env.KAFKA_TIMEOUT || 10000;
-    }
-
-    public getBrokerClientCert(): string {
-        return this.env.KAFKA_CLIENT_CERT;
-    }
-
-    public getBrokerClientCertKey(): string {
-        return this.env.KAFKA_CLIENT_CERT_KEY;
-    }
-
-    public getBrokerTrustedCert(): string {
-        return this.env.KAFKA_TRUSTED_CERT;
-    }
-
-    public hasCertConfig(): boolean {
-        return (
-            this.hasValue(this.getBrokerClientCert()) &&
-            this.hasValue(this.getBrokerClientCertKey()) &&
-            this.hasValue(this.getBrokerTrustedCert())
-        );
-    }
-
-    public getEventPrefix(): string {
-        return this.env.KAFKA_PREFIX;
-    }
-
-    public getEventGroupId(): string {
-        return this.env.KAFKA_GROUP_ID;
-    }
-
-    public getEventNames(): string {
-        return this.env.CONSUME_TOPIC_NAMES;
-    }
-
-    public hasMessagingConfig(): boolean {
-        return (
-            this.hasValue(this.getBrokerUrls()) &&
-            this.hasValue(this.getEventNames())
-        );
-    }
-
-    private hasValue(value: any): boolean {
-        return typeof value !== 'undefined' && value !== null;
     }
 }
 
