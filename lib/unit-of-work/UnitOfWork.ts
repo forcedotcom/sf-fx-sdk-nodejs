@@ -4,6 +4,7 @@ import {
 } from '../Interfaces';
 
 import { CompositeApi } from '..';
+import { Logger } from '../sf-sdk';
 
 interface IReferenceIdToCompositeSubrequests { [key: string]: ICompositeSubrequest };
 interface UuidToReferenceIds { [key: string]: Set<string> };
@@ -86,12 +87,14 @@ class UnitOfWork implements IUnitOfWork {
     private readonly _config: IConnectionConfig;
     private readonly _uuidToReferenceIds: UuidToReferenceIds;
     private readonly _referenceIdToCompositeSubrequests: IReferenceIdToCompositeSubrequests;
+    private logger;
 
-    constructor(config: IConnectionConfig) {
+    constructor(config: IConnectionConfig, logger: Logger) {
         this._config = config;
         this._compositeRequest = CompositeApi.newCompositeRequest();
         this._uuidToReferenceIds = {};
         this._referenceIdToCompositeSubrequests = {};
+        this.logger = logger;
     }
 
     public registerNew(sObject: ISObject): void {
@@ -121,7 +124,7 @@ class UnitOfWork implements IUnitOfWork {
     }
 
     public async commit(): Promise<IUnitOfWorkResponse> {
-        const compositeApi: ICompositeApi = CompositeApi.newCompositeApi(this._config);
+        const compositeApi: ICompositeApi = CompositeApi.newCompositeApi(this._config, this.logger);
 
         const compositeResponse: ICompositeResponse = await compositeApi.invoke(this._compositeRequest);
 
@@ -144,6 +147,6 @@ class UnitOfWork implements IUnitOfWork {
     }
 }
 
-export function newUnitOfWork(connectionConfig: IConnectionConfig) {
-    return new UnitOfWork(connectionConfig);
+export function newUnitOfWork(connectionConfig: IConnectionConfig, logger: Logger) {
+    return new UnitOfWork(connectionConfig, logger);
 }

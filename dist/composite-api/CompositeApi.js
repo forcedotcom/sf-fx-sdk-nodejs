@@ -83,8 +83,9 @@ class CompositeResponse {
     }
 }
 class CompositeApi {
-    constructor(connectionConfig) {
+    constructor(connectionConfig, logger) {
         this._connectionConfig = connectionConfig;
+        this.logger = logger;
     }
     async invoke(compositeRequest) {
         const bearerCredentialHandler = new Handlers_1.BearerCredentialHandler(this._connectionConfig.sessionId);
@@ -92,6 +93,7 @@ class CompositeApi {
         const path = `/services/data/v${this._connectionConfig.apiVersion}/composite/`;
         const headers = { 'Content-Type': 'application/json' };
         const data = JSON.stringify(compositeRequest);
+        this.logger.debug(`POST ${path}`);
         const response = await httpClient.post(this._connectionConfig.instanceUrl + path, data, headers);
         if (response.message.statusCode === HttpClient_1.HttpCodes.OK) {
             const body = await response.readBody();
@@ -103,8 +105,8 @@ class CompositeApi {
         }
     }
 }
-function newCompositeApi(connectionConfig) {
-    return new CompositeApi(connectionConfig);
+function newCompositeApi(connectionConfig, logger) {
+    return new CompositeApi(connectionConfig, logger);
 }
 exports.newCompositeApi = newCompositeApi;
 //# sourceMappingURL=CompositeApi.js.map

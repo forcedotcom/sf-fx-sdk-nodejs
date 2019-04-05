@@ -18,6 +18,7 @@ export interface ISObject {
     named(name: string): ISObject;
     setValue(key: string, value: any): any;
     withId(id: string): ISObject;
+    asMap(): object;
 }
 export interface ICompositeSubrequest {
     readonly httpHeaders: {

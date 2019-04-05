@@ -55,11 +55,12 @@ class UnitOfWorkResponse {
     }
 }
 class UnitOfWork {
-    constructor(config) {
+    constructor(config, logger) {
         this._config = config;
         this._compositeRequest = __1.CompositeApi.newCompositeRequest();
         this._uuidToReferenceIds = {};
         this._referenceIdToCompositeSubrequests = {};
+        this.logger = logger;
     }
     registerNew(sObject) {
         const insertBuilder = __1.CompositeApi.insertBuilder();
@@ -81,7 +82,7 @@ class UnitOfWork {
         this.addCompositeSubrequest(sObject, compositeSubrequest);
     }
     async commit() {
-        const compositeApi = __1.CompositeApi.newCompositeApi(this._config);
+        const compositeApi = __1.CompositeApi.newCompositeApi(this._config, this.logger);
         const compositeResponse = await compositeApi.invoke(this._compositeRequest);
         return new UnitOfWorkResponse(this._uuidToReferenceIds, this._referenceIdToCompositeSubrequests, compositeResponse);
     }
@@ -98,8 +99,8 @@ class UnitOfWork {
         this._referenceIdToCompositeSubrequests[referenceId] = compositeSubrequest;
     }
 }
-function newUnitOfWork(connectionConfig) {
-    return new UnitOfWork(connectionConfig);
+function newUnitOfWork(connectionConfig, logger) {
+    return new UnitOfWork(connectionConfig, logger);
 }
 exports.newUnitOfWork = newUnitOfWork;
 //# sourceMappingURL=UnitOfWork.js.map

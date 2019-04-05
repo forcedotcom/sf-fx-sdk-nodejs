@@ -1,5 +1,5 @@
-import * as jsforce from 'jsforce';
-import { IUnitOfWork } from './Interfaces';
+import { IUnitOfWork, ISObject } from './Interfaces';
+import * as api from './api';
 export default class Config {
     private env;
     constructor();
@@ -39,9 +39,10 @@ declare class UserContext {
     private constructor();
 }
 declare class Context {
-    apiVersion: string;
     userContext: UserContext;
-    sfApi: jsforce.Connection;
+    apiVersion: string;
+    fxInvocation: ISObject;
+    forceApi: api.forceApi.IForceApi;
     logger: Logger;
     unitOfWork: IUnitOfWork;
     static create(payload: any, logger: Logger): Promise<Context>;

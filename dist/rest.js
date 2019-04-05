@@ -41,7 +41,7 @@ class RestManager {
                 const payload = JSON.parse(req.body);
                 const context = await sdk.Context.create(payload, logger);
                 const name = 'http';
-                const result = await this.fx.invoke(new sdk.Event(name, context, payload));
+                const result = await this.fx.invoke(new sdk.Event(name, context, payload.payload));
                 res.send(200, result);
             }
             catch (err) {

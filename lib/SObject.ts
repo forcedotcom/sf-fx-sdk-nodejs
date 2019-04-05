@@ -3,6 +3,7 @@ import { v4 as uuid } from 'uuid';
 import { ISObject, IValues } from './Interfaces';
 
 export class SObject implements ISObject {
+
     public static generateReferenceId(type: string): string {
         return `${type}_` + uuid().replace(/-/g, '');
     }
@@ -19,7 +20,7 @@ export class SObject implements ISObject {
         this.uuid = uuid();
         this._values = {};
     }
-    
+
     public named(name: string): ISObject {
         this.setValue('Name', name);
         return this;
@@ -37,7 +38,7 @@ export class SObject implements ISObject {
     public get id(): string {
         return this._id;
     }
-    
+
     public get values(): IValues {
         return this._values as Readonly<IValues>;
     }
@@ -48,5 +49,9 @@ export class SObject implements ISObject {
         } else {
             return `@{${this.referenceId}.id}`;
         }
+    }
+
+    public asMap(): object {
+        return Object.assign({}, { Id: this._id }, this.values);
     }
 }
