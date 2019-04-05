@@ -17,40 +17,49 @@ class EventManager {
         }
         this.brokers = brokerUrls
             .split(/\s*,\s*/)
-            .map(v => /^kafka\+ssl:\/\/(.+)/.exec(v)[1])
+            .map(v => {
+            const parts = /^kafka\+ssl:\/\/(.+)/.exec(v);
+            return parts != null && parts.length > 0 ? parts[1] : v;
+        })
             .join(',');
         this.logger.log(`kafka+ssl brokers ${this.brokers}`);
         this.initConsumer();
     }
     initConsumer() {
         this.logger.log('Initializing Kafka consumer');
-        const certsDir = '.certs';
-        if (!fs.existsSync(certsDir)) {
-            fs.mkdirSync(certsDir);
-        }
-        const trustedCert = path.join(certsDir, 'KAFKA_TRUSTED_CERT');
-        fs.writeFileSync(trustedCert, this.config.getBrokerTrustedCert());
-        this.logger.debug(`Wrote ${trustedCert}`);
-        const clientCert = path.join(certsDir, 'KAFKA_CLIENT_CERT');
-        fs.writeFileSync(clientCert, this.config.getBrokerClientCert());
-        this.logger.debug(`Wrote ${clientCert}`);
-        const clientCertKey = path.join(certsDir, 'KAFKA_CLIENT_CERT_KEY');
-        fs.writeFileSync(clientCertKey, this.config.getBrokerClientCertKey());
-        this.logger.debug(`Wrote ${clientCertKey}`);
         const groupId = `${this.config.getEventPrefix()}${this.config.getEventGroupId() || defaultKafkaGroupId}`;
-        const kafkaConfig = {
+        let kafkaConfig = {
             'api.version.request': true,
             'client.id': `${defaultKafkaGroupId}/${this.config.getDyno() || 'localhost'}`,
             'enable.auto.commit': false,
             event_cb: true,
             'group.id': groupId,
             'metadata.broker.list': this.brokers,
-            'security.protocol': 'SSL',
-            // SSL certs written above to .cert/
-            'ssl.ca.location': trustedCert,
-            'ssl.certificate.location': clientCert,
-            'ssl.key.location': clientCertKey,
         };
+        // if certs are provided, apply to config
+        if (this.config.hasCertConfig()) {
+            const certsDir = '.certs';
+            if (!fs.existsSync(certsDir)) {
+                fs.mkdirSync(certsDir);
+            }
+            const trustedCert = path.join(certsDir, 'KAFKA_TRUSTED_CERT');
+            fs.writeFileSync(trustedCert, this.config.getBrokerTrustedCert());
+            this.logger.debug(`Wrote ${trustedCert}`);
+            const clientCert = path.join(certsDir, 'KAFKA_CLIENT_CERT');
+            fs.writeFileSync(clientCert, this.config.getBrokerClientCert());
+            this.logger.debug(`Wrote ${clientCert}`);
+            const clientCertKey = path.join(certsDir, 'KAFKA_CLIENT_CERT_KEY');
+            fs.writeFileSync(clientCertKey, this.config.getBrokerClientCertKey());
+            this.logger.debug(`Wrote ${clientCertKey}`);
+            this.logger.log('       Applying cert config');
+            kafkaConfig = Object.assign({}, kafkaConfig, {
+                'security.protocol': 'SSL',
+                // SSL certs written above to .cert/
+                'ssl.ca.location': trustedCert,
+                'ssl.certificate.location': clientCert,
+                'ssl.key.location': clientCertKey,
+            });
+        }
         if (this.config.isFinest()) {
             kafkaConfig['debug'] = 'all';
         }
