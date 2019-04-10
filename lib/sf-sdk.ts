@@ -1,10 +1,11 @@
 import * as dotenv from 'dotenv';
-import * as jsforce from 'jsforce';
 
 import { ConnectionConfig } from './ConnectionConfig';
 import { Constants } from './Constants';
-import { IConnectionConfig, IUnitOfWork } from './Interfaces';
+import { IConnectionConfig, IUnitOfWork, ISObject } from './Interfaces';
+import { SObject } from './SObject';
 import { UnitOfWork } from './unit-of-work';
+import * as api from './api';
 
 export default class Config {
     private env;
@@ -132,20 +133,16 @@ class Context {
         const userCtx = UserContext.create(context);
 
         const apiVersion = context.apiVersion || process.env.FX_API_VERSION || Constants.CURRENT_API_VERSION;
-        const sfApi = new jsforce.Connection({
-            accessToken: userCtx.sessionId,
-            instanceUrl: userCtx.salesforceBaseUrl,
-            version: apiVersion,
-        });
-
-        const config: IConnectionConfig = 
+        const config: IConnectionConfig =
             new ConnectionConfig(userCtx.salesforceBaseUrl, apiVersion, userCtx.sessionId);
-        const unitOfWork = UnitOfWork.newUnitOfWork(config);
+        const unitOfWork = UnitOfWork.newUnitOfWork(config, logger);
+        const forceApi = api.forceApi.newForceApi(config, logger);
 
         const newCtx = new Context(
-            apiVersion,
             userCtx,
-            sfApi,
+            apiVersion,
+            new SObject("FunctionInvocation").withId(context.functionInvocationId),
+            forceApi,
             logger,
             unitOfWork
         );
@@ -157,9 +154,10 @@ class Context {
     }
 
     private constructor(
-        public apiVersion: string,
         public userContext: UserContext,
-        public sfApi: jsforce.Connection,
+        public apiVersion: string,
+        public fxInvocation: ISObject,
+        public forceApi: api.forceApi.IForceApi,
         public logger: Logger,
         public unitOfWork: IUnitOfWork,
     ) {}

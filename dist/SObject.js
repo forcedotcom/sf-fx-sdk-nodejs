@@ -36,6 +36,9 @@ class SObject {
             return `@{${this.referenceId}.id}`;
         }
     }
+    asMap() {
+        return Object.assign({}, { Id: this._id }, this.values);
+    }
 }
 exports.SObject = SObject;
 //# sourceMappingURL=SObject.js.map

@@ -3,6 +3,7 @@ import { HttpClient, HttpClientResponse, HttpCodes } from 'typed-rest-client/Htt
 import { IHeaders} from 'typed-rest-client/Interfaces';
 
 import { ICompositeApi, ICompositeRequest, ICompositeResponse, ICompositeSubrequest, ICompositeSubresponse, IConnectionConfig, IError } from '../Interfaces';
+import { Logger } from '../sf-sdk';
 
 class CompositeSubresponse implements ICompositeSubresponse {
     private static HEADER_LOCATION: string = 'Location';
@@ -106,9 +107,11 @@ class CompositeResponse implements ICompositeResponse {
 
 class CompositeApi implements ICompositeApi {
     private _connectionConfig: IConnectionConfig;
+    private logger: Logger;
 
-    constructor(connectionConfig: IConnectionConfig) {
+    constructor(connectionConfig: IConnectionConfig, logger: Logger) {
         this._connectionConfig = connectionConfig;
+        this.logger = logger;
     }
 
     public async invoke(compositeRequest: ICompositeRequest): Promise<ICompositeResponse> {
@@ -118,6 +121,8 @@ class CompositeApi implements ICompositeApi {
         const path: string = `/services/data/v${this._connectionConfig.apiVersion}/composite/`;
         const headers: IHeaders = { 'Content-Type': 'application/json' };
         const data: string = JSON.stringify(compositeRequest);
+
+        this.logger.debug(`POST ${path}`);
 
         const response: HttpClientResponse =
             await httpClient.post(this._connectionConfig.instanceUrl + path, data, headers);
@@ -132,6 +137,6 @@ class CompositeApi implements ICompositeApi {
     }
 }
 
-export function newCompositeApi(connectionConfig: IConnectionConfig): ICompositeApi {
-    return new CompositeApi(connectionConfig);
+export function newCompositeApi(connectionConfig: IConnectionConfig, logger: Logger): ICompositeApi {
+    return new CompositeApi(connectionConfig, logger);
 }

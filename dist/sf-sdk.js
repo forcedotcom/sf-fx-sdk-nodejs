@@ -1,10 +1,11 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const dotenv = require("dotenv");
-const jsforce = require("jsforce");
 const ConnectionConfig_1 = require("./ConnectionConfig");
 const Constants_1 = require("./Constants");
+const SObject_1 = require("./SObject");
 const unit_of_work_1 = require("./unit-of-work");
+const api = require("./api");
 class Config {
     constructor() {
         dotenv.config();
@@ -86,10 +87,11 @@ class UserContext {
 }
 exports.UserContext = UserContext;
 class Context {
-    constructor(apiVersion, userContext, sfApi, logger, unitOfWork) {
-        this.apiVersion = apiVersion;
+    constructor(userContext, apiVersion, fxInvocation, forceApi, logger, unitOfWork) {
         this.userContext = userContext;
-        this.sfApi = sfApi;
+        this.apiVersion = apiVersion;
+        this.fxInvocation = fxInvocation;
+        this.forceApi = forceApi;
         this.logger = logger;
         this.unitOfWork = unitOfWork;
     }
@@ -104,14 +106,10 @@ class Context {
         }
         const userCtx = UserContext.create(context);
         const apiVersion = context.apiVersion || process.env.FX_API_VERSION || Constants_1.Constants.CURRENT_API_VERSION;
-        const sfApi = new jsforce.Connection({
-            accessToken: userCtx.sessionId,
-            instanceUrl: userCtx.salesforceBaseUrl,
-            version: apiVersion,
-        });
         const config = new ConnectionConfig_1.ConnectionConfig(userCtx.salesforceBaseUrl, apiVersion, userCtx.sessionId);
-        const unitOfWork = unit_of_work_1.UnitOfWork.newUnitOfWork(config);
-        const newCtx = new Context(apiVersion, userCtx, sfApi, logger, unitOfWork);
+        const unitOfWork = unit_of_work_1.UnitOfWork.newUnitOfWork(config, logger);
+        const forceApi = api.forceApi.newForceApi(config, logger);
+        const newCtx = new Context(userCtx, apiVersion, new SObject_1.SObject("FunctionInvocation").withId(context.functionInvocationId), forceApi, logger, unitOfWork);
         delete payload.Context__c;
         delete payload.context;
         return newCtx;

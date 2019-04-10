@@ -1,2 +1,3 @@
 import { ICompositeApi, IConnectionConfig } from '../Interfaces';
-export declare function newCompositeApi(connectionConfig: IConnectionConfig): ICompositeApi;
+import { Logger } from '../sf-sdk';
+export declare function newCompositeApi(connectionConfig: IConnectionConfig, logger: Logger): ICompositeApi;

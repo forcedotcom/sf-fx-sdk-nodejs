@@ -43,19 +43,27 @@ export default class RestManager {
         );
 
         /*  Example body sent from the dispatcher
-            {
-                "context": { 
-                    "userContext": { 
-                        "orgId": "00Dxx0000002967", 
-                        "userId": "005xx000001WZtP", 
-                        "username": "admin@9158457974503.com", 
-                        "salesforceBaseUrl": "http://jbartolott-wsl1.internal.salesforce.com:6109", 
-                        "orgDomainUrl": null, "sessionId": "00Dxx0000002967!AQcAQGp3QNDZkXyaD8n0CIhKWXnpudTACB_2S3Nq4Hn5aMBuz8RJGhGGSSDZn2X.96_DBs7hSY2K4cEP45a7jlJAP2C_yR7F" }, 
-                        "apiVersion": "46.0", "functionInvocationId": "9mdxx000000001Y" 
-                    }, 
-                    "payload": { "Account_ID__c": "001xx000003EHKn" } 
-                } 
-            }
+{
+    "id":"00Dxx0000006GoF-0cXxx000000000H",
+    "functionName":"salesforce.pdf_creator_function_invoke__e",
+    "context":{
+        "userContext":{
+            "orgId":"00Dxx0000006GoF",
+            "userId":"005xx000001X7dl",
+            "username":"chris@sffx.org",
+            "salesforceBaseUrl":"http://sffx-dev-ed.localhost.internal.salesforce.com:6109",
+            "orgDomainUrl":"http://sffx-dev-ed.localhost.internal.salesforce.com:6109",
+            "sessionId":"00Dxx0000006GoF!AQEAQBRrFr2zwFCWTwzCHmFWdzzQ7j8PZM1.5FBRbw3i8LCfo1IankJupmEgUXML4usfVizeupD8OCimPWOKzKGdNUHUQQ.F"
+        },
+        "apiVersion":"46.0",
+        "functionInvocationId":"9mdxx00000000Mb"
+    },
+    "payload":{  // custom function payload
+        "url":"https://google.com",
+        "html":null,
+        "isLightning":false
+    }
+}
         */
         server.post(
             '/invoke',

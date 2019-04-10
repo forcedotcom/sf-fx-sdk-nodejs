@@ -13,4 +13,5 @@ export declare class SObject implements ISObject {
     readonly id: string;
     readonly values: IValues;
     readonly fkId: string;
+    asMap(): object;
 }
