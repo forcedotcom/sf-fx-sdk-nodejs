@@ -141,7 +141,7 @@ class Context {
         const newCtx = new Context(
             userCtx,
             apiVersion,
-            new SObject("FunctionInvocation").withId(context.functionInvocationId),
+            new SObject("FunctionInvocationRequest").withId(context.functionInvocationId),
             forceApi,
             logger,
             unitOfWork

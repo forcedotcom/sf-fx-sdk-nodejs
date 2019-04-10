@@ -109,7 +109,7 @@ class Context {
         const config = new ConnectionConfig_1.ConnectionConfig(userCtx.salesforceBaseUrl, apiVersion, userCtx.sessionId);
         const unitOfWork = unit_of_work_1.UnitOfWork.newUnitOfWork(config, logger);
         const forceApi = api.forceApi.newForceApi(config, logger);
-        const newCtx = new Context(userCtx, apiVersion, new SObject_1.SObject("FunctionInvocation").withId(context.functionInvocationId), forceApi, logger, unitOfWork);
+        const newCtx = new Context(userCtx, apiVersion, new SObject_1.SObject("FunctionInvocationRequest").withId(context.functionInvocationId), forceApi, logger, unitOfWork);
         delete payload.Context__c;
         delete payload.context;
         return newCtx;
