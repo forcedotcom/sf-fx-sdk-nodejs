@@ -1,17 +1,23 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const rest_1 = require("./rest");
 const SdkInterfaces = require("./Interfaces");
 exports.SdkInterfaces = SdkInterfaces;
 const sdk = require("./sf-sdk");
 exports.sdk = sdk;
 async function invoke(fx) {
+    console.log('Invoke called');
     const config = new sdk.Config();
     const logger = sdk.logInit(config.isVerbose());
-    await fx.init(config, logger);
-    // initialize http request handlers
-    // tslint:disable-next-line:no-unused-expression
-    new rest_1.default(config, logger, fx);
+    try {
+        const sfFxPayload = JSON.parse(process.env.SF_FX_PAYLOAD);
+        await fx.init(config, logger);
+        const context = await sdk.Context.create(sfFxPayload, logger);
+        const name = 'cmd';
+        await fx.invoke(new sdk.Event(name, context, sfFxPayload.payload));
+    }
+    catch (err) {
+        logger.error(`Error: ${err}`);
+    }
 }
 exports.invoke = invoke;
 var composite_api_1 = require("./composite-api");
