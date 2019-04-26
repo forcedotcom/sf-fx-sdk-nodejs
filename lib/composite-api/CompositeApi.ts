@@ -4,6 +4,7 @@ import { IHeaders} from 'typed-rest-client/Interfaces';
 
 import { ICompositeApi, ICompositeRequest, ICompositeResponse, ICompositeSubrequest, ICompositeSubresponse, IConnectionConfig, IError } from '../Interfaces';
 import { Logger } from '../sf-sdk';
+import { sdk } from '../index';
 
 class CompositeSubresponse implements ICompositeSubresponse {
     private static HEADER_LOCATION: string = 'Location';
@@ -137,6 +138,6 @@ class CompositeApi implements ICompositeApi {
     }
 }
 
-export function newCompositeApi(connectionConfig: IConnectionConfig, logger: Logger): ICompositeApi {
-    return new CompositeApi(connectionConfig, logger);
+export function newCompositeApi(connectionConfig: IConnectionConfig, logger?: Logger): ICompositeApi {
+    return new CompositeApi(connectionConfig, logger || sdk.logInit(false));
 }

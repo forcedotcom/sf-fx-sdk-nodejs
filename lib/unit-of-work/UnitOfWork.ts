@@ -5,6 +5,7 @@ import {
 
 import { CompositeApi } from '..';
 import { Logger } from '../sf-sdk';
+import { sdk } from '../index';
 
 interface IReferenceIdToCompositeSubrequests { [key: string]: ICompositeSubrequest };
 interface UuidToReferenceIds { [key: string]: Set<string> };
@@ -147,6 +148,6 @@ class UnitOfWork implements IUnitOfWork {
     }
 }
 
-export function newUnitOfWork(connectionConfig: IConnectionConfig, logger: Logger) {
-    return new UnitOfWork(connectionConfig, logger);
+export function newUnitOfWork(connectionConfig: IConnectionConfig, logger?: Logger) {
+    return new UnitOfWork(connectionConfig, logger || sdk.logInit(false));
 }

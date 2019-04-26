@@ -2,7 +2,7 @@
 import { expect } from 'chai';
 import 'mocha';
 
-import { CompositeApi } from '../lib';
+import { CompositeApi, sdk } from '../lib';
 import { ICompositeApi, ICompositeRequest, ICompositeResponse, ICompositeSubrequest, ICompositeSubresponse, IConnectionConfig } from '../lib/Interfaces';
 
 const httpCodeCreated:number = 201;

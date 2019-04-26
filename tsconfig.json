@@ -2,12 +2,13 @@
     "compilerOptions": {
         "module": "commonjs",
         "outDir": "./dist",
-        "rootDir": "./lib",
         "target": "es2017",
         "lib": [
             "es2017"
         ],
-        "types": ["node"],
+        "types": [
+            "node", "cloudevents-sdk"
+        ],
         "sourceMap": true,
         "declaration":true,
         "declarationDir": "./dist",
@@ -16,10 +17,14 @@
         "experimentalDecorators": true,
         "allowSyntheticDefaultImports": true,
         "alwaysStrict": true,
-        "pretty": true
+        "pretty": true,
+        "typeRoots": [
+            "./node_modules/@types", "./lib/@types"
+        ]
     },
     "include": [
-        "./lib/**/*"
+        "./lib/**/*",
+        "./test/**/*"
     ],
-    "exclude": ["./node_modules", "./tests"]
+    "exclude": ["./node_modules"]
 }

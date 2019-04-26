@@ -1,13 +1,15 @@
 import * as dotenv from 'dotenv';
 
+import Cloudevent = require('cloudevents-sdk');
+
 import { ConnectionConfig } from './ConnectionConfig';
 import { Constants } from './Constants';
-import { IConnectionConfig, IUnitOfWork, ISObject } from './Interfaces';
+import { IConnectionConfig, ISObject, IUnitOfWork } from './Interfaces';
 import { SObject } from './SObject';
 import { UnitOfWork } from './unit-of-work';
 import * as api from './api';
 
-export default class Config {
+class Config {
     private env;
 
     constructor() {
@@ -85,9 +87,9 @@ class LoggerImpl implements Logger {
         }
     }
 }
-const noOpLogger = new NoOpLoggerImpl();
+const NO_OP_LOGGER = new NoOpLoggerImpl();
 function logInit(verbose: boolean): Logger {
-    return verbose ? new LoggerImpl() : noOpLogger;
+    return verbose ? new LoggerImpl() : NO_OP_LOGGER;
 }
 
 class UserContext {
@@ -163,28 +165,12 @@ class Context {
     ) {}
 }
 
-class Event {
-    public constructor(public name: string, public context: Context, public payload: any) {}
-
-    public getReplayId(): any {
-        return this.payload.event.replayId;
-    }
-
-    public getValue(key: string): any {
-        return this.payload[key];
-    }
-
-    public isHttp() {
-        return 'http' === this.name;
-    }
-}
-
 interface SfFunction {
     getName(): string;
 
     init(config: Config, logger: Logger): Promise<any>;
 
-    invoke(event: Event): Promise<any>;
+    invoke(context: Context, event: Cloudevent): Promise<any>;
 }
 
-export { Config, Logger, logInit, UserContext, Context, Event, SfFunction };
+export { Cloudevent, Config, Logger, logInit, UserContext, Context, SfFunction };

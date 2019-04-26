@@ -35,7 +35,7 @@ describe('Context Tests', () => {
         expect(context.userContext.orgDomainUrl).to.equal('https://my-domain.salesforce.com');
         expect(context.userContext.sessionId).to.equal('ASessionId');
 
-        expect(context.sfApi).to.exist;
+        expect(context.forceApi).to.exist;
         expect(context.logger).to.exist;
         expect(context.unitOfWork).to.exist;
     });
