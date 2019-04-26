@@ -7,7 +7,6 @@ import { Query, QueryResult, Connection, RecordResult } from 'jsforce';
 export { Query, QueryResult, Connection, RecordResult } from 'jsforce';
 
 export interface IForceApi {
-
     /**
      * Execute the given SOQL by using "/query" API.
      *
@@ -30,7 +29,7 @@ export interface IForceApi {
      * @param sobjects - same typed Salesforce objects to save
      * @returns Promise<(RecordResult | RecordResult[])>
      */
-    insert(sobjects: ISObject[]): Promise<(RecordResult | RecordResult[])>;
+    insert(sobjects: ISObject[]): Promise<RecordResult | RecordResult[]>;
 
     /**
      * Update a salesforce object.
@@ -38,7 +37,7 @@ export interface IForceApi {
      * @param sobjects - same typed Salesforce object to save
      * @returns Promise<ForceResponse>
      */
-    update(sobjects: ISObject[]): Promise<(RecordResult | RecordResult[])>;
+    update(sobjects: ISObject[]): Promise<RecordResult | RecordResult[]>;
 
     /**
      * TODO
@@ -52,7 +51,6 @@ export interface IForceApi {
 }
 
 class ForceApi implements IForceApi {
-
     public readonly conn: Connection;
 
     constructor(private connConfig: IConnectionConfig, private logger: Logger) {
@@ -71,23 +69,23 @@ class ForceApi implements IForceApi {
         return this.conn.query(locator);
     }
 
-    insert(sobjects: ISObject[]): Promise<(RecordResult | RecordResult[])> {
+    insert(sobjects: ISObject[]): Promise<RecordResult | RecordResult[]> {
         const records: Array<any> = sobjects.map(sobject => sobject.asMap());
         return this.conn.insert(sobjects[0].sObjectType, records);
     }
 
-    update(sobjects: ISObject[]): Promise<(RecordResult | RecordResult[])> {
+    update(sobjects: ISObject[]): Promise<RecordResult | RecordResult[]> {
         const records: Array<any> = sobjects.map(sobject => sobject.asMap());
         return this.conn.update(sobjects[0].sObjectType, records);
     }
 
     request(method: string, url: string, body: string, headers?: object): Promise<Object> {
         return this.conn.request({
-                method,
-                url,
-                body,
-                headers
-            });
+            method,
+            url,
+            body,
+            headers,
+        });
     }
 }
 

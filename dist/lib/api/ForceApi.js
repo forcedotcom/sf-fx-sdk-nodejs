@@ -34,7 +34,7 @@ class ForceApi {
             method,
             url,
             body,
-            headers
+            headers,
         });
     }
 }

@@ -23,14 +23,14 @@ export interface IForceApi {
      * @param sobjects - same typed Salesforce objects to save
      * @returns Promise<(RecordResult | RecordResult[])>
      */
-    insert(sobjects: ISObject[]): Promise<(RecordResult | RecordResult[])>;
+    insert(sobjects: ISObject[]): Promise<RecordResult | RecordResult[]>;
     /**
      * Update a salesforce object.
      *
      * @param sobjects - same typed Salesforce object to save
      * @returns Promise<ForceResponse>
      */
-    update(sobjects: ISObject[]): Promise<(RecordResult | RecordResult[])>;
+    update(sobjects: ISObject[]): Promise<RecordResult | RecordResult[]>;
     /**
      * TODO
      *

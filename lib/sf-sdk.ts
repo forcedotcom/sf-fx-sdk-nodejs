@@ -135,8 +135,11 @@ class Context {
         const userCtx = UserContext.create(context);
 
         const apiVersion = context.apiVersion || process.env.FX_API_VERSION || Constants.CURRENT_API_VERSION;
-        const config: IConnectionConfig =
-            new ConnectionConfig(userCtx.salesforceBaseUrl, apiVersion, userCtx.sessionId);
+        const config: IConnectionConfig = new ConnectionConfig(
+            userCtx.salesforceBaseUrl,
+            apiVersion,
+            userCtx.sessionId,
+        );
         const unitOfWork = UnitOfWork.newUnitOfWork(config, logger);
         const forceApi = api.forceApi.newForceApi(config, logger);
 
@@ -146,7 +149,7 @@ class Context {
             new SObject('FunctionInvocationRequest').withId(context.functionInvocationId),
             forceApi,
             logger,
-            unitOfWork
+            unitOfWork,
         );
 
         delete payload.Context__c;

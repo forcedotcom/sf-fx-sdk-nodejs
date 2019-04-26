@@ -12,6 +12,6 @@ exports.CompositeApi = {
     newCompositeApi: CompositeApi_1.newCompositeApi,
     newCompositeRequest: CompositeRequest_1.newCompositeRequest,
     patchBuilder: CompositeSubrequest_1.patchBuilder,
-    putBuilder: CompositeSubrequest_1.putBuilder
+    putBuilder: CompositeSubrequest_1.putBuilder,
 };
 //# sourceMappingURL=index.js.map

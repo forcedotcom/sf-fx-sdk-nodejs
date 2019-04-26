@@ -26,7 +26,6 @@
   },
   "pre-commit": [
     "build",
-    "format",
     "lint",
     "test"
   ],
