@@ -33,3 +33,23 @@ export async function insertAccount(connectionConfig: IConnectionConfig): Promis
 
     return { id: accountId, name: accountName } as IInsertResponse;
 }
+
+export class FakeFunction implements sdk.SfFunction {
+
+    public initParams: any;
+    public invokeParams: any;
+
+    public getName() {
+        return 'fakeFx';
+    }
+
+    public init(config: sdk.Config, logger: sdk.Logger): Promise<any> {
+        this.initParams = { context, logger };
+        return Promise.resolve(null);
+    }
+
+    public invoke(context: sdk.Context, event: sdk.Cloudevent): Promise<any> {
+        this.invokeParams = { context, event };
+        return Promise.resolve(null);
+    }
+};

@@ -59,6 +59,9 @@ declare module 'cloudevents-sdk' {
         public getEventTypeVersion(): string | undefined;
 
         public source(source: string): Spec02;
+        // FIXME: following changes needs to be published to npm, so using
+        // repo directly in package.json until then
+        // https://github.com/cloudevents/sdk-javascript/pull/8
         public getSource(): string | undefined;
 
         public id(id: string): Spec02;
