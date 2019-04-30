@@ -2,7 +2,6 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const dotenv = require("dotenv");
 const Cloudevent = require("cloudevents-sdk");
-exports.Cloudevent = Cloudevent;
 const ConnectionConfig_1 = require("./ConnectionConfig");
 const Constants_1 = require("./Constants");
 const SObject_1 = require("./SObject");
@@ -117,4 +116,10 @@ class Context {
     }
 }
 exports.Context = Context;
+class SfCloudevent extends Cloudevent {
+    getPayload() {
+        return this.getData().payload;
+    }
+}
+exports.SfCloudevent = SfCloudevent;
 //# sourceMappingURL=sf-sdk.js.map

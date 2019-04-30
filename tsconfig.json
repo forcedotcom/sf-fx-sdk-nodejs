@@ -6,9 +6,6 @@
         "lib": [
             "es2017"
         ],
-        "types": [
-            "node", "cloudevents-sdk"
-        ],
         "sourceMap": true,
         "declaration":true,
         "declarationDir": "./dist",
@@ -26,5 +23,8 @@
         "./lib/**/*",
         "./test/**/*"
     ],
-    "exclude": ["./node_modules"]
+    "exclude": [
+        "./node_modules",
+        "./dist"
+    ]
 }

@@ -38,9 +38,12 @@ declare class Context {
     static create(payload: any, logger: Logger): Promise<Context>;
     private constructor();
 }
+declare class SfCloudevent extends Cloudevent {
+    getPayload(): any;
+}
 interface SfFunction {
     getName(): string;
     init(config: Config, logger: Logger): Promise<any>;
-    invoke(context: Context, event: Cloudevent): Promise<any>;
+    invoke(context: Context, event: SfCloudevent): Promise<any>;
 }
-export { Cloudevent, Config, Logger, logInit, UserContext, Context, SfFunction };
+export { Config, Context, logInit, Logger, UserContext, SfCloudevent, SfFunction };
