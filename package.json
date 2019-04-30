@@ -2,14 +2,11 @@
   "name": "salesforce-fdk",
   "version": "1.0.0",
   "description": "Salesforce Lightning Function Developer Kit",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "main": "dist/lib/index.js",
+  "types": "dist/lib/index.d.ts",
   "directories": {
-    "lib": "lib"
+    "lib": "./dist/lib"
   },
-  "files": [
-    "dist/**/*"
-  ],
   "scripts": {
     "build": "tsc -p .",
     "format": "prettier --write \"lib/**/*.ts\" \"lib/**/*.js\"",
