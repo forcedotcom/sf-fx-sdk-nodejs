@@ -5,8 +5,9 @@ export { Query, QueryResult, Connection, RecordResult, SuccessResult, ErrorResul
 export declare class ForceApi {
     private connConfig;
     private logger;
-    readonly conn: Connection;
+    private conn;
     constructor(connConfig: IConnectionConfig, logger: Logger);
+    connect(): Connection;
     /**
      * Execute the given SOQL by using "/query" API.
      *
@@ -44,5 +45,4 @@ export declare class ForceApi {
      * @param headers
      */
     request(method: string, url: string, body: string, headers?: object): Promise<object>;
-    private connect;
 }

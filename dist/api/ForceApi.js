@@ -9,7 +9,15 @@ class ForceApi {
     constructor(connConfig, logger) {
         this.connConfig = connConfig;
         this.logger = logger;
-        this.conn = this.connect();
+    }
+    connect() {
+        return this.conn
+            ? this.conn
+            : (this.conn = new jsforce_1.Connection({
+                accessToken: this.connConfig.sessionId,
+                instanceUrl: this.connConfig.instanceUrl,
+                version: this.connConfig.apiVersion,
+            }));
     }
     /**
      * Execute the given SOQL by using "/query" API.
@@ -18,7 +26,8 @@ class ForceApi {
      * @return Query<QueryResult<T>>
      */
     query(soql) {
-        return this.conn.query(soql);
+        // REVIEWME: return sdk.SObject?
+        return this.connect().query(soql);
     }
     /**
      * Query further records using nextRecordsURL.
@@ -27,7 +36,8 @@ class ForceApi {
      * @return Promise<QueryResult<T>>
      */
     queryMore(locator) {
-        return this.conn.query(locator);
+        // REVIEWME: return sdk.SObject?
+        return this.connect().query(locator);
     }
     /**
      * Insert a salesforce object.
@@ -36,7 +46,9 @@ class ForceApi {
      * @returns Promise<(RecordResult)>
      */
     insert(sobject) {
-        return this.conn.sobject(sobject.sObjectType).insert(sobject.asMap());
+        return this.connect()
+            .sobject(sobject.sObjectType)
+            .insert(sobject.asMap());
     }
     /**
      * Update a salesforce object.
@@ -45,7 +57,9 @@ class ForceApi {
      * @returns Promise<ForceResponse>
      */
     update(sobject) {
-        return this.conn.sobject(sobject.sObjectType).update(sobject.asMap());
+        return this.connect()
+            .sobject(sobject.sObjectType)
+            .update(sobject.asMap());
     }
     /**
      * TODO
@@ -61,13 +75,6 @@ class ForceApi {
             url,
             body,
             headers,
-        });
-    }
-    connect() {
-        return new jsforce_1.Connection({
-            accessToken: this.connConfig.sessionId,
-            instanceUrl: this.connConfig.instanceUrl,
-            version: this.connConfig.apiVersion,
         });
     }
 }
