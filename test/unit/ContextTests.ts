@@ -21,7 +21,7 @@ describe('Context Tests', () => {
             }
         };
 
-        const logger = sdk.logInit(false /*verbose*/);
+        const logger = sdk.Logger.create(false /*verbose*/);
         const context: sdk.Context = await sdk.Context.create(payload, logger);
 
         expect(context.apiVersion).to.exist;
@@ -56,7 +56,7 @@ describe('Context Tests', () => {
             }
         };
 
-        const logger = sdk.logInit(false /*verbose*/);
+        const logger = sdk.Logger.create(false /*verbose*/);
         const context: sdk.Context = await sdk.Context.create(payload, logger);
 
         expect(context.apiVersion).to.exist;

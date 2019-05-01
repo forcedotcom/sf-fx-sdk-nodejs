@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const __1 = require("..");
-const index_1 = require("../index");
+const sf_sdk_1 = require("../sf-sdk");
 class UnitOfWorkResult {
     constructor(method, id, isSuccess, errors) {
         this.method = method;
@@ -102,8 +102,8 @@ class UnitOfWork {
         this._referenceIdToCompositeSubrequests[referenceId] = compositeSubrequest;
     }
 }
-function newUnitOfWork(connectionConfig, logger) {
-    return new UnitOfWork(connectionConfig, logger || index_1.sdk.logInit(false));
+function newUnitOfWork(connectionConfig, logger = sf_sdk_1.Logger.create(false)) {
+    return new UnitOfWork(connectionConfig, logger);
 }
 exports.newUnitOfWork = newUnitOfWork;
 //# sourceMappingURL=UnitOfWork.js.map

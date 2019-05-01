@@ -2,8 +2,8 @@
   "name": "salesforce-fdk",
   "version": "1.0.0",
   "description": "Salesforce Lightning Function Developer Kit",
-  "main": "dist/lib/index.js",
-  "types": "dist/lib/index.d.ts",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "directories": {
     "lib": "./dist"
   },
@@ -38,11 +38,10 @@
   "homepage": "https://github.com/forcedotcom/sf-fx-sdk-nodejs#readme",
   "dependencies": {
     "@types/jsforce": "^1.9.3",
-    "cloudevents-sdk": "git+ssh://git@github.com:cloudevents/sdk-javascript.git",
+    "cloudevents-sdk": "git+https://github.com/cloudevents/sdk-javascript.git",
     "dotenv": "^4.0.0",
     "jsforce": "^1.9.0",
     "jsforce-connection": "^2.1.0",
-    "json-schema-to-typescript": "^6.1.3",
     "tslib": "1.9.3",
     "typed-rest-client": "^1.0.11"
   },

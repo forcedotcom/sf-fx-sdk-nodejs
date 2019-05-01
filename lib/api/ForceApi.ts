@@ -1,19 +1,35 @@
-import * as jsforce from 'jsforce';
+import { Connection, Query, QueryResult, RecordResult } from 'jsforce';
 import { IConnectionConfig, ISObject } from '../Interfaces';
 import { Logger } from '../sf-sdk';
-import { Query, QueryResult, Connection, RecordResult } from 'jsforce';
 
 // REVIEWME: ForceApi exposes jsforce objects.  Re-think.
-export { Query, QueryResult, Connection, RecordResult } from 'jsforce';
+export { Query, QueryResult, Connection, RecordResult, SuccessResult, ErrorResult } from 'jsforce';
 
-export interface IForceApi {
+export class ForceApi {
+    private conn: Connection;
+
+    constructor(private connConfig: IConnectionConfig, private logger: Logger) {}
+
+    public connect(): Connection {
+        return this.conn
+            ? this.conn
+            : (this.conn = new Connection({
+                  accessToken: this.connConfig.sessionId,
+                  instanceUrl: this.connConfig.instanceUrl,
+                  version: this.connConfig.apiVersion,
+              }));
+    }
+
     /**
      * Execute the given SOQL by using "/query" API.
      *
      * @param soql - SOQL to be executed.
      * @return Query<QueryResult<T>>
      */
-    query<T>(soql: string): Query<QueryResult<T>>;
+    public query<T>(soql: string): Query<QueryResult<T>> {
+        // REVIEWME: return sdk.SObject?
+        return this.connect().query(soql);
+    }
 
     /**
      * Query further records using nextRecordsURL.
@@ -21,15 +37,22 @@ export interface IForceApi {
      * @param locator - query locator.
      * @return Promise<QueryResult<T>>
      */
-    queryMore<T>(locator: string): Promise<QueryResult<T>>;
+    public queryMore<T>(locator: string): Promise<QueryResult<T>> {
+        // REVIEWME: return sdk.SObject?
+        return this.connect().query(locator);
+    }
 
     /**
      * Insert a salesforce object.
      *
      * @param sobjects - same typed Salesforce objects to save
-     * @returns Promise<(RecordResult | RecordResult[])>
+     * @returns Promise<(RecordResult)>
      */
-    insert(sobjects: ISObject[]): Promise<RecordResult | RecordResult[]>;
+    public insert(sobject: ISObject): Promise<RecordResult> {
+        return this.connect()
+            .sobject(sobject.sObjectType)
+            .insert(sobject.asMap());
+    }
 
     /**
      * Update a salesforce object.
@@ -37,7 +60,11 @@ export interface IForceApi {
      * @param sobjects - same typed Salesforce object to save
      * @returns Promise<ForceResponse>
      */
-    update(sobjects: ISObject[]): Promise<RecordResult | RecordResult[]>;
+    public update(sobject: ISObject): Promise<RecordResult> {
+        return this.connect()
+            .sobject(sobject.sObjectType)
+            .update(sobject.asMap());
+    }
 
     /**
      * TODO
@@ -47,39 +74,7 @@ export interface IForceApi {
      * @param body
      * @param headers
      */
-    request(method: string, url: string, body: string, headers?: object): Promise<Object>;
-}
-
-class ForceApi implements IForceApi {
-    public readonly conn: Connection;
-
-    constructor(private connConfig: IConnectionConfig, private logger: Logger) {
-        this.conn = new jsforce.Connection({
-            accessToken: connConfig.sessionId,
-            instanceUrl: connConfig.instanceUrl,
-            version: connConfig.apiVersion,
-        });
-    }
-
-    query<T>(soql: string): Query<QueryResult<T>> {
-        return this.conn.query(soql);
-    }
-
-    queryMore<T>(locator: string): Promise<QueryResult<T>> {
-        return this.conn.query(locator);
-    }
-
-    insert(sobjects: ISObject[]): Promise<RecordResult | RecordResult[]> {
-        const records: Array<any> = sobjects.map(sobject => sobject.asMap());
-        return this.conn.insert(sobjects[0].sObjectType, records);
-    }
-
-    update(sobjects: ISObject[]): Promise<RecordResult | RecordResult[]> {
-        const records: Array<any> = sobjects.map(sobject => sobject.asMap());
-        return this.conn.update(sobjects[0].sObjectType, records);
-    }
-
-    request(method: string, url: string, body: string, headers?: object): Promise<Object> {
+    public request(method: string, url: string, body: string, headers?: object): Promise<object> {
         return this.conn.request({
             method,
             url,
@@ -87,8 +82,4 @@ class ForceApi implements IForceApi {
             headers,
         });
     }
-}
-
-export function newForceApi(connectionConfig: IConnectionConfig, logger: Logger): IForceApi {
-    return new ForceApi(connectionConfig, logger);
 }

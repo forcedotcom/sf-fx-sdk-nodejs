@@ -2,12 +2,12 @@ import * as dotenv from 'dotenv';
 
 import Cloudevent = require('cloudevents-sdk');
 
+import * as api from './api';
 import { ConnectionConfig } from './ConnectionConfig';
 import { Constants } from './Constants';
 import { IConnectionConfig, ISObject, IUnitOfWork } from './Interfaces';
 import { SObject } from './SObject';
 import { UnitOfWork } from './unit-of-work';
-import * as api from './api';
 
 class Config {
     private env;
@@ -34,27 +34,11 @@ class Config {
     }
 }
 
-interface Logger {
-    log(msg: string, ...supportingData: any[]): void;
-    shout(msg: string, ...supportingData: any[]): void;
+class Logger {
+    public static create(verbose: boolean): Logger {
+        return verbose ? new Logger() : NO_OP_LOGGER;
+    }
 
-    debug(msg: string, ...supportingData: any[]): void;
-    warn(msg: string, ...supportingData: any[]): void;
-    error(msg: string, ...supportingData: any[]): void;
-    info(msg: string, ...supportingData: any[]): void;
-}
-
-class NoOpLoggerImpl implements Logger {
-    public log(msg: string, ...supportingData: any[]): void {}
-    public shout(msg: string, ...supportingData: any[]): void {}
-
-    public debug(msg: string, ...supportingData: any[]): void {}
-    public warn(msg: string, ...supportingData: any[]): void {}
-    public error(msg: string, ...supportingData: any[]): void {}
-    public info(msg: string, ...supportingData: any[]): void {}
-}
-
-class LoggerImpl implements Logger {
     public shout(msg: string, ...supportingData: any[]): void {
         this.emitLogMessage('info', `-----> ${msg}`, supportingData);
     }
@@ -87,10 +71,17 @@ class LoggerImpl implements Logger {
         }
     }
 }
-const NO_OP_LOGGER = new NoOpLoggerImpl();
-function logInit(verbose: boolean): Logger {
-    return verbose ? new LoggerImpl() : NO_OP_LOGGER;
+
+class NoOpLogger extends Logger {
+    public log(msg: string, ...supportingData: any[]): void {}
+    public shout(msg: string, ...supportingData: any[]): void {}
+    public debug(msg: string, ...supportingData: any[]): void {}
+    public warn(msg: string, ...supportingData: any[]): void {}
+    public error(msg: string, ...supportingData: any[]): void {}
+    public info(msg: string, ...supportingData: any[]): void {}
 }
+
+const NO_OP_LOGGER = new NoOpLogger();
 
 class UserContext {
     public static create(context: any): UserContext {
@@ -141,7 +132,7 @@ class Context {
             userCtx.sessionId,
         );
         const unitOfWork = UnitOfWork.newUnitOfWork(config, logger);
-        const forceApi = api.forceApi.newForceApi(config, logger);
+        const forceApi = new api.ForceApi(config, logger);
 
         const newCtx = new Context(
             userCtx,
@@ -162,13 +153,25 @@ class Context {
         public userContext: UserContext,
         public apiVersion: string,
         public fxInvocation: ISObject,
-        public forceApi: api.forceApi.IForceApi,
+        public forceApi: api.ForceApi,
         public logger: Logger,
         public unitOfWork: IUnitOfWork,
     ) {}
 }
 
 class SfCloudevent extends Cloudevent {
+    constructor(eventPayload?: any, specVersion: string = '0.2') {
+        super(Cloudevent.specs[specVersion]);
+
+        if (eventPayload) {
+            this.spec.payload = Object.assign(this.spec.payload, eventPayload);
+        }
+    }
+
+    public check(): void {
+        this.spec.check();
+    }
+
     public getPayload(): any {
         return this.getData().payload;
     }
@@ -182,4 +185,4 @@ interface SfFunction {
     invoke(context: Context, event: SfCloudevent): Promise<any>;
 }
 
-export { Config, Context, logInit, Logger, UserContext, SfCloudevent, SfFunction };
+export { Config, Context, Logger, UserContext, SfCloudevent, SfFunction };

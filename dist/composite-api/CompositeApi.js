@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const Handlers_1 = require("typed-rest-client/Handlers");
 const HttpClient_1 = require("typed-rest-client/HttpClient");
-const index_1 = require("../index");
+const sf_sdk_1 = require("../sf-sdk");
 class CompositeSubresponse {
     constructor(compositeSubresponse) {
         this.httpHeaders = compositeSubresponse.httpHeaders;
@@ -105,8 +105,8 @@ class CompositeApi {
         }
     }
 }
-function newCompositeApi(connectionConfig, logger) {
-    return new CompositeApi(connectionConfig, logger || index_1.sdk.logInit(false));
+function newCompositeApi(connectionConfig, logger = sf_sdk_1.Logger.create(false)) {
+    return new CompositeApi(connectionConfig, logger);
 }
 exports.newCompositeApi = newCompositeApi;
 //# sourceMappingURL=CompositeApi.js.map

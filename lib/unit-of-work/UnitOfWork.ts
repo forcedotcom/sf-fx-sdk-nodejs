@@ -173,6 +173,6 @@ class UnitOfWork implements IUnitOfWork {
     }
 }
 
-export function newUnitOfWork(connectionConfig: IConnectionConfig, logger?: Logger) {
-    return new UnitOfWork(connectionConfig, logger || sdk.logInit(false));
+export function newUnitOfWork(connectionConfig: IConnectionConfig, logger: Logger = Logger.create(false)) {
+    return new UnitOfWork(connectionConfig, logger);
 }

@@ -31,7 +31,7 @@ describe('UnitOfWork Integration Tests', () => {
                 },
             }
         };
-        const logger = sdk.logInit(false /*verbose*/);
+        const logger = sdk.Logger.create(false /*verbose*/);
         const context: sdk.Context = await sdk.Context.create(payload, logger);
         uow = context.unitOfWork;        
     });

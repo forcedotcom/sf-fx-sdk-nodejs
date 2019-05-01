@@ -1,6 +1,6 @@
 import Cloudevent = require('cloudevents-sdk');
-import { ISObject, IUnitOfWork } from './Interfaces';
 import * as api from './api';
+import { ISObject, IUnitOfWork } from './Interfaces';
 declare class Config {
     private env;
     constructor();
@@ -9,15 +9,16 @@ declare class Config {
     getPort(): string;
     getDyno(): string;
 }
-interface Logger {
-    log(msg: string, ...supportingData: any[]): void;
+declare class Logger {
+    static create(verbose: boolean): Logger;
     shout(msg: string, ...supportingData: any[]): void;
+    log(msg: string, ...supportingData: any[]): void;
     debug(msg: string, ...supportingData: any[]): void;
     warn(msg: string, ...supportingData: any[]): void;
     error(msg: string, ...supportingData: any[]): void;
     info(msg: string, ...supportingData: any[]): void;
+    private emitLogMessage;
 }
-declare function logInit(verbose: boolean): Logger;
 declare class UserContext {
     orgId: string;
     username: string;
@@ -32,13 +33,15 @@ declare class Context {
     userContext: UserContext;
     apiVersion: string;
     fxInvocation: ISObject;
-    forceApi: api.forceApi.IForceApi;
+    forceApi: api.ForceApi;
     logger: Logger;
     unitOfWork: IUnitOfWork;
     static create(payload: any, logger: Logger): Promise<Context>;
     private constructor();
 }
 declare class SfCloudevent extends Cloudevent {
+    constructor(eventPayload?: any, specVersion?: string);
+    check(): void;
     getPayload(): any;
 }
 interface SfFunction {
@@ -46,4 +49,4 @@ interface SfFunction {
     init(config: Config, logger: Logger): Promise<any>;
     invoke(context: Context, event: SfCloudevent): Promise<any>;
 }
-export { Config, Context, logInit, Logger, UserContext, SfCloudevent, SfFunction };
+export { Config, Context, Logger, UserContext, SfCloudevent, SfFunction };

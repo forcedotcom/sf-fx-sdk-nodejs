@@ -152,6 +152,9 @@ class CompositeApi implements ICompositeApi {
     }
 }
 
-export function newCompositeApi(connectionConfig: IConnectionConfig, logger?: Logger): ICompositeApi {
-    return new CompositeApi(connectionConfig, logger || sdk.logInit(false));
+export function newCompositeApi(
+    connectionConfig: IConnectionConfig,
+    logger: Logger = Logger.create(false),
+): ICompositeApi {
+    return new CompositeApi(connectionConfig, logger);
 }

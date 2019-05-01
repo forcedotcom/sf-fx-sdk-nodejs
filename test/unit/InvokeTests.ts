@@ -60,11 +60,15 @@ const cloudeventJson = {
     type : 'com.github.pull.create',
 };
 
-const cloudEvent: sdk.SfCloudevent = new sdk.SfCloudevent(sdk.SfCloudevent.specs['0.2']);
+const cloudEvent: sdk.SfCloudevent = new sdk.SfCloudevent();
         cloudEvent
             .type('com.salesforce.functions.pdf.create')
             .source('urn:event:from:salesforce/visualforce/00D/005/mypdfpage')
             .data(pdfData);
+cloudEvent.check();
+
+
+//   T E S T S
 
 describe('Invoke Function Tests', () => {
 

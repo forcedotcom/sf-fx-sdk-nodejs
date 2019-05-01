@@ -1,8 +1,12 @@
+import { Connection, Query, QueryResult, RecordResult } from 'jsforce';
 import { IConnectionConfig, ISObject } from '../Interfaces';
 import { Logger } from '../sf-sdk';
-import { Query, QueryResult, RecordResult } from 'jsforce';
-export { Query, QueryResult, Connection, RecordResult } from 'jsforce';
-export interface IForceApi {
+export { Query, QueryResult, Connection, RecordResult, SuccessResult, ErrorResult } from 'jsforce';
+export declare class ForceApi {
+    private connConfig;
+    private logger;
+    readonly conn: Connection;
+    constructor(connConfig: IConnectionConfig, logger: Logger);
     /**
      * Execute the given SOQL by using "/query" API.
      *
@@ -21,16 +25,16 @@ export interface IForceApi {
      * Insert a salesforce object.
      *
      * @param sobjects - same typed Salesforce objects to save
-     * @returns Promise<(RecordResult | RecordResult[])>
+     * @returns Promise<(RecordResult)>
      */
-    insert(sobjects: ISObject[]): Promise<RecordResult | RecordResult[]>;
+    insert(sobject: ISObject): Promise<RecordResult>;
     /**
      * Update a salesforce object.
      *
      * @param sobjects - same typed Salesforce object to save
      * @returns Promise<ForceResponse>
      */
-    update(sobjects: ISObject[]): Promise<RecordResult | RecordResult[]>;
+    update(sobject: ISObject): Promise<RecordResult>;
     /**
      * TODO
      *
@@ -39,6 +43,6 @@ export interface IForceApi {
      * @param body
      * @param headers
      */
-    request(method: string, url: string, body: string, headers?: object): Promise<Object>;
+    request(method: string, url: string, body: string, headers?: object): Promise<object>;
+    private connect;
 }
-export declare function newForceApi(connectionConfig: IConnectionConfig, logger: Logger): IForceApi;

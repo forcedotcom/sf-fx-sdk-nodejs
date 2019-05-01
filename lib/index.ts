@@ -3,18 +3,16 @@ import * as sdk from './sf-sdk';
 export async function invoke(fx: sdk.SfFunction) {
     // Setup
     const config = new sdk.Config();
-    const logger = sdk.logInit(config.isVerbose());
+    const logger = sdk.Logger.create(config.isVerbose());
 
     try {
         // Init function
         await fx.init(config, logger);
 
         // Create and validate Cloudevent
-        const sfFxPayload = JSON.parse(process.env.SF_FX_PAYLOAD);
-        const specversion = sfFxPayload.specversion || '0.2';
-        const cloudEvent: sdk.SfCloudevent = new sdk.SfCloudevent(sdk.SfCloudevent.specs[specversion]);
-        cloudEvent.spec.payload = Object.assign(cloudEvent.spec.payload, sfFxPayload);
-        cloudEvent.spec.check();
+        const eventPayload: any = JSON.parse(process.env.SF_FX_PAYLOAD);
+        const cloudEvent: sdk.SfCloudevent = new sdk.SfCloudevent(eventPayload);
+        cloudEvent.check();
 
         // Setup context
         const context = await sdk.Context.create(cloudEvent.getData(), logger);
@@ -29,7 +27,8 @@ export async function invoke(fx: sdk.SfFunction) {
 export { CompositeApi } from './composite-api';
 export { ConnectionConfig } from './ConnectionConfig';
 export { Constants } from './Constants';
-export { forceApi } from './api';
+export * from './api';
+export * from './Interfaces';
 export { SObject } from './SObject';
 export { UnitOfWork } from './unit-of-work';
 export { sdk };
