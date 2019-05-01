@@ -13,5 +13,5 @@ declare class UnitOfWork implements IUnitOfWork {
     commit(): Promise<IUnitOfWorkResponse>;
     private addCompositeSubrequest;
 }
-export declare function newUnitOfWork(connectionConfig: IConnectionConfig, logger: Logger): UnitOfWork;
+export declare function newUnitOfWork(connectionConfig: IConnectionConfig, logger?: Logger): UnitOfWork;
 export {};

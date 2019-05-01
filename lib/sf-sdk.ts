@@ -1,13 +1,15 @@
 import * as dotenv from 'dotenv';
 
+import Cloudevent = require('cloudevents-sdk');
+
+import * as api from './api';
 import { ConnectionConfig } from './ConnectionConfig';
 import { Constants } from './Constants';
-import { IConnectionConfig, IUnitOfWork, ISObject } from './Interfaces';
+import { IConnectionConfig, ISObject, IUnitOfWork } from './Interfaces';
 import { SObject } from './SObject';
 import { UnitOfWork } from './unit-of-work';
-import * as api from './api';
 
-export default class Config {
+class Config {
     private env;
 
     constructor() {
@@ -32,27 +34,11 @@ export default class Config {
     }
 }
 
-interface Logger {
-    log(msg: string, ...supportingData: any[]): void;
-    shout(msg: string, ...supportingData: any[]): void;
+class Logger {
+    public static create(verbose: boolean): Logger {
+        return verbose ? new Logger() : NO_OP_LOGGER;
+    }
 
-    debug(msg: string, ...supportingData: any[]): void;
-    warn(msg: string, ...supportingData: any[]): void;
-    error(msg: string, ...supportingData: any[]): void;
-    info(msg: string, ...supportingData: any[]): void;
-}
-
-class NoOpLoggerImpl implements Logger {
-    public log(msg: string, ...supportingData: any[]): void {}
-    public shout(msg: string, ...supportingData: any[]): void {}
-
-    public debug(msg: string, ...supportingData: any[]): void {}
-    public warn(msg: string, ...supportingData: any[]): void {}
-    public error(msg: string, ...supportingData: any[]): void {}
-    public info(msg: string, ...supportingData: any[]): void {}
-}
-
-class LoggerImpl implements Logger {
     public shout(msg: string, ...supportingData: any[]): void {
         this.emitLogMessage('info', `-----> ${msg}`, supportingData);
     }
@@ -85,10 +71,17 @@ class LoggerImpl implements Logger {
         }
     }
 }
-const noOpLogger = new NoOpLoggerImpl();
-function logInit(verbose: boolean): Logger {
-    return verbose ? new LoggerImpl() : noOpLogger;
+
+class NoOpLogger extends Logger {
+    public log(msg: string, ...supportingData: any[]): void {}
+    public shout(msg: string, ...supportingData: any[]): void {}
+    public debug(msg: string, ...supportingData: any[]): void {}
+    public warn(msg: string, ...supportingData: any[]): void {}
+    public error(msg: string, ...supportingData: any[]): void {}
+    public info(msg: string, ...supportingData: any[]): void {}
 }
+
+const NO_OP_LOGGER = new NoOpLogger();
 
 class UserContext {
     public static create(context: any): UserContext {
@@ -133,10 +126,13 @@ class Context {
         const userCtx = UserContext.create(context);
 
         const apiVersion = context.apiVersion || process.env.FX_API_VERSION || Constants.CURRENT_API_VERSION;
-        const config: IConnectionConfig =
-            new ConnectionConfig(userCtx.salesforceBaseUrl, apiVersion, userCtx.sessionId);
+        const config: IConnectionConfig = new ConnectionConfig(
+            userCtx.salesforceBaseUrl,
+            apiVersion,
+            userCtx.sessionId,
+        );
         const unitOfWork = UnitOfWork.newUnitOfWork(config, logger);
-        const forceApi = api.forceApi.newForceApi(config, logger);
+        const forceApi = new api.ForceApi(config, logger);
 
         const newCtx = new Context(
             userCtx,
@@ -144,7 +140,7 @@ class Context {
             new SObject('FunctionInvocationRequest').withId(context.functionInvocationId),
             forceApi,
             logger,
-            unitOfWork
+            unitOfWork,
         );
 
         delete payload.Context__c;
@@ -157,25 +153,27 @@ class Context {
         public userContext: UserContext,
         public apiVersion: string,
         public fxInvocation: ISObject,
-        public forceApi: api.forceApi.IForceApi,
+        public forceApi: api.ForceApi,
         public logger: Logger,
         public unitOfWork: IUnitOfWork,
     ) {}
 }
 
-class Event {
-    public constructor(public name: string, public context: Context, public payload: any) {}
+class SfCloudevent extends Cloudevent {
+    constructor(eventPayload?: any, specVersion: string = '0.2') {
+        super(Cloudevent.specs[specVersion]);
 
-    public getReplayId(): any {
-        return this.payload.event.replayId;
+        if (eventPayload) {
+            this.spec.payload = Object.assign(this.spec.payload, eventPayload);
+        }
     }
 
-    public getValue(key: string): any {
-        return this.payload[key];
+    public check(): void {
+        this.spec.check();
     }
 
-    public isHttp() {
-        return 'http' === this.name;
+    public getPayload(): any {
+        return this.getData().payload;
     }
 }
 
@@ -184,7 +182,7 @@ interface SfFunction {
 
     init(config: Config, logger: Logger): Promise<any>;
 
-    invoke(event: Event): Promise<any>;
+    invoke(context: Context, event: SfCloudevent): Promise<any>;
 }
 
-export { Config, Logger, logInit, UserContext, Context, Event, SfFunction };
+export { Config, Context, Logger, UserContext, SfCloudevent, SfFunction };

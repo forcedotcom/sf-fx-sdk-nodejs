@@ -4,7 +4,8 @@ npm-debug.log
 
 # Local development
 .vscode
+.idea
 .DS_Store
-#dist
+dist/test/
 
 .sfdx

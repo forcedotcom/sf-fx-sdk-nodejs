@@ -3,7 +3,6 @@ import { v4 as uuid } from 'uuid';
 import { ISObject, IValues } from './Interfaces';
 
 export class SObject implements ISObject {
-
     public static generateReferenceId(type: string): string {
         return `${type}_` + uuid().replace(/-/g, '');
     }

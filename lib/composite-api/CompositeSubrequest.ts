@@ -52,20 +52,19 @@ abstract class CompositeSubrequestBuilder implements ICompositeSubrequestBuilder
         return this._apiVersion;
     }
 
-    public getId():string {
+    public getId(): string {
         return this._id;
     }
 
-    public getReferenceId():string {
+    public getReferenceId(): string {
         return this._referenceId;
     }
-
 
     public getSObjectType(): string {
         return this._sObjectType;
     }
 
-    public getUrl():string {
+    public getUrl(): string {
         return this._url;
     }
 
@@ -91,8 +90,8 @@ abstract class CompositeSubrequestBuilder implements ICompositeSubrequestBuilder
         return this;
     }
 
-    public addValues(values: { [key: string]: any; }): ICompositeSubrequestBuilder {
-        Object.keys(values).forEach((key) => {
+    public addValues(values: { [key: string]: any }): ICompositeSubrequestBuilder {
+        Object.keys(values).forEach(key => {
             this.addValue(key, values[key]);
         });
         return this;
@@ -113,8 +112,8 @@ abstract class CompositeSubrequestBuilder implements ICompositeSubrequestBuilder
         return this;
     }
 
-    public headers(headers: { [key: string]: string; }): ICompositeSubrequestBuilder {
-        Object.keys(headers).forEach((key) => {
+    public headers(headers: { [key: string]: string }): ICompositeSubrequestBuilder {
+        Object.keys(headers).forEach(key => {
             this.header(key, headers[key]);
         });
         return this;
@@ -156,14 +155,14 @@ abstract class CompositeSubrequestBuilder implements ICompositeSubrequestBuilder
 
 abstract class NoBodyCompositeSubrequestBuilder extends CompositeSubrequestBuilder {
     constructor(method: Method) {
-        super(method, undefined/*This request can't accept any values*/);
+        super(method, undefined /*This request can't accept any values*/);
     }
 
     public addValue(key: string, value: any): ICompositeSubrequestBuilder {
         throw new Error(`This request doesn't have a body`);
     }
 
-    public addValues(values: { [key: string]: any; }): ICompositeSubrequestBuilder {
+    public addValues(values: { [key: string]: any }): ICompositeSubrequestBuilder {
         if (Object.keys(values).length > 0) {
             throw new Error(`This request doesn't have a body`);
         }

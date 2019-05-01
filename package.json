@@ -5,13 +5,10 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "directories": {
-    "lib": "lib"
+    "lib": "./dist"
   },
-  "files": [
-    "dist/**/*"
-  ],
   "scripts": {
-    "build": "tsc",
+    "build": "tsc -p .",
     "format": "prettier --write \"lib/**/*.ts\" \"lib/**/*.js\"",
     "lint": "tslint -c tslint.json 'lib/**/*.ts'",
     "prepare": "npm run build",
@@ -24,33 +21,41 @@
     "version": "npm run format && git add -A src",
     "watch-ts": "tsc -w"
   },
+  "pre-commit": [
+    "build",
+    "lint",
+    "test"
+  ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/forcedotcom/sf-fx-sdk-node.git"
+    "url": "git+https://github.com/forcedotcom/sf-fx-sdk-nodejs.git"
   },
   "author": "cwall@salesforce.com",
   "license": "UNLICENSED",
   "bugs": {
-    "url": "https://github.com/forcedotcom/sf-fx-sdk-node/issues"
+    "url": "https://github.com/forcedotcom/sf-fx-sdk-nodejs/issues"
   },
-  "homepage": "https://github.com/forcedotcom/sf-fx-sdk-node#readme",
+  "homepage": "https://github.com/forcedotcom/sf-fx-sdk-nodejs#readme",
   "dependencies": {
     "@types/jsforce": "^1.9.3",
-    "@types/restify": "^7.2.7",
+    "cloudevents-sdk": "git+https://github.com/cloudevents/sdk-javascript.git",
     "dotenv": "^4.0.0",
     "jsforce": "^1.9.0",
     "jsforce-connection": "^2.1.0",
-    "restify": "^7.2.7",
-    "restify-await-promise": "^2.1.0",
     "tslib": "1.9.3",
     "typed-rest-client": "^1.0.11"
   },
   "devDependencies": {
+    "@types/chai": "^4.1.7",
+    "@types/chai-as-promised": "^7.1.0",
     "@types/mocha": "^5.2.5",
     "@types/node": "^10.12.18",
     "@types/sinon": "^7.0.4",
     "chai": "^4.2.0",
+    "chai-as-promised": "^7.1.1",
     "mocha": "^5.2.0",
+    "nock": "^10.0.6",
+    "pre-commit": "^1.2.2",
     "prettier": "^1.15.3",
     "sinon": "^7.2.3",
     "ts-node": "7.0.0",

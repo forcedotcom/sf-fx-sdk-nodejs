@@ -14,8 +14,8 @@ class CompositeRequest implements ICompositeRequest {
 
     public setAllOrNone(allOrNone: boolean): void {
         this.allOrNone = allOrNone;
-    }    
-    
+    }
+
     public get isAllOrNone(): boolean {
         return this.allOrNone;
     }
@@ -40,6 +40,6 @@ class CompositeRequest implements ICompositeRequest {
     }
 }
 
-export function newCompositeRequest():ICompositeRequest {
+export function newCompositeRequest(): ICompositeRequest {
     return new CompositeRequest();
 }

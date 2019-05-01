@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const Handlers_1 = require("typed-rest-client/Handlers");
 const HttpClient_1 = require("typed-rest-client/HttpClient");
+const sf_sdk_1 = require("../sf-sdk");
 class CompositeSubresponse {
     constructor(compositeSubresponse) {
         this.httpHeaders = compositeSubresponse.httpHeaders;
@@ -46,7 +47,7 @@ class CompositeSubresponse {
         }
     }
     get isSuccess() {
-        return (this.httpStatusCode && this.httpStatusCode < HttpClient_1.HttpCodes.BadRequest);
+        return this.httpStatusCode && this.httpStatusCode < HttpClient_1.HttpCodes.BadRequest;
     }
     get location() {
         if (this.httpHeaders && this.httpHeaders[CompositeSubresponse.HEADER_LOCATION]) {
@@ -59,7 +60,6 @@ class CompositeSubresponse {
 }
 CompositeSubresponse.HEADER_LOCATION = 'Location';
 CompositeSubresponse.KEY_ID = 'id';
-;
 class CompositeResponse {
     constructor(json) {
         const compositeResponseJsonObject = JSON.parse(json);
@@ -105,7 +105,7 @@ class CompositeApi {
         }
     }
 }
-function newCompositeApi(connectionConfig, logger) {
+function newCompositeApi(connectionConfig, logger = sf_sdk_1.Logger.create(false)) {
     return new CompositeApi(connectionConfig, logger);
 }
 exports.newCompositeApi = newCompositeApi;

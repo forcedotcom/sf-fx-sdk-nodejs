@@ -4,5 +4,4 @@ class Constants {
 }
 Constants.CURRENT_API_VERSION = '44.0';
 exports.Constants = Constants;
-;
 //# sourceMappingURL=Constants.js.map

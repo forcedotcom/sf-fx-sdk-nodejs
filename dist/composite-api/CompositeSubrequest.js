@@ -61,7 +61,7 @@ class CompositeSubrequestBuilder {
         return this;
     }
     addValues(values) {
-        Object.keys(values).forEach((key) => {
+        Object.keys(values).forEach(key => {
             this.addValue(key, values[key]);
         });
         return this;
@@ -79,7 +79,7 @@ class CompositeSubrequestBuilder {
         return this;
     }
     headers(headers) {
-        Object.keys(headers).forEach((key) => {
+        Object.keys(headers).forEach(key => {
             this.header(key, headers[key]);
         });
         return this;

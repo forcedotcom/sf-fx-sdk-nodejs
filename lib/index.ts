@@ -1,27 +1,34 @@
-import RestManager from './rest';
-import * as SdkInterfaces from './Interfaces';
 import * as sdk from './sf-sdk';
 
 export async function invoke(fx: sdk.SfFunction) {
+    // Setup
     const config = new sdk.Config();
-    const logger = sdk.logInit(config.isVerbose());
+    const logger = sdk.Logger.create(config.isVerbose());
 
-    await fx.init(config, logger);
+    try {
+        // Init function
+        await fx.init(config, logger);
 
-    // initialize http request handlers
-    // tslint:disable-next-line:no-unused-expression
-    new RestManager(config, logger, fx);
+        // Create and validate Cloudevent
+        const eventPayload: any = JSON.parse(process.env.SF_FX_PAYLOAD);
+        const cloudEvent: sdk.SfCloudevent = new sdk.SfCloudevent(eventPayload);
+        cloudEvent.check();
+
+        // Setup context
+        const context = await sdk.Context.create(cloudEvent.getData(), logger);
+
+        // Invoke function
+        await fx.invoke(context, cloudEvent);
+    } catch (err) {
+        logger.error(err.message, err);
+    }
 }
 
 export { CompositeApi } from './composite-api';
-export { ConnectionConfig  } from './ConnectionConfig';
+export { ConnectionConfig } from './ConnectionConfig';
 export { Constants } from './Constants';
-export { forceApi } from './api';
+export * from './api';
+export * from './Interfaces';
 export { SObject } from './SObject';
 export { UnitOfWork } from './unit-of-work';
-
-
-export {
-    sdk,
-    SdkInterfaces
-};
+export { sdk };

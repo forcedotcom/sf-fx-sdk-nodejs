@@ -1,21 +1,30 @@
 import { BearerCredentialHandler } from 'typed-rest-client/Handlers';
 import { HttpClient, HttpClientResponse, HttpCodes } from 'typed-rest-client/HttpClient';
-import { IHeaders} from 'typed-rest-client/Interfaces';
+import { IHeaders } from 'typed-rest-client/Interfaces';
 
-import { ICompositeApi, ICompositeRequest, ICompositeResponse, ICompositeSubrequest, ICompositeSubresponse, IConnectionConfig, IError } from '../Interfaces';
+import {
+    ICompositeApi,
+    ICompositeRequest,
+    ICompositeResponse,
+    ICompositeSubrequest,
+    ICompositeSubresponse,
+    IConnectionConfig,
+    IError,
+} from '../Interfaces';
 import { Logger } from '../sf-sdk';
+import { sdk } from '../index';
 
 class CompositeSubresponse implements ICompositeSubresponse {
     private static HEADER_LOCATION: string = 'Location';
     private static KEY_ID: string = 'id';
 
-    public readonly httpHeaders: { [key: string]: string; };
+    public readonly httpHeaders: { [key: string]: string };
     public readonly httpStatusCode: number;
     public readonly referenceId: string;
     private readonly _errors: ReadonlyArray<IError>;
-    private readonly _body: { [key: string]: any; };
+    private readonly _body: { [key: string]: any };
 
-    public get body(): { [key: string]: any; } {
+    public get body(): { [key: string]: any } {
         if (this.httpStatusCode < HttpCodes.BadRequest) {
             return this._body;
         } else {
@@ -40,7 +49,7 @@ class CompositeSubresponse implements ICompositeSubresponse {
     }
 
     public get isSuccess(): boolean {
-        return (this.httpStatusCode && this.httpStatusCode < HttpCodes.BadRequest);
+        return this.httpStatusCode && this.httpStatusCode < HttpCodes.BadRequest;
     }
 
     public get location(): string {
@@ -74,14 +83,16 @@ class CompositeSubresponse implements ICompositeSubresponse {
  * Used to avoid string access to json object below.
  */
 interface CompositeResponseJsonObject {
-    compositeResponse:ICompositeSubresponse[];
-};
+    compositeResponse: ICompositeSubresponse[];
+}
 
 class CompositeResponse implements ICompositeResponse {
     public readonly compositeSubresponses: ReadonlyArray<ICompositeSubresponse>;
 
     public constructor(json: string) {
-        const compositeResponseJsonObject:CompositeResponseJsonObject = JSON.parse(json) as CompositeResponseJsonObject;
+        const compositeResponseJsonObject: CompositeResponseJsonObject = JSON.parse(
+            json,
+        ) as CompositeResponseJsonObject;
         const compositeSubResponses: ICompositeSubresponse[] = compositeResponseJsonObject.compositeResponse;
         if (compositeSubResponses) {
             compositeSubResponses.forEach((element: ICompositeSubresponse, index: number) => {
@@ -115,8 +126,9 @@ class CompositeApi implements ICompositeApi {
     }
 
     public async invoke(compositeRequest: ICompositeRequest): Promise<ICompositeResponse> {
-        const bearerCredentialHandler: BearerCredentialHandler =
-            new BearerCredentialHandler(this._connectionConfig.sessionId);
+        const bearerCredentialHandler: BearerCredentialHandler = new BearerCredentialHandler(
+            this._connectionConfig.sessionId,
+        );
         const httpClient: HttpClient = new HttpClient('sf-fx-node', [bearerCredentialHandler]);
         const path: string = `/services/data/v${this._connectionConfig.apiVersion}/composite/`;
         const headers: IHeaders = { 'Content-Type': 'application/json' };
@@ -124,8 +136,11 @@ class CompositeApi implements ICompositeApi {
 
         this.logger.debug(`POST ${path}`);
 
-        const response: HttpClientResponse =
-            await httpClient.post(this._connectionConfig.instanceUrl + path, data, headers);
+        const response: HttpClientResponse = await httpClient.post(
+            this._connectionConfig.instanceUrl + path,
+            data,
+            headers,
+        );
         if (response.message.statusCode === HttpCodes.OK) {
             const body: string = await response.readBody();
             const compositeResponse: ICompositeResponse = new CompositeResponse(body);
@@ -137,6 +152,9 @@ class CompositeApi implements ICompositeApi {
     }
 }
 
-export function newCompositeApi(connectionConfig: IConnectionConfig, logger: Logger): ICompositeApi {
+export function newCompositeApi(
+    connectionConfig: IConnectionConfig,
+    logger: Logger = Logger.create(false),
+): ICompositeApi {
     return new CompositeApi(connectionConfig, logger);
 }

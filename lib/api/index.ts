@@ -1,6 +1,1 @@
-
-import * as forceApi from './ForceApi';
-
-export {
-    forceApi
-}
+export * from './ForceApi';

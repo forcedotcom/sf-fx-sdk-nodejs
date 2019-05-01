@@ -1,8 +1,9 @@
 /* tslint:disable: no-unused-expression */
 import { expect } from 'chai';
 import 'mocha';
+import * as sinon from 'sinon';
 
-import { CompositeApi } from '../lib';
+import { CompositeApi, sdk } from '../lib';
 import { ICompositeApi, ICompositeRequest, ICompositeResponse, ICompositeSubrequest, ICompositeSubresponse, IConnectionConfig } from '../lib/Interfaces';
 
 const httpCodeCreated:number = 201;
@@ -16,7 +17,7 @@ export async function insertAccount(connectionConfig: IConnectionConfig): Promis
     const accountName: string = `Account ${new Date()}`;
     const compositeApi: ICompositeApi = CompositeApi.newCompositeApi(connectionConfig);
     const compositeRequest: ICompositeRequest = CompositeApi.newCompositeRequest();
-    const compositeSubRequest: ICompositeSubrequest = 
+    const compositeSubRequest: ICompositeSubrequest =
     CompositeApi.insertBuilder().sObjectType('Account').named(accountName).build();
     compositeRequest.addSubrequest(compositeSubRequest);
 
@@ -33,3 +34,31 @@ export async function insertAccount(connectionConfig: IConnectionConfig): Promis
 
     return { id: accountId, name: accountName } as IInsertResponse;
 }
+
+export class FakeFunction implements sdk.SfFunction {
+
+    public initParams: any;
+    public invokeParams: any;
+    public errors: string[];
+
+    constructor(public sandbox: sinon.SinonSandbox) {
+        this.errors = [];
+    }
+
+    public getName() {
+        return this.constructor.name;
+    }
+
+    public init(config: sdk.Config, logger: sdk.Logger): Promise<any> {
+        this.initParams = { config, logger };
+        this.sandbox.stub(logger, 'error').callsFake((message: string) => {
+            this.errors.push(message);
+        });
+        return Promise.resolve(null);
+    }
+
+    public invoke(context: sdk.Context, event: sdk.SfCloudevent): Promise<any> {
+        this.invokeParams = { context, event };
+        return Promise.resolve(null);
+    }
+};

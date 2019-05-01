@@ -1,8 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const __1 = require("..");
-;
-;
+const sf_sdk_1 = require("../sf-sdk");
 class UnitOfWorkResult {
     constructor(method, id, isSuccess, errors) {
         this.method = method;
@@ -21,7 +20,8 @@ class UnitOfWorkResponse {
         const results = [];
         const referenceIds = this._uuidToReferenceIds[sObject.uuid];
         if (referenceIds && referenceIds.size > 0) {
-            const compositeSubresponses = this._compositeResponse.compositeSubresponses;
+            const compositeSubresponses = this._compositeResponse
+                .compositeSubresponses;
             if (compositeSubresponses) {
                 // Use some so that it can short circuit after finding all relevant elements
                 compositeSubresponses.some((compositeSubresponse) => {
@@ -40,7 +40,7 @@ class UnitOfWorkResponse {
                         }
                         results.push(new UnitOfWorkResult(method, id, success, errors));
                         // 1:1 relationship. Exit if we have found everything
-                        return (results.length === referenceIds.size);
+                        return results.length === referenceIds.size;
                     }
                 });
             }
@@ -78,7 +78,10 @@ class UnitOfWork {
             throw new Error('Id not provided');
         }
         const deleteBuilder = __1.CompositeApi.deleteBuilder();
-        const compositeSubrequest = deleteBuilder.sObjectType(sObject.sObjectType).id(id).build();
+        const compositeSubrequest = deleteBuilder
+            .sObjectType(sObject.sObjectType)
+            .id(id)
+            .build();
         this.addCompositeSubrequest(sObject, compositeSubrequest);
     }
     async commit() {
@@ -99,7 +102,7 @@ class UnitOfWork {
         this._referenceIdToCompositeSubrequests[referenceId] = compositeSubrequest;
     }
 }
-function newUnitOfWork(connectionConfig, logger) {
+function newUnitOfWork(connectionConfig, logger = sf_sdk_1.Logger.create(false)) {
     return new UnitOfWork(connectionConfig, logger);
 }
 exports.newUnitOfWork = newUnitOfWork;
