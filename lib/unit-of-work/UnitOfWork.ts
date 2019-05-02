@@ -1,13 +1,29 @@
 import {
-    ICompositeApi, ICompositeRequest, ICompositeResponse, ICompositeSubrequest, ICompositeSubrequestBuilder,
-    ICompositeSubresponse, IConnectionConfig, IError, ISObject, IUnitOfWork, IUnitOfWorkResponse, IUnitOfWorkResult, Method
+    ICompositeApi,
+    ICompositeRequest,
+    ICompositeResponse,
+    ICompositeSubrequest,
+    ICompositeSubrequestBuilder,
+    ICompositeSubresponse,
+    IConnectionConfig,
+    IError,
+    ISObject,
+    IUnitOfWork,
+    IUnitOfWorkResponse,
+    IUnitOfWorkResult,
+    Method,
 } from '../Interfaces';
 
 import { CompositeApi } from '..';
 import { Logger } from '../sf-sdk';
+import { sdk } from '../index';
 
-interface IReferenceIdToCompositeSubrequests { [key: string]: ICompositeSubrequest };
-interface UuidToReferenceIds { [key: string]: Set<string> };
+interface IReferenceIdToCompositeSubrequests {
+    [key: string]: ICompositeSubrequest;
+}
+interface UuidToReferenceIds {
+    [key: string]: Set<string>;
+}
 
 class UnitOfWorkResult implements IUnitOfWorkResult {
     public readonly method: Method;
@@ -28,8 +44,11 @@ class UnitOfWorkResponse implements IUnitOfWorkResponse {
     private readonly _referenceIdToCompositeSubrequests: IReferenceIdToCompositeSubrequests;
     private readonly _compositeResponse: ICompositeResponse;
 
-    constructor(uuidToReferenceIds: UuidToReferenceIds,
-        referenceIdToCompositeSubrequests: IReferenceIdToCompositeSubrequests, compositeResponse: ICompositeResponse) {
+    constructor(
+        uuidToReferenceIds: UuidToReferenceIds,
+        referenceIdToCompositeSubrequests: IReferenceIdToCompositeSubrequests,
+        compositeResponse: ICompositeResponse,
+    ) {
         this._uuidToReferenceIds = uuidToReferenceIds;
         this._referenceIdToCompositeSubrequests = referenceIdToCompositeSubrequests;
         this._compositeResponse = compositeResponse;
@@ -40,16 +59,17 @@ class UnitOfWorkResponse implements IUnitOfWorkResponse {
         const referenceIds: Set<string> = this._uuidToReferenceIds[sObject.uuid];
 
         if (referenceIds && referenceIds.size > 0) {
-            const compositeSubresponses: ReadonlyArray<ICompositeSubresponse> =
-                this._compositeResponse.compositeSubresponses;
+            const compositeSubresponses: ReadonlyArray<ICompositeSubresponse> = this._compositeResponse
+                .compositeSubresponses;
 
             if (compositeSubresponses) {
                 // Use some so that it can short circuit after finding all relevant elements
                 compositeSubresponses.some((compositeSubresponse: ICompositeSubresponse) => {
                     const referenceId: string = compositeSubresponse.referenceId;
                     if (referenceIds.has(referenceId)) {
-                        const compositeSubrequest: ICompositeSubrequest =
-                            this._referenceIdToCompositeSubrequests[referenceId];
+                        const compositeSubrequest: ICompositeSubrequest = this._referenceIdToCompositeSubrequests[
+                            referenceId
+                        ];
                         if (!compositeSubrequest) {
                             throw new Error('Unable to find CompositeSubrequest with referenceId=' + referenceId);
                         }
@@ -65,7 +85,7 @@ class UnitOfWorkResponse implements IUnitOfWorkResponse {
                         results.push(new UnitOfWorkResult(method, id, success, errors));
 
                         // 1:1 relationship. Exit if we have found everything
-                        return (results.length === referenceIds.size);
+                        return results.length === referenceIds.size;
                     }
                 });
             }
@@ -118,7 +138,10 @@ class UnitOfWork implements IUnitOfWork {
         }
 
         const deleteBuilder: ICompositeSubrequestBuilder = CompositeApi.deleteBuilder();
-        const compositeSubrequest: ICompositeSubrequest = deleteBuilder.sObjectType(sObject.sObjectType).id(id).build();
+        const compositeSubrequest: ICompositeSubrequest = deleteBuilder
+            .sObjectType(sObject.sObjectType)
+            .id(id)
+            .build();
 
         this.addCompositeSubrequest(sObject, compositeSubrequest);
     }
@@ -128,8 +151,11 @@ class UnitOfWork implements IUnitOfWork {
 
         const compositeResponse: ICompositeResponse = await compositeApi.invoke(this._compositeRequest);
 
-        return new UnitOfWorkResponse(this._uuidToReferenceIds,
-            this._referenceIdToCompositeSubrequests, compositeResponse);
+        return new UnitOfWorkResponse(
+            this._uuidToReferenceIds,
+            this._referenceIdToCompositeSubrequests,
+            compositeResponse,
+        );
     }
 
     private addCompositeSubrequest(sObject: ISObject, compositeSubrequest: ICompositeSubrequest): void {
@@ -147,6 +173,6 @@ class UnitOfWork implements IUnitOfWork {
     }
 }
 
-export function newUnitOfWork(connectionConfig: IConnectionConfig, logger: Logger) {
+export function newUnitOfWork(connectionConfig: IConnectionConfig, logger: Logger = Logger.create(false)) {
     return new UnitOfWork(connectionConfig, logger);
 }

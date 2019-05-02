@@ -3,11 +3,12 @@ export enum Method {
     GET = 'GET',
     PATCH = 'PATCH',
     POST = 'POST',
-    PUT = 'PUT'
+    PUT = 'PUT',
 }
 
-export interface IValues { [key: string]: any; };
-
+export interface IValues {
+    [key: string]: any;
+}
 
 export interface ISObject {
     readonly fkId: string;
@@ -77,7 +78,7 @@ export interface ICompositeSubresponse {
 }
 
 export interface ICompositeResponse {
-    readonly compositeSubresponses: ReadonlyArray<ICompositeSubresponse>
+    readonly compositeSubresponses: ReadonlyArray<ICompositeSubresponse>;
     getCompositeSubresponse(compositeSubrequest: ICompositeSubrequest): ICompositeSubresponse;
 }
 

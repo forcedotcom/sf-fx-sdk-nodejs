@@ -1,11 +1,28 @@
-# sf-fx-sdk-node
+# Salesforce Function SDK for Node.js
 
-```bash
-# Possible Issues
-/usr/bin/ld: cannot find -lcrypto
-/usr/bin/ld: cannot find -lssl
+## Usage
+```javascript
+import { invoke, sdk } from 'salesforce-fdk';
 
-# Fix
+class MyFunction implements sdk.SfFunction {
 
-> sudo apt-get install libssl-dev
+    public init(config: sdk.Config, logger: sdk.Logger): Promise<any> {
+        console.log('init');
+        
+        // do init
+        
+        return Promise.resolve(null);
+    }
+
+    public invoke(context: sdk.Context, event: sdk.Cloudevent): Promise<any> {
+        console.log('invoke');
+        
+        // do something
+        
+        return Promise.resolve(null);
+    }
+};
+
+console.log('invoking...');
+invoke(new MyFunction());
 ```

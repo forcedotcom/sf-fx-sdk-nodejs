@@ -1,11 +1,12 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const dotenv = require("dotenv");
+const Cloudevent = require("cloudevents-sdk");
+const api = require("./api");
 const ConnectionConfig_1 = require("./ConnectionConfig");
 const Constants_1 = require("./Constants");
 const SObject_1 = require("./SObject");
 const unit_of_work_1 = require("./unit-of-work");
-const api = require("./api");
 class Config {
     constructor() {
         dotenv.config();
@@ -24,17 +25,11 @@ class Config {
         return this.env.DYNO;
     }
 }
-exports.default = Config;
 exports.Config = Config;
-class NoOpLoggerImpl {
-    log(msg, ...supportingData) { }
-    shout(msg, ...supportingData) { }
-    debug(msg, ...supportingData) { }
-    warn(msg, ...supportingData) { }
-    error(msg, ...supportingData) { }
-    info(msg, ...supportingData) { }
-}
-class LoggerImpl {
+class Logger {
+    static create(verbose) {
+        return verbose ? new Logger() : NO_OP_LOGGER;
+    }
     shout(msg, ...supportingData) {
         this.emitLogMessage('info', `-----> ${msg}`, supportingData);
     }
@@ -62,11 +57,16 @@ class LoggerImpl {
         }
     }
 }
-const noOpLogger = new NoOpLoggerImpl();
-function logInit(verbose) {
-    return verbose ? new LoggerImpl() : noOpLogger;
+exports.Logger = Logger;
+class NoOpLogger extends Logger {
+    log(msg, ...supportingData) { }
+    shout(msg, ...supportingData) { }
+    debug(msg, ...supportingData) { }
+    warn(msg, ...supportingData) { }
+    error(msg, ...supportingData) { }
+    info(msg, ...supportingData) { }
 }
-exports.logInit = logInit;
+const NO_OP_LOGGER = new NoOpLogger();
 class UserContext {
     constructor(orgId, username, userId, salesforceBaseUrl, orgDomainUrl, sessionId) {
         this.orgId = orgId;
@@ -108,7 +108,7 @@ class Context {
         const apiVersion = context.apiVersion || process.env.FX_API_VERSION || Constants_1.Constants.CURRENT_API_VERSION;
         const config = new ConnectionConfig_1.ConnectionConfig(userCtx.salesforceBaseUrl, apiVersion, userCtx.sessionId);
         const unitOfWork = unit_of_work_1.UnitOfWork.newUnitOfWork(config, logger);
-        const forceApi = api.forceApi.newForceApi(config, logger);
+        const forceApi = new api.ForceApi(config, logger);
         const newCtx = new Context(userCtx, apiVersion, new SObject_1.SObject('FunctionInvocationRequest').withId(context.functionInvocationId), forceApi, logger, unitOfWork);
         delete payload.Context__c;
         delete payload.context;
@@ -116,21 +116,19 @@ class Context {
     }
 }
 exports.Context = Context;
-class Event {
-    constructor(name, context, payload) {
-        this.name = name;
-        this.context = context;
-        this.payload = payload;
+class SfCloudevent extends Cloudevent {
+    constructor(eventPayload, specVersion = '0.2') {
+        super(Cloudevent.specs[specVersion]);
+        if (eventPayload) {
+            this.spec.payload = Object.assign(this.spec.payload, eventPayload);
+        }
     }
-    getReplayId() {
-        return this.payload.event.replayId;
+    check() {
+        this.spec.check();
     }
-    getValue(key) {
-        return this.payload[key];
-    }
-    isHttp() {
-        return 'http' === this.name;
+    getPayload() {
+        return this.getData().payload;
     }
 }
-exports.Event = Event;
+exports.SfCloudevent = SfCloudevent;
 //# sourceMappingURL=sf-sdk.js.map

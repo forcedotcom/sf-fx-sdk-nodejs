@@ -8,5 +8,4 @@ var Method;
     Method["POST"] = "POST";
     Method["PUT"] = "PUT";
 })(Method = exports.Method || (exports.Method = {}));
-;
 //# sourceMappingURL=Interfaces.js.map

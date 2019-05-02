@@ -1,6 +1,7 @@
-import { IUnitOfWork, ISObject } from './Interfaces';
+import Cloudevent = require('cloudevents-sdk');
 import * as api from './api';
-export default class Config {
+import { ISObject, IUnitOfWork } from './Interfaces';
+declare class Config {
     private env;
     constructor();
     isVerbose(): boolean;
@@ -8,15 +9,16 @@ export default class Config {
     getPort(): string;
     getDyno(): string;
 }
-interface Logger {
-    log(msg: string, ...supportingData: any[]): void;
+declare class Logger {
+    static create(verbose: boolean): Logger;
     shout(msg: string, ...supportingData: any[]): void;
+    log(msg: string, ...supportingData: any[]): void;
     debug(msg: string, ...supportingData: any[]): void;
     warn(msg: string, ...supportingData: any[]): void;
     error(msg: string, ...supportingData: any[]): void;
     info(msg: string, ...supportingData: any[]): void;
+    private emitLogMessage;
 }
-declare function logInit(verbose: boolean): Logger;
 declare class UserContext {
     orgId: string;
     username: string;
@@ -31,24 +33,20 @@ declare class Context {
     userContext: UserContext;
     apiVersion: string;
     fxInvocation: ISObject;
-    forceApi: api.forceApi.IForceApi;
+    forceApi: api.ForceApi;
     logger: Logger;
     unitOfWork: IUnitOfWork;
     static create(payload: any, logger: Logger): Promise<Context>;
     private constructor();
 }
-declare class Event {
-    name: string;
-    context: Context;
-    payload: any;
-    constructor(name: string, context: Context, payload: any);
-    getReplayId(): any;
-    getValue(key: string): any;
-    isHttp(): boolean;
+declare class SfCloudevent extends Cloudevent {
+    constructor(eventPayload?: any, specVersion?: string);
+    check(): void;
+    getPayload(): any;
 }
 interface SfFunction {
     getName(): string;
     init(config: Config, logger: Logger): Promise<any>;
-    invoke(event: Event): Promise<any>;
+    invoke(context: Context, event: SfCloudevent): Promise<any>;
 }
-export { Config, Logger, logInit, UserContext, Context, Event, SfFunction };
+export { Config, Context, Logger, UserContext, SfCloudevent, SfFunction };

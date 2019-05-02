@@ -1,45 +1,82 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const jsforce = require("jsforce");
+const jsforce_1 = require("jsforce");
 // REVIEWME: ForceApi exposes jsforce objects.  Re-think.
-var jsforce_1 = require("jsforce");
-exports.Query = jsforce_1.Query;
-exports.Connection = jsforce_1.Connection;
+var jsforce_2 = require("jsforce");
+exports.Query = jsforce_2.Query;
+exports.Connection = jsforce_2.Connection;
 class ForceApi {
     constructor(connConfig, logger) {
         this.connConfig = connConfig;
         this.logger = logger;
-        this.conn = new jsforce.Connection({
-            accessToken: connConfig.sessionId,
-            instanceUrl: connConfig.instanceUrl,
-            version: connConfig.apiVersion,
-        });
     }
+    connect() {
+        return this.conn
+            ? this.conn
+            : (this.conn = new jsforce_1.Connection({
+                accessToken: this.connConfig.sessionId,
+                instanceUrl: this.connConfig.instanceUrl,
+                version: this.connConfig.apiVersion,
+            }));
+    }
+    /**
+     * Execute the given SOQL by using "/query" API.
+     *
+     * @param soql - SOQL to be executed.
+     * @return Query<QueryResult<T>>
+     */
     query(soql) {
-        return this.conn.query(soql);
+        // REVIEWME: return sdk.SObject?
+        return this.connect().query(soql);
     }
+    /**
+     * Query further records using nextRecordsURL.
+     *
+     * @param locator - query locator.
+     * @return Promise<QueryResult<T>>
+     */
     queryMore(locator) {
-        return this.conn.query(locator);
+        // REVIEWME: return sdk.SObject?
+        return this.connect().query(locator);
     }
-    insert(sobjects) {
-        const records = sobjects.map(sobject => sobject.asMap());
-        return this.conn.insert(sobjects[0].sObjectType, records);
+    /**
+     * Insert a salesforce object.
+     *
+     * @param sobjects - same typed Salesforce objects to save
+     * @returns Promise<(RecordResult)>
+     */
+    insert(sobject) {
+        return this.connect()
+            .sobject(sobject.sObjectType)
+            .insert(sobject.asMap());
     }
-    update(sobjects) {
-        const records = sobjects.map(sobject => sobject.asMap());
-        return this.conn.update(sobjects[0].sObjectType, records);
+    /**
+     * Update a salesforce object.
+     *
+     * @param sobjects - same typed Salesforce object to save
+     * @returns Promise<ForceResponse>
+     */
+    update(sobject) {
+        return this.connect()
+            .sobject(sobject.sObjectType)
+            .update(sobject.asMap());
     }
+    /**
+     * TODO
+     *
+     * @param method
+     * @param url
+     * @param body
+     * @param headers
+     */
     request(method, url, body, headers) {
         return this.conn.request({
             method,
             url,
             body,
-            headers
+            headers,
         });
     }
 }
-function newForceApi(connectionConfig, logger) {
-    return new ForceApi(connectionConfig, logger);
-}
-exports.newForceApi = newForceApi;
+exports.ForceApi = ForceApi;
 //# sourceMappingURL=ForceApi.js.map
