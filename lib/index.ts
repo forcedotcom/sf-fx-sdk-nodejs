@@ -1,3 +1,4 @@
+import * as SdkInterfaces from './Interfaces';
 import * as sdk from './sf-sdk';
 
 export async function invoke(fx: sdk.SfFunction) {
