@@ -3,6 +3,7 @@
     "extends": ["tslint:recommended", "tslint-config-prettier"],
     "jsRules": {},
     "rules": {
+        "indent": [true, "spaces", 4],
         "interface-name": false,
         "no-console": false,
         "quotemark": [true, "single"],
