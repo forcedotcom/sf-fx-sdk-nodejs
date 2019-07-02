@@ -129,6 +129,9 @@ class SfCloudevent extends Cloudevent {
     getPayload() {
         return this.getData().payload;
     }
+    getPayloadVersion() {
+        return this.getSource().substr(this.getSource().lastIndexOf('/') + 1);
+    }
 }
 exports.SfCloudevent = SfCloudevent;
 //# sourceMappingURL=sf-sdk.js.map

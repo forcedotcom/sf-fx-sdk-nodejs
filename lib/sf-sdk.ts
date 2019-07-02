@@ -175,6 +175,10 @@ class SfCloudevent extends Cloudevent {
     public getPayload(): any {
         return this.getData().payload;
     }
+
+    public getPayloadVersion(): string {
+        return this.getSource().substr(this.getSource().lastIndexOf('/') + 1);
+    }
 }
 
 interface SfFunction {
