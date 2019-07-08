@@ -42,7 +42,8 @@ const pdfData = {
         html:null,
         isLightning:false,
         url:'https://sffx-dev-ed.localhost.internal.salesforce.com/apex/MyPdfPage'
-    }
+    },
+    payloadVersion:'218.9'
 };
 
 const cloudeventJson = {
@@ -63,7 +64,7 @@ const cloudeventJson = {
 const cloudEvent: sdk.SfCloudevent = new sdk.SfCloudevent();
         cloudEvent
             .type('com.salesforce.functions.pdf.create')
-            .source('urn:event:from:salesforce/visualforce/00D/005/mypdfpage')
+            .source(`urn:event:from:salesforce/functionevent/${pdfData.context.userContext.orgId}/${pdfData.payloadVersion}`)
             .data(pdfData);
 cloudEvent.check();
 
@@ -122,6 +123,7 @@ describe('Invoke Function Tests', () => {
         postInvokeAsserts(fakeFx);
         // Validate Cloudevent instance was created and passed to function
         chai.expect(cloudEvent.getData().payload).to.equal(pdfData.payload);
+        chai.expect(cloudEvent.getData().payloadVersion).to.equal(pdfData.payloadVersion);
         chai.assert(fakeFx.invokeParams.event instanceof sdk.SfCloudevent);
         const sfEvent: sdk.SfCloudevent = fakeFx.invokeParams.event;
         chai.expect(cloudEvent.getType()).to.equal(sfEvent.getType());
@@ -129,6 +131,7 @@ describe('Invoke Function Tests', () => {
         chai.expect(sfEvent.getExtensions()).to.be.empty;
         chai.expect(sfEvent.getId()).to.not.be.null;
         chai.expect(sfEvent.getSpecversion()).to.be.equal('0.2');
+        chai.expect(sfEvent.getPayloadVersion()).to.be.equal(pdfData.payloadVersion);
         return Promise.resolve(null);
     });
 

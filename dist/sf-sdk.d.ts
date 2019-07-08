@@ -43,6 +43,7 @@ declare class SfCloudevent extends Cloudevent {
     constructor(eventPayload?: any, specVersion?: string);
     check(): void;
     getPayload(): any;
+    getPayloadVersion(): string;
 }
 interface SfFunction {
     getName(): string;
