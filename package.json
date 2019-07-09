@@ -38,7 +38,7 @@
   "homepage": "https://github.com/forcedotcom/sf-fx-sdk-nodejs#readme",
   "dependencies": {
     "@types/jsforce": "^1.9.3",
-    "cloudevents-sdk": "git+https://github.com/cloudevents/sdk-javascript.git",
+    "cloudevents-sdk": "^0.2.3",
     "dotenv": "^4.0.0",
     "jsforce": "^1.9.0",
     "jsforce-connection": "^2.1.0",
