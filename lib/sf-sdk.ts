@@ -97,7 +97,7 @@ class UserContext {
             userContext.userId,
             userContext.salesforceBaseUrl,
             userContext.orgDomainUrl,
-            userContext.sessionId,
+            userContext.c2cJWT,
         );
     }
 
@@ -107,7 +107,7 @@ class UserContext {
         public userId: string,
         public salesforceBaseUrl: string,
         public orgDomainUrl: string,
-        public sessionId: string,
+        public c2cJWT: string,
     ) {}
 }
 
@@ -129,7 +129,7 @@ class Context {
         const config: IConnectionConfig = new ConnectionConfig(
             userCtx.salesforceBaseUrl,
             apiVersion,
-            userCtx.sessionId,
+            userCtx.c2cJWT,
         );
         const unitOfWork = UnitOfWork.newUnitOfWork(config, logger);
         const forceApi = new api.ForceApi(config, logger);

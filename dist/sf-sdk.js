@@ -68,13 +68,13 @@ class NoOpLogger extends Logger {
 }
 const NO_OP_LOGGER = new NoOpLogger();
 class UserContext {
-    constructor(orgId, username, userId, salesforceBaseUrl, orgDomainUrl, sessionId) {
+    constructor(orgId, username, userId, salesforceBaseUrl, orgDomainUrl, c2cJWT) {
         this.orgId = orgId;
         this.username = username;
         this.userId = userId;
         this.salesforceBaseUrl = salesforceBaseUrl;
         this.orgDomainUrl = orgDomainUrl;
-        this.sessionId = sessionId;
+        this.c2cJWT = c2cJWT;
     }
     static create(context) {
         const userContext = context.userContext;
@@ -82,7 +82,7 @@ class UserContext {
             const message = `UserContext not provided: ${JSON.stringify(context)}`;
             throw new Error(message);
         }
-        return new UserContext(userContext.orgId, userContext.username, userContext.userId, userContext.salesforceBaseUrl, userContext.orgDomainUrl, userContext.sessionId);
+        return new UserContext(userContext.orgId, userContext.username, userContext.userId, userContext.salesforceBaseUrl, userContext.orgDomainUrl, userContext.c2cJWT);
     }
 }
 exports.UserContext = UserContext;
@@ -106,7 +106,7 @@ class Context {
         }
         const userCtx = UserContext.create(context);
         const apiVersion = context.apiVersion || process.env.FX_API_VERSION || Constants_1.Constants.CURRENT_API_VERSION;
-        const config = new ConnectionConfig_1.ConnectionConfig(userCtx.salesforceBaseUrl, apiVersion, userCtx.sessionId);
+        const config = new ConnectionConfig_1.ConnectionConfig(userCtx.salesforceBaseUrl, apiVersion, userCtx.c2cJWT);
         const unitOfWork = unit_of_work_1.UnitOfWork.newUnitOfWork(config, logger);
         const forceApi = new api.ForceApi(config, logger);
         const newCtx = new Context(userCtx, apiVersion, new SObject_1.SObject('FunctionInvocationRequest').withId(context.functionInvocationId), forceApi, logger, unitOfWork);

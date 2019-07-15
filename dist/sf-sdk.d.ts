@@ -25,7 +25,7 @@ declare class UserContext {
     userId: string;
     salesforceBaseUrl: string;
     orgDomainUrl: string;
-    sessionId: string;
+    c2cJWT: string;
     static create(context: any): UserContext;
     private constructor();
 }
