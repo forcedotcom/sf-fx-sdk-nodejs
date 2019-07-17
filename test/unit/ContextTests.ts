@@ -11,10 +11,10 @@ describe('Context Tests', () => {
             Account_ID__c: '0011U0000000000',
             Context__c: {
                 userContext: {
+                    c2cJWT: 'AJWT',
                     orgDomainUrl: 'https://my-domain.salesforce.com',
                     orgId: '00D1U0000000000',
                     salesforceBaseUrl: 'https://na1.salesforce.com',
-                    sessionId: 'ASessionId',
                     userId: '0051U0000000000',
                     username: 'test@salesforce.com'
                 },
@@ -33,7 +33,7 @@ describe('Context Tests', () => {
         expect(context.userContext.userId).to.equal('0051U0000000000');
         expect(context.userContext.salesforceBaseUrl).to.equal('https://na1.salesforce.com');
         expect(context.userContext.orgDomainUrl).to.equal('https://my-domain.salesforce.com');
-        expect(context.userContext.sessionId).to.equal('ASessionId');
+        expect(context.userContext.c2cJWT).to.equal('AJWT');
 
         expect(context.forceApi).to.exist;
         expect(context.logger).to.exist;
