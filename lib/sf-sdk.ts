@@ -1,5 +1,3 @@
-import * as dotenv from 'dotenv';
-
 import Cloudevent = require('cloudevents-sdk');
 
 import * as api from './api';
@@ -13,7 +11,6 @@ class Config {
     private env;
 
     constructor() {
-        dotenv.config();
         this.env = process.env;
     }
 
