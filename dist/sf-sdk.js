@@ -1,6 +1,5 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const dotenv = require("dotenv");
 const Cloudevent = require("cloudevents-sdk");
 const api = require("./api");
 const ConnectionConfig_1 = require("./ConnectionConfig");
@@ -9,7 +8,6 @@ const SObject_1 = require("./SObject");
 const unit_of_work_1 = require("./unit-of-work");
 class Config {
     constructor() {
-        dotenv.config();
         this.env = process.env;
     }
     isVerbose() {
