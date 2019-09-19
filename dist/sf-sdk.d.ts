@@ -1,6 +1,6 @@
 import Cloudevent = require('cloudevents-sdk');
 import * as api from './api';
-import { ISObject, IUnitOfWork } from './Interfaces';
+import { IUnitOfWork } from './Interfaces';
 declare class Config {
     private env;
     constructor();
@@ -29,14 +29,25 @@ declare class UserContext {
     static create(context: any): UserContext;
     private constructor();
 }
+declare class FunctionInvocationRequest {
+    readonly context: Context;
+    readonly id: string;
+    response: any;
+    status: string;
+    private readonly userContext;
+    private readonly logger;
+    constructor(context: Context, id: string);
+    save(): Promise<void>;
+    post(payload: any): Promise<any>;
+}
 declare class Context {
-    userContext: UserContext;
-    apiVersion: string;
-    fxInvocation: ISObject;
-    forceApi: api.ForceApi;
-    logger: Logger;
-    unitOfWork: IUnitOfWork;
-    static create(payload: any, logger: Logger): Promise<Context>;
+    readonly userContext: UserContext;
+    readonly apiVersion: string;
+    readonly forceApi: api.ForceApi;
+    readonly logger: Logger;
+    readonly unitOfWork: IUnitOfWork;
+    static create(data: any, logger: Logger): Context;
+    readonly fxInvocation: FunctionInvocationRequest;
     private constructor();
 }
 declare class SfCloudevent extends Cloudevent {
@@ -46,9 +57,4 @@ declare class SfCloudevent extends Cloudevent {
     getPayload(): any;
     getPayloadVersion(): string;
 }
-interface SfFunction {
-    getName(): string;
-    init(config: Config, logger: Logger): Promise<any>;
-    invoke(context: Context, event: SfCloudevent): Promise<any>;
-}
-export { Config, Context, Logger, UserContext, SfCloudevent, SfFunction };
+export { Config, Context, Logger, UserContext, SfCloudevent, FunctionInvocationRequest };
