@@ -3,10 +3,11 @@ import * as chai from 'chai';
 import * as chaiAsPromised from 'chai-as-promised';
 import 'mocha';
 import * as sinon from 'sinon';
+import * as request from 'request-promise-native';
 
 chai.use(chaiAsPromised);
 
-import { invoke, sdk } from '../../lib';
+import * as sdk from '../../lib';
 import * as testUtils from '../TestUtils';
 
 interface PdfEvent {
@@ -24,7 +25,7 @@ interface PdfEvent {
 
 const pdfData = {
     context:{
-        apiVersion:'46.0',
+        apiVersion:'4.0',
         functionInvocationId:'9mdxx00000000Mb',
         userContext:{
             orgDomainUrl:'http://sffx-dev-ed.localhost.internal.salesforce.com:6109',
@@ -68,15 +69,20 @@ const cloudEvent: sdk.SfCloudevent = new sdk.SfCloudevent();
             .data(pdfData);
 cloudEvent.check();
 
-
 //   T E S T S
 
 describe('Invoke Function Tests', () => {
 
-    let sandbox: sinon.SinonSandbox;
+    // Function params
+    let config: sdk.Config;
+    let logger: sdk.Logger;
+    let context: sdk.Context;
 
-    const newFakeFx = (): testUtils.FakeFunction => {
-        return new testUtils.FakeFunction(sandbox);
+    let sandbox: sinon.SinonSandbox;
+    let mockRequestPost;
+
+    const newFakeFx = (doFxInvocation: boolean = false): testUtils.FakeFunction => {
+        return new testUtils.FakeFunction(sandbox, doFxInvocation);
     };
 
     const postInvokeAsserts = (fakeFx: testUtils.FakeFunction): void => {
@@ -91,33 +97,41 @@ describe('Invoke Function Tests', () => {
 
     beforeEach(() => {
         sandbox = sinon.createSandbox();
+
+        // Function params
+        config = new sdk.Config();
+        logger = sdk.Logger.create(false);
+        context = sdk.Context.create(cloudEvent.getData(), logger);
+
+        // Request
+        mockRequestPost = sandbox.stub(request, 'post');
+        mockRequestPost.resolves(Promise.resolve({}));
     });
 
     afterEach(() => {
-        delete process.env.SF_FX_PAYLOAD;
         sandbox.restore();
     });
 
     it('should invoke function', async () => {
-        // Setup fx and invoke
-        process.env.SF_FX_PAYLOAD = cloudEvent.toString();
+        // Create and invoke function
         const fakeFx: testUtils.FakeFunction = newFakeFx();
-        await invoke(fakeFx);
+        await fakeFx.init(config, logger);
+        await fakeFx.invoke(context, cloudEvent);
 
         // Validate
         postInvokeAsserts(fakeFx);
-        const context: sdk.Context = fakeFx.invokeParams.context;
-        chai.expect(pdfData.context.functionInvocationId).to.equal(context.fxInvocation.id);
+        const paramContext: sdk.Context = fakeFx.invokeParams.context;
+        chai.expect(pdfData.context.functionInvocationId).to.equal(paramContext.fxInvocation.id);
         const userContext: sdk.UserContext = fakeFx.invokeParams.context.userContext;
         chai.expect(pdfData.context.userContext.orgId).to.equal(userContext.orgId);
         return Promise.resolve(null);
     });
 
     it('should create Cloudevent', async () => {
-        // Setup fx and invoke
-        process.env.SF_FX_PAYLOAD = cloudEvent.toString();
+        // Create and invoke function
         const fakeFx: testUtils.FakeFunction = newFakeFx();
-        await invoke(fakeFx);
+        await fakeFx.init(config, logger);
+        await fakeFx.invoke(context, cloudEvent);
 
         // Validate
         postInvokeAsserts(fakeFx);
@@ -136,10 +150,11 @@ describe('Invoke Function Tests', () => {
     });
 
     it('should create Cloudevent (JSON)', async () => {
-        // Setup fx and invoke
-        process.env.SF_FX_PAYLOAD = JSON.stringify(cloudeventJson);
+        // Create and invoke function
+        const cloudEvent: sdk.SfCloudevent = new sdk.SfCloudevent(cloudeventJson);
         const fakeFx: testUtils.FakeFunction = newFakeFx();
-        await invoke(fakeFx);
+        await fakeFx.init(config, logger);
+        await fakeFx.invoke(context, cloudEvent);
 
         // Validate Cloudevent instance was created with JSON and passed to function
         postInvokeAsserts(fakeFx);
@@ -170,23 +185,22 @@ describe('Invoke Function Tests', () => {
             subject : '123',
             time : '2018-04-05T17:31:00Z'
         };
-        process.env.SF_FX_PAYLOAD = JSON.stringify(noDataCloudeventJson);
-        const fakeFx: testUtils.FakeFunction = newFakeFx();
-        await invoke(fakeFx);
-
-        // Validate failure to create sdk.Context
-        chai.assert(fakeFx.errors.length === 1
-            && fakeFx.errors[0].includes('invalid payload'),
-            fakeFx.errors.join());
+        const cloudEvent: sdk.SfCloudevent = new sdk.SfCloudevent(noDataCloudeventJson);
+        try {
+            cloudEvent.check();
+            chai.expect.fail();
+        } catch (err) {
+            chai.expect(err.message).to.eq('invalid payload');
+        }
 
         return Promise.resolve(null);
     });
 
     it('should have payload', async () => {
-        // Setup fx and invoke
-        process.env.SF_FX_PAYLOAD = cloudEvent.toString();
+        // Create and invoke function
         const fakeFx: testUtils.FakeFunction = newFakeFx();
-        await invoke(fakeFx);
+        await fakeFx.init(config, logger);
+        await fakeFx.invoke(context, cloudEvent);
 
         // Validate
         postInvokeAsserts(fakeFx);
@@ -215,14 +229,34 @@ describe('Invoke Function Tests', () => {
             time : '2018-04-05T17:31:00Z',
             type : 'com.github.pull.create',
         };
-        process.env.SF_FX_PAYLOAD = JSON.stringify(noDataCloudeventJson);
-        const fakeFx: testUtils.FakeFunction = newFakeFx();
-        await invoke(fakeFx);
+        const cloudEvent: sdk.SfCloudevent = new sdk.SfCloudevent(noDataCloudeventJson);
+        try {
+            sdk.Context.create(cloudEvent.getData(), logger)
+            chai.expect.fail();
+        } catch (err) {
+            chai.expect(err.message).to.contain('Context not provided');
+        }
 
-        // Validate failure to create sdk.Context
-        chai.assert(fakeFx.errors.length === 1
-            && fakeFx.errors[0].includes('Context not provided'),
-            fakeFx.errors.join());
+        return Promise.resolve(null);
+    });
+
+    it('validate FunctionInvocationRequest payload', async () => {
+        const post = sandbox.stub(sdk.FunctionInvocationRequest.prototype, 'post');
+
+        // Create and invoke function
+        const fakeFx: testUtils.FakeFunction = newFakeFx(true);
+        await fakeFx.init(config, logger);
+        await fakeFx.invoke(context, cloudEvent);
+
+        sandbox.assert.calledOnce(post);
+        const postedFunctionInvocationRequest = post.getCall(0).args[0];
+        chai.expect(postedFunctionInvocationRequest).to.be.not.undefined;
+        chai.expect(postedFunctionInvocationRequest).to.be.not.null;
+        chai.expect(postedFunctionInvocationRequest).has.property('form');
+        const form = postedFunctionInvocationRequest.form;
+        chai.expect(form).has.property('userContext');
+        chai.expect(form.userContext).to.be.not.undefined;
+        chai.expect(form.userContext).to.be.not.null;
 
         return Promise.resolve(null);
     });

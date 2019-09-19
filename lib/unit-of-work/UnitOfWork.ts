@@ -16,7 +16,6 @@ import {
 
 import { CompositeApi } from '..';
 import { Logger } from '../sf-sdk';
-import { sdk } from '../index';
 
 interface IReferenceIdToCompositeSubrequests {
     [key: string]: ICompositeSubrequest;
