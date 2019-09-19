@@ -42,6 +42,7 @@ declare class Context {
 declare class SfCloudevent extends Cloudevent {
     constructor(eventPayload?: any, specVersion?: string);
     check(): void;
+    getData(): any;
     getPayload(): any;
     getPayloadVersion(): string;
 }

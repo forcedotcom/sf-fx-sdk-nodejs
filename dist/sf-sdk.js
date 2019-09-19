@@ -124,6 +124,9 @@ class SfCloudevent extends Cloudevent {
     check() {
         this.spec.check();
     }
+    getData() {
+        return super.getData();
+    }
     getPayload() {
         return this.getData().payload;
     }
