@@ -46,7 +46,7 @@ declare class Context {
     readonly forceApi: api.ForceApi;
     readonly logger: Logger;
     readonly unitOfWork: IUnitOfWork;
-    static create(payload: any, logger: Logger): Context;
+    static create(data: any, logger: Logger): Context;
     private constructor();
 }
 declare class SfCloudevent extends Cloudevent {

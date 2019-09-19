@@ -5,7 +5,7 @@ import 'mocha';
 import * as sinon from 'sinon';
 chai.use(chaiAsPromised);
 import * as jsforce from 'jsforce';
-import { ForceApi, ISObject, SObject } from '../../../lib';
+import { ForceApi, SObject } from '../../../lib';
 
 
 //   T E S T S

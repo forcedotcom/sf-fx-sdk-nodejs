@@ -134,10 +134,10 @@ class Context {
         this.logger = logger;
         this.unitOfWork = unitOfWork;
     }
-    static create(payload, logger) {
-        let context = payload.Context__c || payload.context;
+    static create(data, logger) {
+        let context = data.Context__c || data.context;
         if (!context) {
-            const message = `Context not provided: ${JSON.stringify(payload)}`;
+            const message = `Context not provided: ${JSON.stringify(data)}`;
             throw new Error(message);
         }
         if (typeof context === 'string') {
@@ -153,7 +153,7 @@ class Context {
     }
 }
 exports.Context = Context;
-// REVIEWME: Do we need w/ Lyra Function?  Currently this class just adds a 
+// REVIEWME: Do we need w/ Lyra Function?  Currently this class just adds a
 // convenience method (getPayload) to extract the custom payload.
 class SfCloudevent extends Cloudevent {
     constructor(eventPayload, specVersion = '0.2') {

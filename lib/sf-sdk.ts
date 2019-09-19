@@ -121,7 +121,7 @@ class FunctionInvocationRequest {
 
     constructor(
         public readonly context: Context,
-        public readonly id: string) { 
+        public readonly id: string) {
             this.userContext = context.userContext;
             this.logger = context.logger;
         }
@@ -135,8 +135,7 @@ class FunctionInvocationRequest {
 
         const responseBase64 = Buffer.from(JSON.stringify(this.response)).toString('base64');
 
-        // TODO: Define response payload in HelloFunction.yaml
-        const options = {
+        const payload = {
             form: {
                 userContext: this.context.userContext,
                 id: this.id,
@@ -150,22 +149,26 @@ class FunctionInvocationRequest {
         };
 
         try {
-            const saveResponse = await request.post(options);
+            const saveResponse = await this.post(payload);
             this.logger.info(`Successfully sent the result for ${this.id}`);
-
             return saveResponse;
         } catch (err) {
             this.logger.error(`Failed to send the response for ${this.id}: ${err}`);
             throw err;
         }
     }
+
+    async post(payload): Promise<any> {
+        return await request.post(payload);
+    }
 }
 
 class Context {
-    public static create(payload: any, logger: Logger): Context {
-        let context = payload.Context__c || payload.context;
+    // data contains salesforce stuff (user context, etc) and function's payload (data.payload)
+    public static create(data: any, logger: Logger): Context {
+        let context = data.Context__c || data.context;
         if (!context) {
-            const message = `Context not provided: ${JSON.stringify(payload)}`;
+            const message = `Context not provided: ${JSON.stringify(data)}`;
             throw new Error(message);
         }
 
@@ -187,26 +190,30 @@ class Context {
         const newCtx = new Context(
             userCtx,
             apiVersion,
-            new FunctionInvocationRequest(context, context.functionInvocationId),
             forceApi,
             logger,
             unitOfWork,
+            context.functionInvocationId
         );
 
         return newCtx;
     }
 
+    public readonly fxInvocation: FunctionInvocationRequest;
+
     private constructor(
         public readonly userContext: UserContext,
         public readonly apiVersion: string,
-        public readonly fxInvocation: FunctionInvocationRequest,
         public readonly forceApi: api.ForceApi,
         public readonly logger: Logger,
         public readonly unitOfWork: IUnitOfWork,
-    ) {}
+        functionInvocationId: string
+    ) {
+        this.fxInvocation = new FunctionInvocationRequest(this, functionInvocationId);
+    }
 }
 
-// REVIEWME: Do we need w/ Lyra Function?  Currently this class just adds a 
+// REVIEWME: Do we need w/ Lyra Function?  Currently this class just adds a
 // convenience method (getPayload) to extract the custom payload.
 class SfCloudevent extends Cloudevent {
     constructor(eventPayload?: any, specVersion: string = '0.2') {

@@ -3,6 +3,7 @@ import * as chai from 'chai';
 import * as chaiAsPromised from 'chai-as-promised';
 import 'mocha';
 import * as sinon from 'sinon';
+import * as request from 'request-promise-native';
 
 chai.use(chaiAsPromised);
 
@@ -24,7 +25,7 @@ interface PdfEvent {
 
 const pdfData = {
     context:{
-        apiVersion:'46.0',
+        apiVersion:'4.0',
         functionInvocationId:'9mdxx00000000Mb',
         userContext:{
             orgDomainUrl:'http://sffx-dev-ed.localhost.internal.salesforce.com:6109',
@@ -73,14 +74,15 @@ cloudEvent.check();
 describe('Invoke Function Tests', () => {
 
     // Function params
-    const config: sdk.Config = new sdk.Config();
-    const logger: sdk.Logger = sdk.Logger.create(true);
-    const context: sdk.Context = sdk.Context.create(cloudEvent.getData(), logger);
+    let config: sdk.Config;
+    let logger: sdk.Logger;
+    let context: sdk.Context;
 
     let sandbox: sinon.SinonSandbox;
+    let mockRequestPost;
 
-    const newFakeFx = (): testUtils.FakeFunction => {
-        return new testUtils.FakeFunction(sandbox);
+    const newFakeFx = (doFxInvocation: boolean = false): testUtils.FakeFunction => {
+        return new testUtils.FakeFunction(sandbox, doFxInvocation);
     };
 
     const postInvokeAsserts = (fakeFx: testUtils.FakeFunction): void => {
@@ -95,10 +97,18 @@ describe('Invoke Function Tests', () => {
 
     beforeEach(() => {
         sandbox = sinon.createSandbox();
+
+        // Function params
+        config = new sdk.Config();
+        logger = sdk.Logger.create(false);
+        context = sdk.Context.create(cloudEvent.getData(), logger);
+
+        // Request
+        mockRequestPost = sandbox.stub(request, 'post');
+        mockRequestPost.resolves(Promise.resolve({}));
     });
 
     afterEach(() => {
-        delete process.env.SF_FX_PAYLOAD;
         sandbox.restore();
     });
 
@@ -226,6 +236,27 @@ describe('Invoke Function Tests', () => {
         } catch (err) {
             chai.expect(err.message).to.contain('Context not provided');
         }
+
+        return Promise.resolve(null);
+    });
+
+    it('validate FunctionInvocationRequest payload', async () => {
+        const post = sandbox.stub(sdk.FunctionInvocationRequest.prototype, 'post');
+
+        // Create and invoke function
+        const fakeFx: testUtils.FakeFunction = newFakeFx(true);
+        await fakeFx.init(config, logger);
+        await fakeFx.invoke(context, cloudEvent);
+
+        sandbox.assert.calledOnce(post);
+        const postedFunctionInvocationRequest = post.getCall(0).args[0];
+        chai.expect(postedFunctionInvocationRequest).to.be.not.undefined;
+        chai.expect(postedFunctionInvocationRequest).to.be.not.null;
+        chai.expect(postedFunctionInvocationRequest).has.property('form');
+        const form = postedFunctionInvocationRequest.form;
+        chai.expect(form).has.property('userContext');
+        chai.expect(form.userContext).to.be.not.undefined;
+        chai.expect(form.userContext).to.be.not.null;
 
         return Promise.resolve(null);
     });

@@ -40,7 +40,7 @@ export class FakeFunction {
     public invokeParams: any;
     public errors: string[];
 
-    constructor(public sandbox: sinon.SinonSandbox) {
+    constructor(public sandbox: sinon.SinonSandbox, private doFxInvocation: boolean = false) {
         this.errors = [];
     }
 
@@ -58,6 +58,12 @@ export class FakeFunction {
 
     public invoke(context: sdk.Context, event: sdk.SfCloudevent): Promise<any> {
         this.invokeParams = { context, event };
+
+        if (this.doFxInvocation) {
+            context.fxInvocation.response = '{}';
+            context.fxInvocation.save();
+        }
+
         return Promise.resolve(null);
     }
 };
