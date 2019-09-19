@@ -12,7 +12,6 @@ import {
     IError,
 } from '../Interfaces';
 import { Logger } from '../sf-sdk';
-import { sdk } from '../index';
 
 class CompositeSubresponse implements ICompositeSubresponse {
     private static HEADER_LOCATION: string = 'Location';

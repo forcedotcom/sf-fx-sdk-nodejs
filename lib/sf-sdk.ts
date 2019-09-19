@@ -1,4 +1,5 @@
 import Cloudevent = require('cloudevents-sdk');
+import * as request from 'request-promise-native';
 
 import * as api from './api';
 import { ConnectionConfig } from './ConnectionConfig';
@@ -108,8 +109,60 @@ class UserContext {
     ) {}
 }
 
+// TODO: Remove when FunctionInvocationRequest is deprecated.
+// Encapsulates FunctionInvocationRequest object to be saved to org.
+class FunctionInvocationRequest {
+
+    public response: any;
+    public status: string;
+
+    private readonly userContext: UserContext;
+    private readonly logger: Logger;
+
+    constructor(
+        public readonly context: Context,
+        public readonly id: string) { 
+            this.userContext = context.userContext;
+            this.logger = context.logger;
+        }
+
+    // TODO: Remove when FunctionInvocationRequestServlet is deprecated
+    // Temp helper method to save response to FunctionInvocationRequest
+    public async save(): Promise<void> {
+        if (!this.response) {
+            throw new Error('Response not provided');
+        }
+
+        const responseBase64 = Buffer.from(JSON.stringify(this.response)).toString('base64');
+
+        // TODO: Define response payload in HelloFunction.yaml
+        const options = {
+            form: {
+                userContext: this.context.userContext,
+                id: this.id,
+                response: responseBase64
+            },
+            headers: {
+                'Authorization': `C2C ${this.userContext.c2cJWT}`
+            },
+            method: 'POST',
+            uri: `${this.userContext.salesforceBaseUrl}/servlet/FunctionInvocationRequestServlet`,
+        };
+
+        try {
+            const saveResponse = await request.post(options);
+            this.logger.info(`Successfully sent the result for ${this.id}`);
+
+            return saveResponse;
+        } catch (err) {
+            this.logger.error(`Failed to send the response for ${this.id}: ${err}`);
+            throw err;
+        }
+    }
+}
+
 class Context {
-    public static async create(payload: any, logger: Logger): Promise<Context> {
+    public static create(payload: any, logger: Logger): Context {
         let context = payload.Context__c || payload.context;
         if (!context) {
             const message = `Context not provided: ${JSON.stringify(payload)}`;
@@ -134,28 +187,27 @@ class Context {
         const newCtx = new Context(
             userCtx,
             apiVersion,
-            new SObject('FunctionInvocationRequest').withId(context.functionInvocationId),
+            new FunctionInvocationRequest(context, context.functionInvocationId),
             forceApi,
             logger,
             unitOfWork,
         );
 
-        delete payload.Context__c;
-        delete payload.context;
-
         return newCtx;
     }
 
     private constructor(
-        public userContext: UserContext,
-        public apiVersion: string,
-        public fxInvocation: ISObject,
-        public forceApi: api.ForceApi,
-        public logger: Logger,
-        public unitOfWork: IUnitOfWork,
+        public readonly userContext: UserContext,
+        public readonly apiVersion: string,
+        public readonly fxInvocation: FunctionInvocationRequest,
+        public readonly forceApi: api.ForceApi,
+        public readonly logger: Logger,
+        public readonly unitOfWork: IUnitOfWork,
     ) {}
 }
 
+// REVIEWME: Do we need w/ Lyra Function?  Currently this class just adds a 
+// convenience method (getPayload) to extract the custom payload.
 class SfCloudevent extends Cloudevent {
     constructor(eventPayload?: any, specVersion: string = '0.2') {
         super(Cloudevent.specs[specVersion]);
@@ -178,12 +230,4 @@ class SfCloudevent extends Cloudevent {
     }
 }
 
-interface SfFunction {
-    getName(): string;
-
-    init(config: Config, logger: Logger): Promise<any>;
-
-    invoke(context: Context, event: SfCloudevent): Promise<any>;
-}
-
-export { Config, Context, Logger, UserContext, SfCloudevent, SfFunction };
+export { Config, Context, Logger, UserContext, SfCloudevent, FunctionInvocationRequest };

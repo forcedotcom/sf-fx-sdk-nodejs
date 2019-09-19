@@ -1,10 +1,10 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const Cloudevent = require("cloudevents-sdk");
+const request = require("request-promise-native");
 const api = require("./api");
 const ConnectionConfig_1 = require("./ConnectionConfig");
 const Constants_1 = require("./Constants");
-const SObject_1 = require("./SObject");
 const unit_of_work_1 = require("./unit-of-work");
 class Config {
     constructor() {
@@ -84,6 +84,47 @@ class UserContext {
     }
 }
 exports.UserContext = UserContext;
+// TODO: Remove when FunctionInvocationRequest is deprecated.
+// Encapsulates FunctionInvocationRequest object to be saved to org.
+class FunctionInvocationRequest {
+    constructor(context, id) {
+        this.context = context;
+        this.id = id;
+        this.userContext = context.userContext;
+        this.logger = context.logger;
+    }
+    // TODO: Remove when FunctionInvocationRequestServlet is deprecated
+    // Temp helper method to save response to FunctionInvocationRequest
+    async save() {
+        if (!this.response) {
+            throw new Error('Response not provided');
+        }
+        const responseBase64 = Buffer.from(JSON.stringify(this.response)).toString('base64');
+        // TODO: Define response payload in HelloFunction.yaml
+        const options = {
+            form: {
+                userContext: this.context.userContext,
+                id: this.id,
+                response: responseBase64
+            },
+            headers: {
+                'Authorization': `C2C ${this.userContext.c2cJWT}`
+            },
+            method: 'POST',
+            uri: `${this.userContext.salesforceBaseUrl}/servlet/FunctionInvocationRequestServlet`,
+        };
+        try {
+            const saveResponse = await request.post(options);
+            this.logger.info(`Successfully sent the result for ${this.id}`);
+            return saveResponse;
+        }
+        catch (err) {
+            this.logger.error(`Failed to send the response for ${this.id}: ${err}`);
+            throw err;
+        }
+    }
+}
+exports.FunctionInvocationRequest = FunctionInvocationRequest;
 class Context {
     constructor(userContext, apiVersion, fxInvocation, forceApi, logger, unitOfWork) {
         this.userContext = userContext;
@@ -93,7 +134,7 @@ class Context {
         this.logger = logger;
         this.unitOfWork = unitOfWork;
     }
-    static async create(payload, logger) {
+    static create(payload, logger) {
         let context = payload.Context__c || payload.context;
         if (!context) {
             const message = `Context not provided: ${JSON.stringify(payload)}`;
@@ -107,13 +148,13 @@ class Context {
         const config = new ConnectionConfig_1.ConnectionConfig(userCtx.salesforceBaseUrl, apiVersion, userCtx.c2cJWT);
         const unitOfWork = unit_of_work_1.UnitOfWork.newUnitOfWork(config, logger);
         const forceApi = new api.ForceApi(config, logger);
-        const newCtx = new Context(userCtx, apiVersion, new SObject_1.SObject('FunctionInvocationRequest').withId(context.functionInvocationId), forceApi, logger, unitOfWork);
-        delete payload.Context__c;
-        delete payload.context;
+        const newCtx = new Context(userCtx, apiVersion, new FunctionInvocationRequest(context, context.functionInvocationId), forceApi, logger, unitOfWork);
         return newCtx;
     }
 }
 exports.Context = Context;
+// REVIEWME: Do we need w/ Lyra Function?  Currently this class just adds a 
+// convenience method (getPayload) to extract the custom payload.
 class SfCloudevent extends Cloudevent {
     constructor(eventPayload, specVersion = '0.2') {
         super(Cloudevent.specs[specVersion]);

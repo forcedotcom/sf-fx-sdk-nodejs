@@ -3,8 +3,7 @@ import { expect } from 'chai';
 import 'mocha';
 import * as sinon from 'sinon';
 
-import { CompositeApi, sdk } from '../lib';
-import { ICompositeApi, ICompositeRequest, ICompositeResponse, ICompositeSubrequest, ICompositeSubresponse, IConnectionConfig } from '../lib/Interfaces';
+import * as sdk from '../lib';
 
 const httpCodeCreated:number = 201;
 
@@ -13,20 +12,20 @@ export interface IInsertResponse {
     readonly name: string;
 }
 
-export async function insertAccount(connectionConfig: IConnectionConfig): Promise<IInsertResponse> {
+export async function insertAccount(connectionConfig: sdk.IConnectionConfig): Promise<IInsertResponse> {
     const accountName: string = `Account ${new Date()}`;
-    const compositeApi: ICompositeApi = CompositeApi.newCompositeApi(connectionConfig);
-    const compositeRequest: ICompositeRequest = CompositeApi.newCompositeRequest();
-    const compositeSubRequest: ICompositeSubrequest =
-    CompositeApi.insertBuilder().sObjectType('Account').named(accountName).build();
+    const compositeApi: sdk.ICompositeApi = sdk.CompositeApi.newCompositeApi(connectionConfig);
+    const compositeRequest: sdk.ICompositeRequest = sdk.CompositeApi.newCompositeRequest();
+    const compositeSubRequest: sdk.ICompositeSubrequest =
+    sdk.CompositeApi.insertBuilder().sObjectType('Account').named(accountName).build();
     compositeRequest.addSubrequest(compositeSubRequest);
 
-    const compositeResponse: ICompositeResponse = await compositeApi.invoke(compositeRequest);
+    const compositeResponse: sdk.ICompositeResponse = await compositeApi.invoke(compositeRequest);
     expect(compositeResponse).to.exist;
     expect(compositeResponse.compositeSubresponses).to.exist;
     expect(compositeResponse.compositeSubresponses).lengthOf(1);
 
-    const compositeSubresponse: ICompositeSubresponse = compositeResponse.compositeSubresponses[0];
+    const compositeSubresponse: sdk.ICompositeSubresponse = compositeResponse.compositeSubresponses[0];
     expect(compositeSubresponse.isSuccess).to.be.true;
     expect(compositeSubresponse.httpStatusCode).to.equal(httpCodeCreated);
 
@@ -35,7 +34,7 @@ export async function insertAccount(connectionConfig: IConnectionConfig): Promis
     return { id: accountId, name: accountName } as IInsertResponse;
 }
 
-export class FakeFunction implements sdk.SfFunction {
+export class FakeFunction {
 
     public initParams: any;
     public invokeParams: any;
