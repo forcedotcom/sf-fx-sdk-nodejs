@@ -102,7 +102,7 @@ class FunctionInvocationRequest {
         const responseBase64 = Buffer.from(JSON.stringify(this.response)).toString('base64');
         const payload = {
             form: {
-                userContext: this.context.userContext,
+                userContext: JSON.stringify(this.context.userContext),
                 id: this.id,
                 response: responseBase64
             },

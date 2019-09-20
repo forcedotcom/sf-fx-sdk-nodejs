@@ -137,7 +137,7 @@ class FunctionInvocationRequest {
 
         const payload = {
             form: {
-                userContext: this.context.userContext,
+                userContext: JSON.stringify(this.context.userContext),
                 id: this.id,
                 response: responseBase64
             },
