@@ -23,29 +23,40 @@ interface PdfEvent {
     }
 }
 
-const pdfData = {
-    context:{
-        apiVersion:'4.0',
-        functionInvocationId:'9mdxx00000000Mb',
-        userContext:{
-            orgDomainUrl:'http://sffx-dev-ed.localhost.internal.salesforce.com:6109',
-            orgId:'00Dxx0000006GoF',
-            salesforceBaseUrl:'http://sffx-dev-ed.localhost.internal.salesforce.com:6109',
-            sessionId:'00Dxx0000006GoF!SESSION_ID',
-            userId:'005xx000001X7dl',
-            username:'chris@sffx.org'
-        }
+const generateData = (setAccessToken: boolean): any => {
+    const userContext: sdk.UserContext = {
+        orgDomainUrl:'http://sffx-dev-ed.localhost.internal.salesforce.com:6109',
+        orgId:'00Dxx0000006GoF',
+        salesforceBaseUrl:'http://sffx-dev-ed.localhost.internal.salesforce.com:6109',
+        userId:'005xx000001X7dl',
+        username:'chris@sffx.org'
+    }
 
-    },
-    functionName:'salesforce.pdf_creator_function_invoke__e',
-    id:'00Dxx0000006GoF-0cXxx000000000H',
-    payload:{
-        html:null,
-        isLightning:false,
-        url:'https://sffx-dev-ed.localhost.internal.salesforce.com/apex/MyPdfPage'
-    },
-    payloadVersion:'218.9'
-};
+    if (setAccessToken) {
+        userContext.accessToken = `${userContext.orgId}!sdfssfdss`;
+    } else {
+        userContext.c2cJWT = 'JWTHERE';
+    }
+
+    return {
+        context:{
+            apiVersion:'46.0',
+            functionInvocationId:'9mdxx00000000Mb',
+            userContext
+        },
+        functionName:'salesforce.pdf_creator_function_invoke__e',
+        id:'00Dxx0000006GoF-0cXxx000000000H',
+        payload:{
+            html:null,
+            isLightning:false,
+            url:'https://sffx-dev-ed.localhost.internal.salesforce.com/apex/MyPdfPage'
+        },
+        payloadVersion:'224.9'
+    };
+}
+
+const dataWithAccessToken = generateData(true);
+const dataWithJWT = generateData(false);
 
 const cloudeventJson = {
     comexampleextension1 : 'value',
@@ -53,7 +64,7 @@ const cloudeventJson = {
         othervalue: 5
     },
     contenttype : 'application/json',
-    data : pdfData,
+    data : dataWithAccessToken,
     id : 'A234-1234-1234',
     source : 'https://github.com/cloudevents/spec/pull',
     specversion : '0.2',
@@ -65,8 +76,8 @@ const cloudeventJson = {
 const cloudEvent: sdk.SfCloudevent = new sdk.SfCloudevent();
         cloudEvent
             .type('com.salesforce.functions.pdf.create')
-            .source(`urn:event:from:salesforce/functionevent/${pdfData.context.userContext.orgId}/${pdfData.payloadVersion}`)
-            .data(pdfData);
+            .source(`urn:event:from:salesforce/functionevent/${dataWithAccessToken.context.userContext.orgId}/${dataWithAccessToken.payloadVersion}`)
+            .data(dataWithAccessToken);
 cloudEvent.check();
 
 //   T E S T S
@@ -121,9 +132,9 @@ describe('Invoke Function Tests', () => {
         // Validate
         postInvokeAsserts(fakeFx);
         const paramContext: sdk.Context = fakeFx.invokeParams.context;
-        chai.expect(pdfData.context.functionInvocationId).to.equal(paramContext.fxInvocation.id);
+        chai.expect(dataWithAccessToken.context.functionInvocationId).to.equal(paramContext.fxInvocation.id);
         const userContext: sdk.UserContext = fakeFx.invokeParams.context.userContext;
-        chai.expect(pdfData.context.userContext.orgId).to.equal(userContext.orgId);
+        chai.expect(dataWithAccessToken.context.userContext.orgId).to.equal(userContext.orgId);
         return Promise.resolve(null);
     });
 
@@ -136,8 +147,8 @@ describe('Invoke Function Tests', () => {
         // Validate
         postInvokeAsserts(fakeFx);
         // Validate Cloudevent instance was created and passed to function
-        chai.expect(cloudEvent.getData().payload).to.equal(pdfData.payload);
-        chai.expect(cloudEvent.getData().payloadVersion).to.equal(pdfData.payloadVersion);
+        chai.expect(cloudEvent.getData().payload).to.equal(dataWithAccessToken.payload);
+        chai.expect(cloudEvent.getData().payloadVersion).to.equal(dataWithAccessToken.payloadVersion);
         chai.assert(fakeFx.invokeParams.event instanceof sdk.SfCloudevent);
         const sfEvent: sdk.SfCloudevent = fakeFx.invokeParams.event;
         chai.expect(cloudEvent.getType()).to.equal(sfEvent.getType());
@@ -145,7 +156,7 @@ describe('Invoke Function Tests', () => {
         chai.expect(sfEvent.getExtensions()).to.be.empty;
         chai.expect(sfEvent.getId()).to.not.be.null;
         chai.expect(sfEvent.getSpecversion()).to.be.equal('0.2');
-        chai.expect(sfEvent.getPayloadVersion()).to.be.equal(pdfData.payloadVersion);
+        chai.expect(sfEvent.getPayloadVersion()).to.be.equal(dataWithAccessToken.payloadVersion);
         return Promise.resolve(null);
     });
 
@@ -207,7 +218,7 @@ describe('Invoke Function Tests', () => {
         // Validate Cloudevent instance payload
         const sfEvent: sdk.SfCloudevent = fakeFx.invokeParams.event;
         const pdfPayload: PdfEvent = sfEvent.getPayload();
-        chai.expect(pdfData.payload.url).to.equal(pdfPayload.url);
+        chai.expect(dataWithAccessToken.payload.url).to.equal(pdfPayload.url);
 
         return Promise.resolve(null);
     });
@@ -240,16 +251,53 @@ describe('Invoke Function Tests', () => {
         return Promise.resolve(null);
     });
 
-    it('validate FunctionInvocationRequest payload', async () => {
-        const post = sandbox.stub(sdk.FunctionInvocationRequest.prototype, 'post');
+    it('should handle FunctionInvocation with acccessToken', async () => {
+        const updateSub = sandbox.stub(sdk.FunctionInvocationRequest.prototype, 'update');
+        updateSub.callsFake((): Promise<any> => {
+            return Promise.resolve({ success: true });
+        });
 
         // Create and invoke function
         const fakeFx: testUtils.FakeFunction = newFakeFx(true);
         await fakeFx.init(config, logger);
         await fakeFx.invoke(context, cloudEvent);
 
-        sandbox.assert.calledOnce(post);
-        const postedFunctionInvocationRequest = post.getCall(0).args[0];
+        sandbox.assert.calledOnce(updateSub);
+        const updatedFunctionInvocationRequest = updateSub.getCall(0).args[0];
+        chai.expect(updatedFunctionInvocationRequest).to.be.not.undefined;
+        chai.expect(updatedFunctionInvocationRequest).to.be.not.null;
+        chai.expect(updatedFunctionInvocationRequest).has.property('referenceId');
+        chai.expect(updatedFunctionInvocationRequest).has.property('sObjectType');
+        chai.expect(updatedFunctionInvocationRequest.sObjectType).to.eql('FunctionInvocationRequest');
+        chai.expect(updatedFunctionInvocationRequest).has.property('values');
+        const values = updatedFunctionInvocationRequest.values;
+        chai.expect(values).to.be.not.undefined;
+        chai.expect(values).to.be.not.null;
+        chai.expect(values.ResponseBody).to.be.not.undefined;
+        chai.expect(values.ResponseBody).to.be.not.null;
+
+        return Promise.resolve(null);
+    });
+
+    it('should handle FunctionInvocation with JWT', async () => {
+        // Setup fx w/ JWT payload and invoke
+        const cloudEventWithJWT: sdk.SfCloudevent = new sdk.SfCloudevent();
+        cloudEventWithJWT
+            .type('com.salesforce.functions.pdf.create')
+            .source(`urn:event:from:salesforce/functionevent/${dataWithJWT.context.userContext.orgId}/${dataWithJWT.payloadVersion}`)
+            .data(dataWithJWT);
+        cloudEventWithJWT.check();
+        const contextWithJWT = sdk.Context.create(cloudEventWithJWT.getData(), logger);
+
+        const postStub = sandbox.stub(sdk.FunctionInvocationRequest.prototype, 'post');
+
+        // Create and invoke function
+        const fakeFx: testUtils.FakeFunction = newFakeFx(true);
+        await fakeFx.init(config, logger);
+        await fakeFx.invoke(contextWithJWT, cloudEventWithJWT);
+
+        sandbox.assert.calledOnce(postStub);
+        const postedFunctionInvocationRequest = postStub.getCall(0).args[0];
         chai.expect(postedFunctionInvocationRequest).to.be.not.undefined;
         chai.expect(postedFunctionInvocationRequest).to.be.not.null;
         chai.expect(postedFunctionInvocationRequest).has.property('form');

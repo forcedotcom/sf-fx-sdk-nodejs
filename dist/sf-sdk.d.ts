@@ -1,6 +1,6 @@
 import Cloudevent = require('cloudevents-sdk');
 import * as api from './api';
-import { IUnitOfWork } from './Interfaces';
+import { ISObject, IUnitOfWork } from './Interfaces';
 declare class Config {
     private env;
     constructor();
@@ -20,24 +20,33 @@ declare class Logger {
     private emitLogMessage;
 }
 declare class UserContext {
-    orgId: string;
-    username: string;
-    userId: string;
-    salesforceBaseUrl: string;
-    orgDomainUrl: string;
-    c2cJWT: string;
+    readonly orgDomainUrl: string;
+    readonly orgId: string;
+    readonly salesforceBaseUrl: string;
+    readonly username: string;
+    readonly userId: string;
+    accessToken?: string;
+    c2cJWT?: string;
     static create(context: any): UserContext;
     private constructor();
 }
 declare class FunctionInvocationRequest {
-    readonly context: Context;
+    private readonly context;
     readonly id: string;
     response: any;
     status: string;
-    private readonly userContext;
+    private readonly userCtx;
     private readonly logger;
     constructor(context: Context, id: string);
-    save(): Promise<void>;
+    /**
+     * Saves FunctionInvocationRequest either through API w/ accessToken or
+     * FunctionInvocationRequestServlet w/ c2cJWT.
+     *
+     @throws err if response not provided or on failed save
+     */
+    save(): Promise<any>;
+    saveC2C(responseBase64: string): Promise<void>;
+    update(fxInvocation: ISObject): Promise<api.SuccessResult | api.ErrorResult>;
     post(payload: any): Promise<any>;
 }
 declare class Context {
