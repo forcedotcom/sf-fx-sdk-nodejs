@@ -5,6 +5,7 @@ const request = require("request-promise-native");
 const api = require("./api");
 const ConnectionConfig_1 = require("./ConnectionConfig");
 const Constants_1 = require("./Constants");
+const SObject_1 = require("./SObject");
 const unit_of_work_1 = require("./unit-of-work");
 class Config {
     constructor() {
@@ -66,12 +67,13 @@ class NoOpLogger extends Logger {
 }
 const NO_OP_LOGGER = new NoOpLogger();
 class UserContext {
-    constructor(orgId, username, userId, salesforceBaseUrl, orgDomainUrl, c2cJWT) {
+    constructor(orgDomainUrl, orgId, salesforceBaseUrl, username, userId, accessToken, c2cJWT) {
+        this.orgDomainUrl = orgDomainUrl;
         this.orgId = orgId;
+        this.salesforceBaseUrl = salesforceBaseUrl;
         this.username = username;
         this.userId = userId;
-        this.salesforceBaseUrl = salesforceBaseUrl;
-        this.orgDomainUrl = orgDomainUrl;
+        this.accessToken = accessToken;
         this.c2cJWT = c2cJWT;
     }
     static create(context) {
@@ -80,26 +82,53 @@ class UserContext {
             const message = `UserContext not provided: ${JSON.stringify(context)}`;
             throw new Error(message);
         }
-        return new UserContext(userContext.orgId, userContext.username, userContext.userId, userContext.salesforceBaseUrl, userContext.orgDomainUrl, userContext.c2cJWT);
+        return new UserContext(userContext.orgDomainUrl, userContext.orgId, userContext.salesforceBaseUrl, userContext.username, userContext.userId, userContext.accessToken, userContext.c2cJWT);
     }
 }
 exports.UserContext = UserContext;
+// FOR C2C JWT only.  With Salesforce provided context.userContext.accessToken,
+// standard new SObject('FunctionInvocationRequest') can be used.
 // TODO: Remove when FunctionInvocationRequest is deprecated.
-// Encapsulates FunctionInvocationRequest object to be saved to org.
 class FunctionInvocationRequest {
     constructor(context, id) {
         this.context = context;
         this.id = id;
-        this.userContext = context.userContext;
+        this.userCtx = context.userContext;
         this.logger = context.logger;
     }
-    // TODO: Remove when FunctionInvocationRequestServlet is deprecated
-    // Temp helper method to save response to FunctionInvocationRequest
+    /**
+     * Saves FunctionInvocationRequest either through API w/ accessToken or
+     * FunctionInvocationRequestServlet w/ c2cJWT.
+     *
+     @throws err if response not provided or on failed save
+     */
     async save() {
         if (!this.response) {
             throw new Error('Response not provided');
         }
         const responseBase64 = Buffer.from(JSON.stringify(this.response)).toString('base64');
+        if (this.userCtx.accessToken) {
+            const fxInvocation = new SObject_1.SObject('FunctionInvocationRequest').withId(this.id);
+            fxInvocation.setValue('ResponseBody', responseBase64);
+            const result = await this.update(fxInvocation);
+            if (!result.success && 'errors' in result) { // Tells tsc that 'errors' exist and join below is okay
+                const msg = `Failed to send response [${this.id}]: ${result.errors.join(',')}`;
+                this.logger.error(msg);
+                throw new Error(msg);
+            }
+            else {
+                return result;
+            }
+        }
+        else if (this.userCtx.c2cJWT) {
+            return await this.saveC2C(responseBase64);
+        }
+        else {
+            throw new Error('Authorization not provided');
+        }
+    }
+    // Helper method to save response to FunctionInvocationRequest w/ C2C JWT
+    async saveC2C(responseBase64) {
         const payload = {
             form: {
                 userContext: JSON.stringify(this.context.userContext),
@@ -107,10 +136,10 @@ class FunctionInvocationRequest {
                 response: responseBase64
             },
             headers: {
-                'Authorization': `C2C ${this.userContext.c2cJWT}`
+                'Authorization': `C2C ${this.userCtx.c2cJWT}`
             },
             method: 'POST',
-            uri: `${this.userContext.salesforceBaseUrl}/servlet/FunctionInvocationRequestServlet`,
+            uri: `${this.userCtx.salesforceBaseUrl}/servlet/FunctionInvocationRequestServlet`,
         };
         try {
             const saveResponse = await this.post(payload);
@@ -121,6 +150,9 @@ class FunctionInvocationRequest {
             this.logger.error(`Failed to send the response for ${this.id}: ${err}`);
             throw err;
         }
+    }
+    async update(fxInvocation) {
+        return await this.context.forceApi.update(fxInvocation);
     }
     async post(payload) {
         return await request.post(payload);
@@ -148,7 +180,7 @@ class Context {
         }
         const userCtx = UserContext.create(context);
         const apiVersion = context.apiVersion || process.env.FX_API_VERSION || Constants_1.Constants.CURRENT_API_VERSION;
-        const config = new ConnectionConfig_1.ConnectionConfig(userCtx.salesforceBaseUrl, apiVersion, userCtx.c2cJWT);
+        const config = new ConnectionConfig_1.ConnectionConfig(userCtx.salesforceBaseUrl, apiVersion, userCtx.accessToken || userCtx.c2cJWT);
         const unitOfWork = unit_of_work_1.UnitOfWork.newUnitOfWork(config, logger);
         const forceApi = new api.ForceApi(config, logger);
         const newCtx = new Context(userCtx, apiVersion, forceApi, logger, unitOfWork, context.functionInvocationId);
