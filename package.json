@@ -1,7 +1,7 @@
 {
-  "name": "salesforce-fdk",
-  "version": "1.0.0",
-  "description": "Salesforce Lightning Function Developer Kit",
+  "name": "@heroku/salesforce-sdk",
+  "version": "0.0.1",
+  "description": "Salesforce Developer Kit",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "directories": {
