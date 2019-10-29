@@ -1,7 +1,7 @@
 {
-  "name": "salesforce-fdk",
-  "version": "1.0.0",
-  "description": "Salesforce Lightning Function Developer Kit",
+  "name": "@heroku/salesforce-sdk",
+  "version": "0.0.1",
+  "description": "Salesforce Function SDK for Node.js",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "directories": {
@@ -31,7 +31,7 @@
     "url": "git+https://github.com/forcedotcom/sf-fx-sdk-nodejs.git"
   },
   "author": "cwall@salesforce.com",
-  "license": "UNLICENSED",
+  "license": "BSD-3-Clause",
   "bugs": {
     "url": "https://github.com/forcedotcom/sf-fx-sdk-nodejs/issues"
   },
