@@ -39,7 +39,6 @@
   "dependencies": {
     "cloudevents-sdk": "~0.3.1",
     "jsforce": "~1.9.2",
-    "np": "^5.1.2",
     "request": "^2.88.0",
     "request-promise-native": "^1.0.7",
     "tslib": "1.10.0",
