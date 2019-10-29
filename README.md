@@ -4,33 +4,24 @@
 
 ## Usage
 ```javascript
-import { invoke, sdk } from 'salesforce-fdk';
+import * as sdk from 'salesforce-sdk';
 
-export interface MyPayload {
-    paramHere:  string,
-    shouldDoThis: boolean
-    anOptionalParam?:  string,
+export default class HelloFunction {
+
+    constructor(private readonly config: sdk.Config,  // REVIEWME: Needed?
+                private readonly context: sdk.Context,
+                private readonly logger: sdk.Logger,
+                private readonly event: sdk.SfCloudevent) {
+        this.logger.shout(`${this.getName()}.init()`);
+    }
+
+    public async invoke(): Promise<any>  {
+        this.logger.shout(`${this.getName()}.invoke()`);
+
+        const results = await this.context.forceApi.query('SELECT Name FROM Account');
+        this.logger.info(JSON.stringify(query));
+
+        return results;
+    }
 }
-
-class MyFunction implements sdk.SfFunction {
-
-    public init(config: sdk.Config, logger: sdk.Logger): Promise<any> {
-        logger.log('init');
-        
-        // do init
-        
-        return Promise.resolve(null);
-    }
-
-    public invoke(context: sdk.Context, event: sdk.SfCloudevent): Promise<any> {
-        logger.log('invoke');
-        
-        const payload: MyPayload = event.getPayload();
-        // do something w/ payload
-        
-        return Promise.resolve(null);
-    }
-};
-
-invoke(new MyFunction());
 ```

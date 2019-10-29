@@ -1,7 +1,7 @@
 {
-  "name": "salesforce-fdk",
-  "version": "1.0.0",
-  "description": "Salesforce Lightning Function Developer Kit",
+  "name": "salesforce-sdk",
+  "version": "0.0.1",
+  "description": "Salesforce Function SDK for Node.js",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "directories": {
@@ -31,7 +31,7 @@
     "url": "git+https://github.com/forcedotcom/sf-fx-sdk-nodejs.git"
   },
   "author": "cwall@salesforce.com",
-  "license": "UNLICENSED",
+  "license": "BSD-3-Clause",
   "bugs": {
     "url": "https://github.com/forcedotcom/sf-fx-sdk-nodejs/issues"
   },
@@ -39,6 +39,7 @@
   "dependencies": {
     "cloudevents-sdk": "~0.3.1",
     "jsforce": "~1.9.2",
+    "np": "^5.1.2",
     "request": "^2.88.0",
     "request-promise-native": "^1.0.7",
     "tslib": "1.10.0",
