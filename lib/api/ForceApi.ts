@@ -76,10 +76,10 @@ export class ForceApi {
      */
     public request(method: string, url: string, body: string, headers?: object): Promise<object> {
         return this.conn.request({
-            method,
-            url,
             body,
             headers,
+            method,
+            url
         });
     }
 }

@@ -115,25 +115,22 @@ class UserContext {
 // standard new SObject('FunctionInvocationRequest') can be used.
 // TODO: Remove when FunctionInvocationRequest is deprecated.
 class FunctionInvocationRequest {
-
     public response: any;
     public status: string;
 
     private readonly userCtx: UserContext;
     private readonly logger: Logger;
 
-    constructor(
-        private readonly context: Context,
-        public readonly id: string) {
-            this.userCtx = context.userContext;
-            this.logger = context.logger;
-        }
+    constructor(private readonly context: Context, public readonly id: string) {
+        this.userCtx = context.userContext;
+        this.logger = context.logger;
+    }
 
     /**
      * Saves FunctionInvocationRequest either through API w/ accessToken or
      * FunctionInvocationRequestServlet w/ c2cJWT.
      *
-     @throws err if response not provided or on failed save
+     * @throws err if response not provided or on failed save
      */
     public async save(): Promise<any> {
         if (!this.response) {
@@ -146,7 +143,8 @@ class FunctionInvocationRequest {
             const fxInvocation = new SObject('FunctionInvocationRequest').withId(this.id);
             fxInvocation.setValue('ResponseBody', responseBase64);
             const result: api.SuccessResult | api.ErrorResult = await this.update(fxInvocation);
-            if (!result.success && 'errors' in result) { // Tells tsc that 'errors' exist and join below is okay
+            if (!result.success && 'errors' in result) {
+                // Tells tsc that 'errors' exist and join below is okay
                 const msg = `Failed to send response [${this.id}]: ${result.errors.join(',')}`;
                 this.logger.error(msg);
                 throw new Error(msg);
@@ -161,15 +159,15 @@ class FunctionInvocationRequest {
     }
 
     // Helper method to save response to FunctionInvocationRequest w/ C2C JWT
-    async saveC2C(responseBase64: string): Promise<void> {
+    protected async saveC2C(responseBase64: string): Promise<void> {
         const payload = {
             form: {
-                userContext: JSON.stringify(this.context.userContext),
                 id: this.id,
-                response: responseBase64
+                response: responseBase64,
+                userContext: JSON.stringify(this.context.userContext)
             },
             headers: {
-                'Authorization': `C2C ${this.userCtx.c2cJWT}`
+                Authorization: `C2C ${this.userCtx.c2cJWT}`,
             },
             method: 'POST',
             uri: `${this.userCtx.salesforceBaseUrl}/servlet/FunctionInvocationRequestServlet`,
@@ -185,11 +183,11 @@ class FunctionInvocationRequest {
         }
     }
 
-    async update(fxInvocation: ISObject): Promise<api.SuccessResult | api.ErrorResult> {
+    protected async update(fxInvocation: ISObject): Promise<api.SuccessResult | api.ErrorResult> {
         return await this.context.forceApi.update(fxInvocation);
     }
 
-    async post(payload): Promise<any> {
+    protected async post(payload): Promise<any> {
         return await request.post(payload);
     }
 }
@@ -218,14 +216,7 @@ class Context {
         const unitOfWork = UnitOfWork.newUnitOfWork(config, logger);
         const forceApi = new api.ForceApi(config, logger);
 
-        const newCtx = new Context(
-            userCtx,
-            apiVersion,
-            forceApi,
-            logger,
-            unitOfWork,
-            context.functionInvocationId
-        );
+        const newCtx = new Context(userCtx, apiVersion, forceApi, logger, unitOfWork, context.functionInvocationId);
 
         return newCtx;
     }
@@ -238,7 +229,7 @@ class Context {
         public readonly forceApi: api.ForceApi,
         public readonly logger: Logger,
         public readonly unitOfWork: IUnitOfWork,
-        functionInvocationId: string
+        functionInvocationId: string,
     ) {
         this.fxInvocation = new FunctionInvocationRequest(this, functionInvocationId);
     }
