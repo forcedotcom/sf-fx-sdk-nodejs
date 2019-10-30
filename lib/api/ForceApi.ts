@@ -79,7 +79,7 @@ export class ForceApi {
             body,
             headers,
             method,
-            url
+            url,
         });
     }
 }

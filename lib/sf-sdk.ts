@@ -164,7 +164,7 @@ class FunctionInvocationRequest {
             form: {
                 id: this.id,
                 response: responseBase64,
-                userContext: JSON.stringify(this.context.userContext)
+                userContext: JSON.stringify(this.context.userContext),
             },
             headers: {
                 Authorization: `C2C ${this.userCtx.c2cJWT}`,
