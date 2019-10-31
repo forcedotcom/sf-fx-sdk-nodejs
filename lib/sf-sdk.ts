@@ -148,7 +148,6 @@ class FunctionInvocationRequest {
                 this.logger.warn(err.message);
             }
 
-
             const fxInvocation = new SObject('FunctionInvocationRequest').withId(this.id);
             fxInvocation.setValue('ResponseBody', responseBase64);
             const result: api.SuccessResult | api.ErrorResult = await this.context.forceApi.update(fxInvocation);
