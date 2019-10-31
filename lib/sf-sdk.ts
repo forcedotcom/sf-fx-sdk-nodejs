@@ -140,9 +140,18 @@ class FunctionInvocationRequest {
         const responseBase64 = Buffer.from(JSON.stringify(this.response)).toString('base64');
 
         if (this.userCtx.accessToken) {
+            try {
+                // https://gus.lightning.force.com/lightning/r/ADM_Work__c/a07B00000077V3IIAU/view
+                const soql = `SELECT Id, FunctionName, Status, CreatedById, CreatedDate FROM FunctionInvocationRequest WHERE Id ='${this.id}'`;
+                await this.context.forceApi.query(soql);
+            } catch (err) {
+                this.logger.warn(err.message);
+            }
+
+
             const fxInvocation = new SObject('FunctionInvocationRequest').withId(this.id);
             fxInvocation.setValue('ResponseBody', responseBase64);
-            const result: api.SuccessResult | api.ErrorResult = await this.update(fxInvocation);
+            const result: api.SuccessResult | api.ErrorResult = await this.context.forceApi.update(fxInvocation);
             if (!result.success && 'errors' in result) {
                 // Tells tsc that 'errors' exist and join below is okay
                 const msg = `Failed to send response [${this.id}]: ${result.errors.join(',')}`;
@@ -183,11 +192,7 @@ class FunctionInvocationRequest {
         }
     }
 
-    protected async update(fxInvocation: ISObject): Promise<api.SuccessResult | api.ErrorResult> {
-        return await this.context.forceApi.update(fxInvocation);
-    }
-
-    protected async post(payload): Promise<any> {
+    async post(payload): Promise<any> {
         return await request.post(payload);
     }
 }

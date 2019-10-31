@@ -252,18 +252,21 @@ describe('Invoke Function Tests', () => {
     });
 
     it('should handle FunctionInvocation with acccessToken', async () => {
-        const updateSub = sandbox.stub(sdk.FunctionInvocationRequest.prototype, 'update');
-        updateSub.callsFake((): Promise<any> => {
+        const updateStub = sandbox.stub(context.forceApi, 'update');
+        updateStub.callsFake((): Promise<any> => {
             return Promise.resolve({ success: true });
         });
+
+        const queryStub = sandbox.stub(context.forceApi, 'query');
 
         // Create and invoke function
         const fakeFx: testUtils.FakeFunction = newFakeFx(true);
         await fakeFx.init(config, logger);
         await fakeFx.invoke(context, cloudEvent);
 
-        sandbox.assert.calledOnce(updateSub);
-        const updatedFunctionInvocationRequest = updateSub.getCall(0).args[0];
+        sandbox.assert.calledOnce(queryStub);
+        sandbox.assert.calledOnce(updateStub);
+        const updatedFunctionInvocationRequest = updateStub.getCall(0).args[0];
         chai.expect(updatedFunctionInvocationRequest).to.be.not.undefined;
         chai.expect(updatedFunctionInvocationRequest).to.be.not.null;
         chai.expect(updatedFunctionInvocationRequest).has.property('referenceId');
