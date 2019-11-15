@@ -8,10 +8,8 @@ import * as sdk from 'salesforce-sdk';
 
 export default class HelloFunction {
 
-    constructor(private readonly config: sdk.Config,  // REVIEWME: Needed?
-                private readonly context: sdk.Context,
-                private readonly logger: sdk.Logger,
-                private readonly event: sdk.SfCloudevent) {
+    constructor(private readonly event: any,
+                private readonly context: sdk.Context) {
         this.logger.shout(`${this.getName()}.init()`);
     }
 

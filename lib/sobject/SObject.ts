@@ -1,8 +1,10 @@
 import { v4 as uuid } from 'uuid';
 
-import { ISObject, IValues } from './Interfaces';
+export interface Values {
+    [key: string]: any;
+}
 
-export class SObject implements ISObject {
+export class SObject {
     public static generateReferenceId(type: string): string {
         return `${type}_` + uuid().replace(/-/g, '');
     }
@@ -20,7 +22,7 @@ export class SObject implements ISObject {
         this._values = {};
     }
 
-    public named(name: string): ISObject {
+    public named(name: string): SObject {
         this.setValue('Name', name);
         return this;
     }
@@ -29,7 +31,7 @@ export class SObject implements ISObject {
         this._values[key] = value;
     }
 
-    public withId(id: string): ISObject {
+    public withId(id: string): SObject {
         this._id = id;
         return this;
     }
@@ -38,8 +40,8 @@ export class SObject implements ISObject {
         return this._id;
     }
 
-    public get values(): IValues {
-        return this._values as Readonly<IValues>;
+    public get values(): Values {
+        return this._values as Readonly<Values>;
     }
 
     public get fkId(): string {

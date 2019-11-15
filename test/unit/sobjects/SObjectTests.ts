@@ -2,11 +2,10 @@
 import { assert, expect } from 'chai';
 import 'mocha';
 
-import { SObject } from '../../lib';
-import { ISObject } from '../../lib/Interfaces';
+import { SObject } from '../../../lib';
 
 describe('SObject Tests', () => {
-    let sObject: ISObject = null;
+    let sObject: SObject = null;
 
     beforeEach(function () {
         sObject = new SObject('Account');

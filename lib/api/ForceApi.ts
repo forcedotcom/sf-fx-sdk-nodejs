@@ -1,6 +1,6 @@
 import { Connection, Query, QueryResult, RecordResult } from 'jsforce';
-import { IConnectionConfig, ISObject } from '../Interfaces';
-import { Logger } from '../sf-sdk';
+
+import { ConnectionConfig, Logger, SObject } from './..';
 
 // REVIEWME: ForceApi exposes jsforce objects.  Re-think.
 export { Query, QueryResult, Connection, RecordResult, SuccessResult, ErrorResult } from 'jsforce';
@@ -8,13 +8,13 @@ export { Query, QueryResult, Connection, RecordResult, SuccessResult, ErrorResul
 export class ForceApi {
     private conn: Connection;
 
-    constructor(private connConfig: IConnectionConfig, private logger: Logger) {}
+    constructor(private connConfig: ConnectionConfig, private logger: Logger) {}
 
     public connect(): Connection {
         return this.conn
             ? this.conn
             : (this.conn = new Connection({
-                  accessToken: this.connConfig.sessionId,
+                  accessToken: this.connConfig.accessToken,
                   instanceUrl: this.connConfig.instanceUrl,
                   version: this.connConfig.apiVersion,
               }));
@@ -48,7 +48,7 @@ export class ForceApi {
      * @param sobjects - same typed Salesforce objects to save
      * @returns Promise<(RecordResult)>
      */
-    public insert(sobject: ISObject): Promise<RecordResult> {
+    public insert(sobject: SObject): Promise<RecordResult> {
         return this.connect()
             .sobject(sobject.sObjectType)
             .insert(sobject.asMap());
@@ -60,7 +60,7 @@ export class ForceApi {
      * @param sobjects - same typed Salesforce object to save
      * @returns Promise<ForceResponse>
      */
-    public update(sobject: ISObject): Promise<RecordResult> {
+    public update(sobject: SObject): Promise<RecordResult> {
         return this.connect()
             .sobject(sobject.sObjectType)
             .update(sobject.asMap());

@@ -1,11 +1,11 @@
 import * as _ from 'lodash';
 
-import { ICompositeRequest, ICompositeSubrequest } from '../Interfaces';
+import { CompositeSubrequest } from './';
 
-class CompositeRequest implements ICompositeRequest {
+export class CompositeRequest {
     private allOrNone: boolean;
-    // Named to match the composite api schema. This is actually an array of ICompositeSubrequest
-    private compositeRequest: ICompositeSubrequest[];
+    // Named to match the composite api schema. This is actually an array of CompositeSubrequest
+    private compositeRequest: CompositeSubrequest[];
 
     constructor() {
         this.allOrNone = true;
@@ -20,16 +20,16 @@ class CompositeRequest implements ICompositeRequest {
         return this.allOrNone;
     }
 
-    public addSubrequest(compositeSubrequest: ICompositeSubrequest): void {
+    public addSubrequest(compositeSubrequest: CompositeSubrequest): void {
         this.compositeRequest.push(compositeSubrequest);
     }
 
-    public get subrequests(): ReadonlyArray<ICompositeSubrequest> {
-        const ro: ReadonlyArray<ICompositeSubrequest> = this.compositeRequest;
+    public get subrequests(): ReadonlyArray<CompositeSubrequest> {
+        const ro: ReadonlyArray<CompositeSubrequest> = this.compositeRequest;
         return ro;
     }
 
-    public getSubrequest(referenceId: string): ICompositeSubrequest {
+    public getSubrequest(referenceId: string): CompositeSubrequest {
         for (const compositeSubrequest of this.compositeRequest) {
             if (compositeSubrequest.referenceId === referenceId) {
                 return compositeSubrequest;
@@ -38,8 +38,4 @@ class CompositeRequest implements ICompositeRequest {
 
         throw new Error('Unknown referenceId: ' + referenceId);
     }
-}
-
-export function newCompositeRequest(): ICompositeRequest {
-    return new CompositeRequest();
 }

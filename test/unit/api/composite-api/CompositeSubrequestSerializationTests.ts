@@ -3,23 +3,22 @@ import { expect } from 'chai';
 import 'mocha';
 import { beforeEach } from 'mocha';
 
-import { CompositeApi } from '../../../lib';
-import { ICompositeSubrequest, ICompositeSubrequestBuilder} from '../../../lib/Interfaces';
+import { CompositeApi, CompositeSubrequest, CompositeSubrequestBuilder, InsertCompositeSubrequestBuilder } from '../../../../lib';
 
 describe('CompositeSubrequest Serialization Tests', () => {
-    let builder:ICompositeSubrequestBuilder = null;
+    let builder:CompositeSubrequestBuilder = null;
 
     beforeEach(() => {
-        builder = CompositeApi.insertBuilder().sObjectType('Account');
+        builder = new InsertCompositeSubrequestBuilder().sObjectType('Account');
     });
 
-    const convertToAndFromJson = (compositSubRequest:ICompositeSubrequest):object => {
+    const convertToAndFromJson = (compositSubRequest:CompositeSubrequest):object => {
         return JSON.parse(JSON.stringify(compositSubRequest));
     };
 
     it('sObjectType is excluded from serialization', () => {
         const jsonObject:object = convertToAndFromJson(builder.build());
-        
+
         Object.keys(jsonObject).forEach((key) => {
             expect(key).to.not.equal('sObjectType');
         });
@@ -28,7 +27,7 @@ describe('CompositeSubrequest Serialization Tests', () => {
     it('apiVersion is excluded from serialization', () => {
         builder.apiVersion('45.0');
         const jsonObject:object = convertToAndFromJson(builder.build());
-        
+
         Object.keys(jsonObject).forEach((key) => {
             expect(key).to.not.equal('apiVersion');
         });

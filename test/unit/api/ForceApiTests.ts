@@ -1,11 +1,12 @@
 /* tslint:disable: no-unused-expression */
-import * as chai from 'chai';
+import { assert, expect, use } from 'chai';
 import * as chaiAsPromised from 'chai-as-promised';
 import 'mocha';
 import * as sinon from 'sinon';
-chai.use(chaiAsPromised);
+use(chaiAsPromised);
 import * as jsforce from 'jsforce';
-import { ForceApi, SObject } from '../../../lib';
+
+import { ForceApi, NO_OP_LOGGER, SObject } from '../../../lib';
 
 
 //   T E S T S
@@ -25,7 +26,7 @@ describe('ForceApi Tests', () => {
     });
 
     it('should perform query', async () => {
-        const forceApi = new ForceApi(undefined, undefined);
+        const forceApi = new ForceApi(undefined, NO_OP_LOGGER);
         const fakeResult: jsforce.QueryResult<object> = {
             done: true,
             records: [{ Id: 'IDHERE' }],
@@ -37,13 +38,13 @@ describe('ForceApi Tests', () => {
         sandbox.stub(forceApi, 'connect').returns(mockConnection);
 
         const result = await forceApi.query('SOQL HERE');
-        chai.assert(result.done);
-        chai.expect(result.totalSize).to.equal(fakeResult.totalSize);
-        chai.expect(result.records).to.equal(fakeResult.records);
+        assert(result.done);
+        expect(result.totalSize).to.equal(fakeResult.totalSize);
+        expect(result.records).to.equal(fakeResult.records);
     });
 
     it('should perform queryMore', async () => {
-        const forceApi = new ForceApi(undefined, undefined);
+        const forceApi = new ForceApi(undefined, NO_OP_LOGGER);
         const fakeResult: jsforce.QueryResult<object> = {
             done: true,
             records: [{ Id: 'IDHERE' }],
@@ -55,13 +56,13 @@ describe('ForceApi Tests', () => {
         sandbox.stub(forceApi, 'connect').returns(mockConnection);
 
         const result = await forceApi.query('SOQL HERE');
-        chai.assert(result.done);
-        chai.expect(result.totalSize).to.equal(fakeResult.totalSize);
-        chai.expect(result.records).to.equal(fakeResult.records);
+        assert(result.done);
+        expect(result.totalSize).to.equal(fakeResult.totalSize);
+        expect(result.records).to.equal(fakeResult.records);
     });
 
     it('should perform insert', async () => {
-        const forceApi = new ForceApi(undefined, undefined);
+        const forceApi = new ForceApi(undefined, NO_OP_LOGGER);
         const acct: SObject = new SObject('Account');
         acct.setValue('Name', 'Whatever');
         const fakeResult: jsforce.SuccessResult = {
@@ -78,16 +79,16 @@ describe('ForceApi Tests', () => {
         sandbox.stub(forceApi, 'connect').returns(mockConnection);
 
         const result = await forceApi.insert(acct);
-        chai.assert(result.success);
+        assert(result.success);
         if ('id' in result) { // type narrow
-            chai.expect(result.id).to.equal(fakeResult.id);
+            expect(result.id).to.equal(fakeResult.id);
         } else {
-            chai.assert(false);
+            assert(false);
         }
     });
 
     it('should perform update (SuccessResult)', async () => {
-        const forceApi = new ForceApi(undefined, undefined);
+        const forceApi = new ForceApi(undefined, NO_OP_LOGGER);
         const acct: SObject = new SObject('Account');
         acct.setValue('Id', 'IDHERE');
         acct.setValue('Name', 'Whatever');
@@ -105,16 +106,16 @@ describe('ForceApi Tests', () => {
         sandbox.stub(forceApi, 'connect').returns(mockConnection);
 
         const result = await forceApi.update(acct);
-        chai.assert(result.success);
+        assert(result.success);
         if ('id' in result) { // type narrow
-            chai.expect(result.id).to.equal(fakeResult.id);
+            expect(result.id).to.equal(fakeResult.id);
         } else {
-            chai.assert(false);
+            assert(false);
         }
     });
 
     it('should perform update (ErrorResult)', async () => {
-        const forceApi = new ForceApi(undefined, undefined);
+        const forceApi = new ForceApi(undefined, NO_OP_LOGGER);
         const acct: SObject = new SObject('Account');
         acct.setValue('Id', 'IDHERE');
         acct.setValue('Name', 'Whatever');
@@ -132,11 +133,11 @@ describe('ForceApi Tests', () => {
         sandbox.stub(forceApi, 'connect').returns(mockConnection);
 
         const result = await forceApi.update(acct);
-        chai.assert(!result.success);
+        assert(!result.success);
         if ('errors' in result) { // type narrow
-            chai.expect(result.errors).to.equal(fakeResult.errors);
+            expect(result.errors).to.equal(fakeResult.errors);
         } else {
-            chai.assert(false);
+            assert(false);
         }
     });
 

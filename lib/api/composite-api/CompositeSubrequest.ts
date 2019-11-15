@@ -1,11 +1,8 @@
 import * as _ from 'lodash';
 
-import { ICompositeSubrequest, ICompositeSubrequestBuilder, ISObject, Method } from '../Interfaces';
-// Not sure why this doesn't think it's sorted correctly
-// tslint:disable-next-line:ordered-imports
-import { Constants, SObject } from '..';
+import { Constants, Method, SObject } from '../..';
 
-class CompositeSubrequest implements ICompositeSubrequest {
+export class CompositeSubrequest {
     public readonly httpHeaders: { [key: string]: string };
     public readonly method: Method;
     public readonly referenceId: string;
@@ -30,7 +27,7 @@ class CompositeSubrequest implements ICompositeSubrequest {
     }
 }
 
-abstract class CompositeSubrequestBuilder implements ICompositeSubrequestBuilder {
+export abstract class CompositeSubrequestBuilder {
     public readonly method: Method;
     public readonly httpHeaders: { [key: string]: string };
     public readonly values: { [key: string]: any };
@@ -68,58 +65,58 @@ abstract class CompositeSubrequestBuilder implements ICompositeSubrequestBuilder
         return this._url;
     }
 
-    public id(id: string): ICompositeSubrequestBuilder {
+    public id(id: string): CompositeSubrequestBuilder {
         this._id = id;
         return this;
     }
 
-    public sObjectType(sObjectType: string): ICompositeSubrequestBuilder {
+    public sObjectType(sObjectType: string): CompositeSubrequestBuilder {
         this._sObjectType = sObjectType;
         return this;
     }
 
-    public sObject(sObject: ISObject): ICompositeSubrequestBuilder {
+    public sObject(sObject: SObject): CompositeSubrequestBuilder {
         this.sObjectType(sObject.sObjectType);
         this.id(sObject.id);
         this.addValues(sObject.values);
         return this;
     }
 
-    public addValue(key: string, value: any): ICompositeSubrequestBuilder {
+    public addValue(key: string, value: any): CompositeSubrequestBuilder {
         this.values[key] = value;
         return this;
     }
 
-    public addValues(values: { [key: string]: any }): ICompositeSubrequestBuilder {
+    public addValues(values: { [key: string]: any }): CompositeSubrequestBuilder {
         Object.keys(values).forEach(key => {
             this.addValue(key, values[key]);
         });
         return this;
     }
 
-    public named(name: string): ICompositeSubrequestBuilder {
+    public named(name: string): CompositeSubrequestBuilder {
         this.addValue('Name', name);
         return this;
     }
 
-    public apiVersion(apiVersion: string): ICompositeSubrequestBuilder {
+    public apiVersion(apiVersion: string): CompositeSubrequestBuilder {
         this._apiVersion = apiVersion;
         return this;
     }
 
-    public header(key: string, value: string): ICompositeSubrequestBuilder {
+    public header(key: string, value: string): CompositeSubrequestBuilder {
         this.httpHeaders[key] = value;
         return this;
     }
 
-    public headers(headers: { [key: string]: string }): ICompositeSubrequestBuilder {
+    public headers(headers: { [key: string]: string }): CompositeSubrequestBuilder {
         Object.keys(headers).forEach(key => {
             this.header(key, headers[key]);
         });
         return this;
     }
 
-    public build(): ICompositeSubrequest {
+    public build(): CompositeSubrequest {
         if (!this._sObjectType) {
             throw new Error('Type is required');
         }
@@ -158,11 +155,11 @@ abstract class NoBodyCompositeSubrequestBuilder extends CompositeSubrequestBuild
         super(method, undefined /*This request can't accept any values*/);
     }
 
-    public addValue(key: string, value: any): ICompositeSubrequestBuilder {
+    public addValue(key: string, value: any): CompositeSubrequestBuilder {
         throw new Error(`This request doesn't have a body`);
     }
 
-    public addValues(values: { [key: string]: any }): ICompositeSubrequestBuilder {
+    public addValues(values: { [key: string]: any }): CompositeSubrequestBuilder {
         if (Object.keys(values).length > 0) {
             throw new Error(`This request doesn't have a body`);
         }
@@ -170,30 +167,7 @@ abstract class NoBodyCompositeSubrequestBuilder extends CompositeSubrequestBuild
     }
 }
 
-class InsertCompositeSubrequestBuilder extends CompositeSubrequestBuilder {
-    public constructor() {
-        super(Method.POST);
-    }
-
-    public id(id: string): ICompositeSubrequestBuilder {
-        if (id) {
-            throw new Error(`This request doesn't support an id`);
-        }
-        return this;
-    }
-
-    public sObject(sObject: ISObject): ICompositeSubrequestBuilder {
-        this._referenceId = sObject.referenceId;
-        super.sObject(sObject);
-        return this;
-    }
-
-    protected _internalGetUrl(): string {
-        return this._getBaseUrl();
-    }
-}
-
-class DeleteCompositeSubrequestBuilder extends NoBodyCompositeSubrequestBuilder {
+export class DeleteCompositeSubrequestBuilder extends NoBodyCompositeSubrequestBuilder {
     public constructor() {
         super(Method.DELETE);
     }
@@ -203,12 +177,12 @@ class DeleteCompositeSubrequestBuilder extends NoBodyCompositeSubrequestBuilder 
     }
 }
 
-class DescribeCompositeSubrequestBuilder extends NoBodyCompositeSubrequestBuilder {
+export class DescribeCompositeSubrequestBuilder extends NoBodyCompositeSubrequestBuilder {
     public constructor() {
         super(Method.GET);
     }
 
-    public sObject(sObject: ISObject): ICompositeSubrequestBuilder {
+    public sObject(sObject: SObject): CompositeSubrequestBuilder {
         this._referenceId = sObject.referenceId;
         super.sObject(sObject);
         return this;
@@ -219,7 +193,7 @@ class DescribeCompositeSubrequestBuilder extends NoBodyCompositeSubrequestBuilde
     }
 }
 
-class HttpGETCompositeSubrequestBuilder extends NoBodyCompositeSubrequestBuilder {
+export class HttpGETCompositeSubrequestBuilder extends NoBodyCompositeSubrequestBuilder {
     public constructor() {
         super(Method.GET);
     }
@@ -229,12 +203,35 @@ class HttpGETCompositeSubrequestBuilder extends NoBodyCompositeSubrequestBuilder
     }
 }
 
-class PatchCompositeSubrequestBuilder extends CompositeSubrequestBuilder {
+export class InsertCompositeSubrequestBuilder extends CompositeSubrequestBuilder {
+    public constructor() {
+        super(Method.POST);
+    }
+
+    public id(id: string): CompositeSubrequestBuilder {
+        if (id) {
+            throw new Error(`This request doesn't support an id`);
+        }
+        return this;
+    }
+
+    public sObject(sObject: SObject): CompositeSubrequestBuilder {
+        this._referenceId = sObject.referenceId;
+        super.sObject(sObject);
+        return this;
+    }
+
+    protected _internalGetUrl(): string {
+        return this._getBaseUrl();
+    }
+}
+
+export class PatchCompositeSubrequestBuilder extends CompositeSubrequestBuilder {
     public constructor() {
         super(Method.PATCH);
     }
 
-    public sObject(sObject: ISObject): ICompositeSubrequestBuilder {
+    public sObject(sObject: SObject): CompositeSubrequestBuilder {
         this._rootReferenceId = sObject.referenceId;
         super.sObject(sObject);
         return this;
@@ -245,12 +242,12 @@ class PatchCompositeSubrequestBuilder extends CompositeSubrequestBuilder {
     }
 }
 
-class PutCompositeSubrequestBuilder extends CompositeSubrequestBuilder {
+export class PutCompositeSubrequestBuilder extends CompositeSubrequestBuilder {
     public constructor() {
         super(Method.PUT);
     }
 
-    public sObject(sObject: ISObject): ICompositeSubrequestBuilder {
+    public sObject(sObject: SObject): CompositeSubrequestBuilder {
         this._rootReferenceId = sObject.referenceId;
         super.sObject(sObject);
         return this;
@@ -259,28 +256,4 @@ class PutCompositeSubrequestBuilder extends CompositeSubrequestBuilder {
     protected _internalGetUrl(): string {
         return this._getExistingUrl();
     }
-}
-
-export function deleteBuilder(): ICompositeSubrequestBuilder {
-    return new DeleteCompositeSubrequestBuilder();
-}
-
-export function describeBuilder(): ICompositeSubrequestBuilder {
-    return new DescribeCompositeSubrequestBuilder();
-}
-
-export function httpGETBuilder(): ICompositeSubrequestBuilder {
-    return new HttpGETCompositeSubrequestBuilder();
-}
-
-export function insertBuilder(): ICompositeSubrequestBuilder {
-    return new InsertCompositeSubrequestBuilder();
-}
-
-export function patchBuilder(): ICompositeSubrequestBuilder {
-    return new PatchCompositeSubrequestBuilder();
-}
-
-export function putBuilder(): ICompositeSubrequestBuilder {
-    return new PutCompositeSubrequestBuilder();
 }

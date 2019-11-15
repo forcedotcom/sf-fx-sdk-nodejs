@@ -13,9 +13,10 @@
     "lint": "tslint -c tslint.json 'lib/**/*.ts'",
     "prepare": "npm run build",
     "prepublishOnly": "npm test && npm run lint",
+    "posttest": "tslint -c tslint.json 'lib/**/*.ts'",
     "preversion": "npm run lint",
     "postversion": "git push && git push --tags",
-    "test": "mocha -r ts-node/register 'test/unit/**/*.ts'",
+    "test": "nyc --extension .ts mocha --forbid-only -r ts-node/register 'test/unit/**/*.ts'",
     "test-all": "mocha -r ts-node/register 'test/**/*.ts'",
     "test-integration": "mocha -r ts-node/register 'test/integration/**/*.ts'",
     "version": "npm run format && git add -A src",
@@ -35,9 +36,12 @@
   "bugs": {
     "url": "https://github.com/forcedotcom/sf-fx-sdk-nodejs/issues"
   },
+  "engines": {
+    "node": ">=10.0.0"
+  },
   "homepage": "https://github.com/forcedotcom/sf-fx-sdk-nodejs#readme",
   "dependencies": {
-    "cloudevents-sdk": "~0.3.1",
+    "cloudevents-sdk": "0.2.1",
     "jsforce": "~1.9.2",
     "request": "^2.88.0",
     "request-promise-native": "^1.0.7",
@@ -55,6 +59,7 @@
     "chai-as-promised": "^7.1.1",
     "mocha": "^5.2.0",
     "nock": "^10.0.6",
+    "nyc": "^14.1.1",
     "pre-commit": "^1.2.2",
     "prettier": "^1.15.3",
     "sinon": "^7.2.3",
