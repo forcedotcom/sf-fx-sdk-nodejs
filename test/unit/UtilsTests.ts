@@ -9,9 +9,17 @@ import { Logger, NO_OP_LOGGER } from './../..'
 describe('Utils Tests', () => {
 
     let sandbox;
+    let debug;
+    let info;
+    let warn;
+    let error;
 
     beforeEach(() => {
         sandbox = sinon.createSandbox();
+        debug = sandbox.stub(console, 'debug');
+        info = sandbox.stub(console, 'info');
+        warn = sandbox.stub(console, 'warn');
+        error = sandbox.stub(console, 'error');
     });
 
     afterEach(() => {
@@ -19,7 +27,6 @@ describe('Utils Tests', () => {
     });
 
     it('logger methods were called', async () => {
-        const emitLogMessage = sandbox.stub(Logger.prototype, 'emitLogMessage');
         const logger = Logger.create(true);
         logger.shout('hi');
         logger.log('hi');
@@ -28,11 +35,13 @@ describe('Utils Tests', () => {
         logger.warn('hi');
         logger.error('hi');
 
-        expect(emitLogMessage.callCount).to.be.eql(6);
+        expect(debug.callCount).to.be.eql(1);
+        expect(info.callCount).to.be.eql(3);
+        expect(warn.callCount).to.be.eql(1);
+        expect(error.callCount).to.be.eql(1);
     });
 
     it('logger methods were called', async () => {
-        const emitLogMessage = sandbox.stub(Logger.prototype, 'emitLogMessage');
         const logger = NO_OP_LOGGER;
         logger.shout('hi');
         logger.log('hi');
@@ -41,6 +50,9 @@ describe('Utils Tests', () => {
         logger.warn('hi');
         logger.error('hi');
 
-        expect(emitLogMessage.callCount).to.be.eql(0);
+        expect(debug.callCount).to.be.eql(0);
+        expect(info.callCount).to.be.eql(0);
+        expect(warn.callCount).to.be.eql(0);
+        expect(error.callCount).to.be.eql(0);
     });
 });

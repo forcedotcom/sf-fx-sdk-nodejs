@@ -75,11 +75,12 @@ export class ForceApi {
      * @param headers
      */
     public request(method: string, url: string, body: string, headers?: object): Promise<object> {
-        return this.conn.request({
-            body,
-            headers,
-            method,
-            url,
-        });
+        return this.connect()
+            .request({
+                body,
+                headers,
+                method,
+                url,
+            });
     }
 }

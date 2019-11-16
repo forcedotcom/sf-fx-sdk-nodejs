@@ -141,4 +141,19 @@ describe('ForceApi Tests', () => {
         }
     });
 
+    it('should perform request', async () => {
+        const forceApi = new ForceApi(undefined, NO_OP_LOGGER);
+        const mockResult = { 
+            encoding: 'UTF-8', 
+            maxBatchSize : 200, 
+            sobjects: [ { } ]
+        };          
+        mockConnection.request.callsFake(async({ }): Promise<object> => {
+            return Promise.resolve(mockResult);
+        });
+        sandbox.stub(forceApi, 'connect').returns(mockConnection);
+
+        const result = await forceApi.request('GET', '/services/data/v32.0/sobjects/Account/describe', '', { });
+        expect(result['maxBatchSize']).to.equal(mockResult.maxBatchSize);
+    });
 });

@@ -3,7 +3,7 @@ import { expect } from 'chai';
 import 'mocha';
 
 import { Constants, Context, Logger } from '../../../lib';
-import { generateData } from './functionUtils';
+import { generateData } from './FunctionTestUtils';
 
 describe('Context Tests', () => {
 

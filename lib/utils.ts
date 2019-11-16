@@ -27,7 +27,7 @@ export class Logger {
         this.emitLogMessage('info', msg, supportingData);
     }
 
-    emitLogMessage(msgType: 'debug' | 'info' | 'warn' | 'error', msg: string, supportingDetails: any[]) {
+    private emitLogMessage(msgType: 'debug' | 'info' | 'warn' | 'error', msg: string, supportingDetails: any[]) {
         if (supportingDetails.length > 0) {
             console[msgType](msg, supportingDetails);
         } else {

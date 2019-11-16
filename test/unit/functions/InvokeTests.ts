@@ -9,7 +9,7 @@ use(chaiAsPromised);
 
 import { Context, applySfFxMiddleware, UserContext } from '../../../lib';
 import * as testUtils from '../../TestUtils';
-import { generateData } from './functionUtils';
+import { generateData } from './FunctionTestUtils';
 
 interface PdfEvent {
     html?: string,

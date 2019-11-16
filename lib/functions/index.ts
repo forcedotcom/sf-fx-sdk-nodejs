@@ -122,7 +122,7 @@ export class FunctionInvocationRequest {
         }
     }
 
-    async post(payload): Promise<any> {
+    private async post(payload): Promise<any> {
         return await request.post(payload);
     }
 }
