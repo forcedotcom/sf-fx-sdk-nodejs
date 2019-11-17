@@ -2,33 +2,44 @@
 import { expect } from 'chai';
 import 'mocha';
 
-import { CompositeApi, SObject } from '../../../lib';
-import { ICompositeSubrequest, ICompositeSubrequestBuilder, ISObject, Method } from '../../../lib/Interfaces';
+import {
+    CompositeApi,
+    CompositeSubrequest,
+    CompositeSubrequestBuilder,
+    DeleteCompositeSubrequestBuilder,
+    DescribeCompositeSubrequestBuilder,
+    HttpGETCompositeSubrequestBuilder,
+    InsertCompositeSubrequestBuilder,
+    PatchCompositeSubrequestBuilder,
+    PutCompositeSubrequestBuilder,
+    Method,
+    SObject }
+from '../../../../lib';
 
 describe('CompositeSubrequest Builder Tests', () => {
     /**
      * Return all known builders for generic test cases
      */
-    const getBuilderFactories = (): Function[] => {
+    const getBuilderFactories = (): any[] => {
         return [
-            CompositeApi.deleteBuilder,
-            CompositeApi.describeBuilder,
-            CompositeApi.httpGETBuilder,
-            CompositeApi.insertBuilder,
-            CompositeApi.patchBuilder,
-            CompositeApi.putBuilder,
+            DeleteCompositeSubrequestBuilder,
+            DescribeCompositeSubrequestBuilder,
+            HttpGETCompositeSubrequestBuilder,
+            InsertCompositeSubrequestBuilder,
+            PatchCompositeSubrequestBuilder,
+            PutCompositeSubrequestBuilder,
         ];
     };
 
-    const assertSetValuesSucceeds = (builderFactory: Function) => {
+    const assertSetValuesSucceeds = (builderFactory: any) => {
         it(builderFactory.name + ' set values with single value', () => {
             const key: string = 'key1';
             const value: string = 'a_string';
 
-            const builder: ICompositeSubrequestBuilder = builderFactory().sObjectType('Account');
+            const builder: CompositeSubrequestBuilder =  new builderFactory().sObjectType('Account');
             expect(builder.addValue(key, value)).to.equal(builder);
 
-            const compositeSubrequest: ICompositeSubrequest = builder.build();
+            const compositeSubrequest: CompositeSubrequest = builder.build();
             expect(compositeSubrequest).to.exist;
 
             const values: { [key: string]: string } = compositeSubrequest.body;
@@ -47,10 +58,10 @@ describe('CompositeSubrequest Builder Tests', () => {
             const value2: string = 'a_string_2';
             const expectedHeaders: { [key: string]: string } = { key1: value1, key2: value2 };
 
-            const builder: ICompositeSubrequestBuilder = builderFactory().sObjectType('Account');
+            const builder: CompositeSubrequestBuilder =  new builderFactory().sObjectType('Account');
             expect(builder.addValues(expectedHeaders)).to.equal(builder);
 
-            const compositeSubrequest: ICompositeSubrequest = builder.build();
+            const compositeSubrequest: CompositeSubrequest = builder.build();
             expect(compositeSubrequest).to.exist;
 
             const values: { [key: string]: string } = compositeSubrequest.body;
@@ -67,10 +78,10 @@ describe('CompositeSubrequest Builder Tests', () => {
         // Name is syntactic sugar over the value method
         it(builderFactory.name + ' set name', () => {
             const name: string = 'A Name';
-            const builder: ICompositeSubrequestBuilder = builderFactory().sObjectType('Account');
+            const builder: CompositeSubrequestBuilder =  new builderFactory().sObjectType('Account');
             expect(builder.named(name)).to.equal(builder);
 
-            const compositeSubrequest: ICompositeSubrequest = builder.build();
+            const compositeSubrequest: CompositeSubrequest = builder.build();
             expect(compositeSubrequest).to.exist;
             const values: { [key: string]: string } = compositeSubrequest.body;
             expect(values).to.exist;
@@ -82,50 +93,50 @@ describe('CompositeSubrequest Builder Tests', () => {
         });
     };
 
-    const assertSetValuesThrows = (builderFactory: Function) => {
+    const assertSetValuesThrows = (builderFactory: any) => {
         it(builderFactory.name + ' value throws', () => {
-            const builder: ICompositeSubrequestBuilder = builderFactory();
+            const builder: CompositeSubrequestBuilder =  new builderFactory();
             expect(builder.addValue.bind(builder, 'key', 'value')).to.throw(`This request doesn't have a body`);
         });
 
         it(builderFactory.name + ' values throws', () => {
-            const builder: ICompositeSubrequestBuilder = builderFactory();
+            const builder: CompositeSubrequestBuilder =  new builderFactory();
             expect(builder.addValues.bind(builder, { key: 'value' })).to.throw(`This request doesn't have a body`);
         });
 
         // Name is syntactic sugar over the value method
         it(builderFactory.name + ' set name throws', () => {
-            const builder: ICompositeSubrequestBuilder = builderFactory();
+            const builder: CompositeSubrequestBuilder =  new builderFactory();
             expect(builder.named.bind(builder, 'A name')).to.throw(`This request doesn't have a body`);
         });
     };
 
     describe('Generic CompositeSubrequest Tests', () => {
-        const builderFactories: Function[] = getBuilderFactories();
+        const builderFactories: any[] = getBuilderFactories();
 
         // TODO: Update with ID test
         builderFactories.forEach(builderFactory => {
             it(builderFactory.name + ' throws if sObjectType is missing', () => {
-                const builder: ICompositeSubrequestBuilder = builderFactory();
+                const builder: CompositeSubrequestBuilder =  new (builderFactory)();
                 expect(builder.build.bind(builder)).to.throw('Type is required');
             });
 
             it(builderFactory.name + ' sObjectType set via string succeeds', () => {
-                const builder: ICompositeSubrequestBuilder = builderFactory();
+                const builder: CompositeSubrequestBuilder =  new builderFactory();
                 expect(builder.sObjectType('Opportunity')).to.equal(builder);
 
-                const compositeSubrequest: ICompositeSubrequest = builder.build();
+                const compositeSubrequest: CompositeSubrequest = builder.build();
                 expect(compositeSubrequest).to.exist;
 
                 expect(compositeSubrequest.sObjectType).to.match(/Opportunity/);
             });
 
             it(builderFactory.name + ' sObjectType set via sobject succeeds', () => {
-                const sObject: ISObject = new SObject('Case');
-                const builder: ICompositeSubrequestBuilder = builderFactory();
+                const sObject: SObject = new SObject('Case');
+                const builder: CompositeSubrequestBuilder =  new builderFactory();
                 expect(builder.sObject(sObject)).to.equal(builder);
 
-                const compositeSubrequest: ICompositeSubrequest = builder.build();
+                const compositeSubrequest: CompositeSubrequest = builder.build();
                 expect(compositeSubrequest).to.exist;
 
                 expect(compositeSubrequest.sObjectType).to.match(/Case/);
@@ -133,10 +144,10 @@ describe('CompositeSubrequest Builder Tests', () => {
 
             it(builderFactory.name + ' set api version', () => {
                 const version: string = '4933';
-                const builder: ICompositeSubrequestBuilder = builderFactory().sObjectType('Account');
+                const builder: CompositeSubrequestBuilder =  new builderFactory().sObjectType('Account');
                 expect(builder.apiVersion(version)).to.equal(builder);
 
-                const compositeSubrequest: ICompositeSubrequest = builder.build();
+                const compositeSubrequest: CompositeSubrequest = builder.build();
                 expect(compositeSubrequest).to.exist;
 
                 expect(compositeSubrequest.apiVersion).to.match(/4933/);
@@ -146,10 +157,10 @@ describe('CompositeSubrequest Builder Tests', () => {
                 const key: string = 'key1';
                 const value: string = 'a_string';
 
-                const builder: ICompositeSubrequestBuilder = builderFactory().sObjectType('Account');
+                const builder: CompositeSubrequestBuilder =  new builderFactory().sObjectType('Account');
                 expect(builder.header(key, value)).to.equal(builder);
 
-                const compositeSubrequest: ICompositeSubrequest = builder.build();
+                const compositeSubrequest: CompositeSubrequest = builder.build();
                 expect(compositeSubrequest).to.exist;
 
                 const headers: { [key: string]: string } = compositeSubrequest.httpHeaders;
@@ -168,10 +179,10 @@ describe('CompositeSubrequest Builder Tests', () => {
                 const value2: string = 'a_string_2';
                 const expectedHeaders: { [key: string]: string } = { key1: value1, key2: value2 };
 
-                const builder: ICompositeSubrequestBuilder = builderFactory().sObjectType('Account');
+                const builder: CompositeSubrequestBuilder =  new builderFactory().sObjectType('Account');
                 expect(builder.headers(expectedHeaders)).to.equal(builder);
 
-                const compositeSubrequest: ICompositeSubrequest = builder.build();
+                const compositeSubrequest: CompositeSubrequest = builder.build();
                 expect(compositeSubrequest).to.exist;
 
                 const headers: { [key: string]: string } = compositeSubrequest.httpHeaders;
@@ -189,86 +200,86 @@ describe('CompositeSubrequest Builder Tests', () => {
 
     describe('Insert CompositeSubrequest Tests', () => {
         it('test insert builder factory', () => {
-            const builder: ICompositeSubrequestBuilder = CompositeApi.insertBuilder();
+            const builder: CompositeSubrequestBuilder =  new InsertCompositeSubrequestBuilder();
             expect(builder).to.not.be.null;
         });
 
         it('method is POST', () => {
-            const builder: ICompositeSubrequestBuilder = CompositeApi.insertBuilder().sObjectType('Account');
+            const builder: CompositeSubrequestBuilder =  new InsertCompositeSubrequestBuilder().sObjectType('Account');
 
-            const compositeSubrequest: ICompositeSubrequest = builder.build();
+            const compositeSubrequest: CompositeSubrequest = builder.build();
             expect(compositeSubrequest).to.exist;
             expect(compositeSubrequest.method).to.equal(Method.POST);
         });
 
         it('set id with value throws an exception', () => {
-            const builder: ICompositeSubrequestBuilder = CompositeApi.insertBuilder();
+            const builder: CompositeSubrequestBuilder =  new InsertCompositeSubrequestBuilder();
             expect(builder.id.bind(builder, 'an_id')).to.throw();
         });
 
         it('set id with null ignores caller', () => {
-            const builder: ICompositeSubrequestBuilder = CompositeApi.insertBuilder();
+            const builder: CompositeSubrequestBuilder =  new InsertCompositeSubrequestBuilder();
             builder.id(null);
         });
 
         it('url is as expected', () => {
-            const builder: ICompositeSubrequestBuilder = CompositeApi.insertBuilder().sObjectType('Account');
+            const builder: CompositeSubrequestBuilder =  new InsertCompositeSubrequestBuilder().sObjectType('Account');
 
-            const compositeSubrequest: ICompositeSubrequest = builder.build();
+            const compositeSubrequest: CompositeSubrequest = builder.build();
             expect(compositeSubrequest).to.exist;
 
             expect(compositeSubrequest.url).to.match(/^\/services\/data\/v[0-9][0-9]\.[0-9]\/sobjects\/Account$/);
         });
 
-        assertSetValuesSucceeds(CompositeApi.insertBuilder);
+        assertSetValuesSucceeds(InsertCompositeSubrequestBuilder);
     });
 
     describe('Delete CompositeSubrequest Tests', () => {
         it('test delete builder factory', () => {
-            const builder: ICompositeSubrequestBuilder = CompositeApi.deleteBuilder();
+            const builder: CompositeSubrequestBuilder =  new DeleteCompositeSubrequestBuilder();
             expect(builder).to.not.be.null;
         });
 
         it('method is DELETE', () => {
-            const builder: ICompositeSubrequestBuilder = CompositeApi.deleteBuilder().sObjectType('Account');
+            const builder: CompositeSubrequestBuilder =  new DeleteCompositeSubrequestBuilder().sObjectType('Account');
 
-            const compositeSubrequest: ICompositeSubrequest = builder.build();
+            const compositeSubrequest: CompositeSubrequest = builder.build();
             expect(compositeSubrequest).to.exist;
             expect(compositeSubrequest.method).to.equal(Method.DELETE);
         });
 
         it('url is as expected', () => {
-            const builder: ICompositeSubrequestBuilder = CompositeApi.deleteBuilder().sObjectType('Account');
+            const builder: CompositeSubrequestBuilder =  new DeleteCompositeSubrequestBuilder().sObjectType('Account');
 
-            const compositeSubrequest: ICompositeSubrequest = builder.build();
+            const compositeSubrequest: CompositeSubrequest = builder.build();
             expect(compositeSubrequest).to.exist;
 
             const regExp: RegExp = new RegExp('\\/\\@{' + compositeSubrequest.referenceId + '.id}');
             expect(compositeSubrequest.url).to.match(regExp);
         });
 
-        assertSetValuesThrows(CompositeApi.deleteBuilder);
+        assertSetValuesThrows(DeleteCompositeSubrequestBuilder);
     });
 
     describe('Describe CompositeSubrequest Tests', () => {
         it('test describe builder factory', () => {
-            const builder: ICompositeSubrequestBuilder = CompositeApi.describeBuilder();
+            const builder: CompositeSubrequestBuilder =  new DescribeCompositeSubrequestBuilder();
             expect(builder).to.not.be.null;
         });
 
         it('method is GET', () => {
-            const builder: ICompositeSubrequestBuilder = CompositeApi.describeBuilder().sObjectType('Account');
+            const builder: CompositeSubrequestBuilder =  new DescribeCompositeSubrequestBuilder().sObjectType('Account');
 
-            const compositeSubrequest: ICompositeSubrequest = builder.build();
+            const compositeSubrequest: CompositeSubrequest = builder.build();
             expect(compositeSubrequest).to.exist;
             expect(compositeSubrequest.method).to.equal(Method.GET);
         });
 
         it('url is as expected', () => {
-            const builder: ICompositeSubrequestBuilder = CompositeApi.describeBuilder();
+            const builder: CompositeSubrequestBuilder =  new DescribeCompositeSubrequestBuilder();
             builder.sObjectType('Account');
 
-            const compositeSubrequest: ICompositeSubrequest = builder.build();
+            const compositeSubrequest: CompositeSubrequest = builder.build();
             expect(compositeSubrequest).to.exist;
 
             expect(compositeSubrequest.url).to.match(
@@ -276,89 +287,89 @@ describe('CompositeSubrequest Builder Tests', () => {
             );
         });
 
-        assertSetValuesThrows(CompositeApi.describeBuilder);
+        assertSetValuesThrows(DescribeCompositeSubrequestBuilder);
     });
 
     describe('HttpGET CompositeSubrequest Tests', () => {
         it('test httpGGET builder factory', () => {
-            const builder: ICompositeSubrequestBuilder = CompositeApi.httpGETBuilder();
+            const builder: CompositeSubrequestBuilder =  new HttpGETCompositeSubrequestBuilder();
             expect(builder).to.not.be.null;
         });
 
         it('method is GET', () => {
-            const builder: ICompositeSubrequestBuilder = CompositeApi.httpGETBuilder().sObjectType('Account');
+            const builder: CompositeSubrequestBuilder =  new HttpGETCompositeSubrequestBuilder().sObjectType('Account');
 
-            const compositeSubrequest: ICompositeSubrequest = builder.build();
+            const compositeSubrequest: CompositeSubrequest = builder.build();
             expect(compositeSubrequest).to.exist;
             expect(compositeSubrequest.method).to.equal(Method.GET);
         });
 
         it('url is as expected', () => {
-            const builder: ICompositeSubrequestBuilder = CompositeApi.httpGETBuilder();
+            const builder: CompositeSubrequestBuilder =  new HttpGETCompositeSubrequestBuilder();
             builder.sObjectType('Account');
 
-            const compositeSubrequest: ICompositeSubrequest = builder.build();
+            const compositeSubrequest: CompositeSubrequest = builder.build();
             expect(compositeSubrequest).to.exist;
 
             const regExp: RegExp = new RegExp('\\/\\@{' + compositeSubrequest.referenceId + '.id}');
             expect(compositeSubrequest.url).to.match(regExp);
         });
 
-        assertSetValuesThrows(CompositeApi.httpGETBuilder);
+        assertSetValuesThrows(HttpGETCompositeSubrequestBuilder);
     });
 
     describe('Patch CompositeSubrequest Tests', () => {
         it('test patch builder factory', () => {
-            const builder: ICompositeSubrequestBuilder = CompositeApi.patchBuilder();
+            const builder: CompositeSubrequestBuilder =  new PatchCompositeSubrequestBuilder();
             expect(builder).to.not.be.null;
         });
 
         it('method is PATCH', () => {
-            const builder: ICompositeSubrequestBuilder = CompositeApi.patchBuilder().sObjectType('Account');
+            const builder: CompositeSubrequestBuilder =  new PatchCompositeSubrequestBuilder().sObjectType('Account');
 
-            const compositeSubrequest: ICompositeSubrequest = builder.build();
+            const compositeSubrequest: CompositeSubrequest = builder.build();
             expect(compositeSubrequest).to.exist;
             expect(compositeSubrequest.method).to.equal(Method.PATCH);
         });
 
         it('url is as expected', () => {
-            const builder: ICompositeSubrequestBuilder = CompositeApi.patchBuilder().sObjectType('Account');
+            const builder: CompositeSubrequestBuilder =  new PatchCompositeSubrequestBuilder().sObjectType('Account');
 
-            const compositeSubrequest: ICompositeSubrequest = builder.build();
+            const compositeSubrequest: CompositeSubrequest = builder.build();
             expect(compositeSubrequest).to.exist;
 
             const regExp: RegExp = new RegExp('\\/\\@{' + compositeSubrequest.referenceId + '.id}');
             expect(compositeSubrequest.url).to.match(regExp);
         });
 
-        assertSetValuesSucceeds(CompositeApi.patchBuilder);
+        assertSetValuesSucceeds(PatchCompositeSubrequestBuilder);
     });
 
     describe('Put CompositeSubrequest Tests', () => {
         it('test put builder factory', () => {
-            const builder: ICompositeSubrequestBuilder = CompositeApi.putBuilder();
+            const builder: CompositeSubrequestBuilder =  new PutCompositeSubrequestBuilder();
             expect(builder).to.not.be.null;
         });
 
         it('method is PUT', () => {
-            const builder: ICompositeSubrequestBuilder = CompositeApi.putBuilder().sObjectType('Account');
+            const builder: CompositeSubrequestBuilder =  new PutCompositeSubrequestBuilder().sObjectType('Account');
 
-            const compositeSubrequest: ICompositeSubrequest = builder.build();
+            const compositeSubrequest: CompositeSubrequest = builder.build();
             expect(compositeSubrequest).to.exist;
             expect(compositeSubrequest.method).to.equal(Method.PUT);
         });
 
         it('url is as expected', () => {
-            const builder: ICompositeSubrequestBuilder = CompositeApi.putBuilder();
+            const builder: CompositeSubrequestBuilder =  new PutCompositeSubrequestBuilder();
             builder.sObjectType('Account');
 
-            const compositeSubrequest: ICompositeSubrequest = builder.build();
+            const compositeSubrequest: CompositeSubrequest = builder.build();
             expect(compositeSubrequest).to.exist;
 
             const regExp: RegExp = new RegExp('\\/\\@{' + compositeSubrequest.referenceId + '.id}');
             expect(compositeSubrequest.url).to.match(regExp);
         });
 
-        assertSetValuesSucceeds(CompositeApi.putBuilder);
+        assertSetValuesSucceeds(PutCompositeSubrequestBuilder);
     });
 });

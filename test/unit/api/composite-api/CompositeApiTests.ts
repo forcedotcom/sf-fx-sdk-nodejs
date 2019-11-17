@@ -7,42 +7,44 @@ import { HttpCodes } from 'typed-rest-client/HttpClient';
 
 const httpCodeCreated: number = 201;
 
-import { CompositeApi, ConnectionConfig } from '../../../lib';
 import {
-    ICompositeApi,
-    ICompositeRequest,
-    ICompositeResponse,
-    ICompositeSubrequest,
-    ICompositeSubresponse,
-    IConnectionConfig,
-    IError,
-} from '../../../lib/Interfaces';
+    CompositeApi,
+    CompositeRequest,
+    CompositeResponse,
+    CompositeSubrequest,
+    CompositeSubresponse,
+    ConnectionConfig,
+    Error,
+    InsertCompositeSubrequestBuilder,
+    NO_OP_LOGGER }
+from '../../../../lib';
 
 describe('CompositeApi Tests', () => {
+
     const instanceUrl: string = 'http://localhost:3000';
     const apiVersion: string = '45.0';
-    const sessionId: string = 'sessionId1234';
-    const connectionConfig: IConnectionConfig = new ConnectionConfig(instanceUrl, apiVersion, sessionId);
+    const accessToken: string = 'accessToken1234';
+    const connectionConfig: ConnectionConfig = new ConnectionConfig(accessToken, apiVersion, instanceUrl);
 
     afterEach(() => {
         nock.cleanAll();
     });
 
     it('CompositeApi construction', () => {
-        const compositeApi: ICompositeApi = CompositeApi.newCompositeApi(connectionConfig);
+        const compositeApi: CompositeApi = new CompositeApi(connectionConfig, NO_OP_LOGGER);
 
         expect(compositeApi).to.exist;
     });
 
     it('Composite Request is passed through as body', async () => {
-        const compositeRequest: ICompositeRequest = CompositeApi.newCompositeRequest();
-        const compositeSubRequest: ICompositeSubrequest = CompositeApi.insertBuilder()
+        const compositeRequest: CompositeRequest = new CompositeRequest();
+        const compositeSubRequest: CompositeSubrequest = new InsertCompositeSubrequestBuilder()
             .sObjectType('Account')
             .named('MyAccount ' + new Date())
             .build();
         compositeRequest.addSubrequest(compositeSubRequest);
 
-        let capturedCompositeRequest: ICompositeRequest;
+        let capturedCompositeRequest: CompositeRequest;
 
         nock(instanceUrl)
             .post(`/services/data/v${connectionConfig.apiVersion}/composite/`, function(body: any) {
@@ -51,7 +53,7 @@ describe('CompositeApi Tests', () => {
             })
             .reply(HttpCodes.OK, {});
 
-        const compositeApi: ICompositeApi = CompositeApi.newCompositeApi(connectionConfig);
+        const compositeApi: CompositeApi = new CompositeApi(connectionConfig, NO_OP_LOGGER);
         await compositeApi.invoke(compositeRequest);
 
         expect(capturedCompositeRequest).to.exist;
@@ -60,8 +62,8 @@ describe('CompositeApi Tests', () => {
     });
 
     it('Composite Api passes through session id', async () => {
-        const compositeRequest: ICompositeRequest = CompositeApi.newCompositeRequest();
-        const compositeSubRequest: ICompositeSubrequest = CompositeApi.insertBuilder()
+        const compositeRequest: CompositeRequest = new CompositeRequest();
+        const compositeSubRequest: CompositeSubrequest = new InsertCompositeSubrequestBuilder()
             .sObjectType('Account')
             .named('MyAccount ' + new Date())
             .build();
@@ -80,16 +82,16 @@ describe('CompositeApi Tests', () => {
             .post(`/services/data/v${connectionConfig.apiVersion}/composite/`)
             .reply(HttpCodes.OK, {});
 
-        const compositeApi: ICompositeApi = CompositeApi.newCompositeApi(connectionConfig);
+        const compositeApi: CompositeApi = new CompositeApi(connectionConfig, NO_OP_LOGGER);
         await compositeApi.invoke(compositeRequest);
 
         expect(capturedAuthorizationHeader).to.exist;
-        expect(capturedAuthorizationHeader).to.equal('Bearer ' + sessionId);
+        expect(capturedAuthorizationHeader).to.equal('Bearer ' + accessToken);
     });
 
     it('Composite Api Correctly Parses response', async () => {
-        const compositeRequest: ICompositeRequest = CompositeApi.newCompositeRequest();
-        const compositeSubRequest: ICompositeSubrequest = CompositeApi.insertBuilder()
+        const compositeRequest: CompositeRequest = new CompositeRequest();
+        const compositeSubRequest: CompositeSubrequest = new InsertCompositeSubrequestBuilder()
             .sObjectType('Account')
             .named('MyAccount ' + new Date())
             .build();
@@ -110,15 +112,15 @@ describe('CompositeApi Tests', () => {
                 ],
             });
 
-        const compositeApi: ICompositeApi = CompositeApi.newCompositeApi(connectionConfig);
-        const compositeResponse: ICompositeResponse = await compositeApi.invoke(compositeRequest);
+        const compositeApi: CompositeApi = new CompositeApi(connectionConfig, NO_OP_LOGGER);
+        const compositeResponse: CompositeResponse = await compositeApi.invoke(compositeRequest);
 
         expect(compositeResponse).to.exist;
         expect(compositeResponse.compositeSubresponses).to.exist;
         expect(compositeResponse.compositeSubresponses).lengthOf(1);
 
-        const compositeSubResponseFromIndex: ICompositeSubresponse = compositeResponse.compositeSubresponses[0];
-        const compositeSubResponse: ICompositeSubresponse = compositeResponse.getCompositeSubresponse(
+        const compositeSubResponseFromIndex: CompositeSubresponse = compositeResponse.compositeSubresponses[0];
+        const compositeSubResponse: CompositeSubresponse = compositeResponse.getCompositeSubresponse(
             compositeSubRequest,
         );
         expect(compositeSubResponseFromIndex).to.exist;
@@ -131,8 +133,8 @@ describe('CompositeApi Tests', () => {
     });
 
     it('Composite Api Correctly Parses response headers', async () => {
-        const compositeRequest: ICompositeRequest = CompositeApi.newCompositeRequest();
-        const compositeSubRequest: ICompositeSubrequest = CompositeApi.insertBuilder()
+        const compositeRequest: CompositeRequest = new CompositeRequest();
+        const compositeSubRequest: CompositeSubrequest = new InsertCompositeSubrequestBuilder()
             .sObjectType('Account')
             .named('MyAccount ' + new Date())
             .build();
@@ -153,9 +155,9 @@ describe('CompositeApi Tests', () => {
                 ],
             });
 
-        const compositeApi: ICompositeApi = CompositeApi.newCompositeApi(connectionConfig);
-        const compositeResponse: ICompositeResponse = await compositeApi.invoke(compositeRequest);
-        const compositeSubResponse: ICompositeSubresponse = compositeResponse.getCompositeSubresponse(
+        const compositeApi: CompositeApi = new CompositeApi(connectionConfig, NO_OP_LOGGER);
+        const compositeResponse: CompositeResponse = await compositeApi.invoke(compositeRequest);
+        const compositeSubResponse: CompositeSubresponse = compositeResponse.getCompositeSubresponse(
             compositeSubRequest,
         );
 
@@ -169,8 +171,8 @@ describe('CompositeApi Tests', () => {
     });
 
     it('Composite Api Correctly Parses response body', async () => {
-        const compositeRequest: ICompositeRequest = CompositeApi.newCompositeRequest();
-        const compositeSubRequest: ICompositeSubrequest = CompositeApi.insertBuilder()
+        const compositeRequest: CompositeRequest = new CompositeRequest();
+        const compositeSubRequest: CompositeSubrequest = new InsertCompositeSubrequestBuilder()
             .sObjectType('Account')
             .named('MyAccount ' + new Date())
             .build();
@@ -191,9 +193,9 @@ describe('CompositeApi Tests', () => {
                 ],
             });
 
-        const compositeApi: ICompositeApi = CompositeApi.newCompositeApi(connectionConfig);
-        const compositeResponse: ICompositeResponse = await compositeApi.invoke(compositeRequest);
-        const compositeSubResponse: ICompositeSubresponse = compositeResponse.getCompositeSubresponse(
+        const compositeApi: CompositeApi = new CompositeApi(connectionConfig, NO_OP_LOGGER);
+        const compositeResponse: CompositeResponse = await compositeApi.invoke(compositeRequest);
+        const compositeSubResponse: CompositeSubresponse = compositeResponse.getCompositeSubresponse(
             compositeSubRequest,
         );
 
@@ -210,8 +212,8 @@ describe('CompositeApi Tests', () => {
     });
 
     it('Composite Api throws exception if errors accessed on success', async () => {
-        const compositeRequest: ICompositeRequest = CompositeApi.newCompositeRequest();
-        const compositeSubRequest: ICompositeSubrequest = CompositeApi.insertBuilder()
+        const compositeRequest: CompositeRequest = new CompositeRequest();
+        const compositeSubRequest: CompositeSubrequest = new InsertCompositeSubrequestBuilder()
             .sObjectType('Account')
             .named('MyAccount ' + new Date())
             .build();
@@ -232,9 +234,9 @@ describe('CompositeApi Tests', () => {
                 ],
             });
 
-        const compositeApi: ICompositeApi = CompositeApi.newCompositeApi(connectionConfig);
-        const compositeResponse: ICompositeResponse = await compositeApi.invoke(compositeRequest);
-        const compositeSubResponse: ICompositeSubresponse = compositeResponse.getCompositeSubresponse(
+        const compositeApi: CompositeApi = new CompositeApi(connectionConfig, NO_OP_LOGGER);
+        const compositeResponse: CompositeResponse = await compositeApi.invoke(compositeRequest);
+        const compositeSubResponse: CompositeSubresponse = compositeResponse.getCompositeSubresponse(
             compositeSubRequest,
         );
 
@@ -247,8 +249,8 @@ describe('CompositeApi Tests', () => {
     });
 
     it('Composite Api Correctly Parses response body errors', async () => {
-        const compositeRequest: ICompositeRequest = CompositeApi.newCompositeRequest();
-        const compositeSubRequest: ICompositeSubrequest = CompositeApi.insertBuilder()
+        const compositeRequest: CompositeRequest = new CompositeRequest();
+        const compositeSubRequest: CompositeSubrequest = new InsertCompositeSubrequestBuilder()
             .sObjectType('Account')
             .named('MyAccount ' + new Date())
             .build();
@@ -275,17 +277,17 @@ describe('CompositeApi Tests', () => {
                 ],
             });
 
-        const compositeApi: ICompositeApi = CompositeApi.newCompositeApi(connectionConfig);
-        const compositeResponse: ICompositeResponse = await compositeApi.invoke(compositeRequest);
-        const compositeSubResponse: ICompositeSubresponse = compositeResponse.getCompositeSubresponse(
+        const compositeApi: CompositeApi = new CompositeApi(connectionConfig, NO_OP_LOGGER);
+        const compositeResponse: CompositeResponse = await compositeApi.invoke(compositeRequest);
+        const compositeSubResponse: CompositeSubresponse = compositeResponse.getCompositeSubresponse(
             compositeSubRequest,
         );
 
         // Verify the body directly
-        const errors: ReadonlyArray<IError> = compositeSubResponse.errors;
+        const errors: ReadonlyArray<Error> = compositeSubResponse.errors;
         expect(errors).to.exist;
         expect(errors).lengthOf(1);
-        const error: IError = errors[0];
+        const error: Error = errors[0];
         expect(error).to.exist;
         expect(error.message).to.equal('Required fields are missing: [Name]');
         expect(error.errorCode).to.equal('REQUIRED_FIELD_MISSING');
@@ -295,8 +297,8 @@ describe('CompositeApi Tests', () => {
     });
 
     it('Composite Api throws exception if body accessed on errors', async () => {
-        const compositeRequest: ICompositeRequest = CompositeApi.newCompositeRequest();
-        const compositeSubRequest: ICompositeSubrequest = CompositeApi.insertBuilder()
+        const compositeRequest: CompositeRequest = new CompositeRequest();
+        const compositeSubRequest: CompositeSubrequest = new InsertCompositeSubrequestBuilder()
             .sObjectType('Account')
             .named('MyAccount ' + new Date())
             .build();
@@ -323,9 +325,9 @@ describe('CompositeApi Tests', () => {
                 ],
             });
 
-        const compositeApi: ICompositeApi = CompositeApi.newCompositeApi(connectionConfig);
-        const compositeResponse: ICompositeResponse = await compositeApi.invoke(compositeRequest);
-        const compositeSubResponse: ICompositeSubresponse = compositeResponse.getCompositeSubresponse(
+        const compositeApi: CompositeApi = new CompositeApi(connectionConfig, NO_OP_LOGGER);
+        const compositeResponse: CompositeResponse = await compositeApi.invoke(compositeRequest);
+        const compositeSubResponse: CompositeSubresponse = compositeResponse.getCompositeSubresponse(
             compositeSubRequest,
         );
 
@@ -333,8 +335,8 @@ describe('CompositeApi Tests', () => {
     });
 
     it('Composite Response throws error if request id is not found', async () => {
-        const compositeRequest: ICompositeRequest = CompositeApi.newCompositeRequest();
-        const compositeSubRequest: ICompositeSubrequest = CompositeApi.insertBuilder()
+        const compositeRequest: CompositeRequest = new CompositeRequest();
+        const compositeSubRequest: CompositeSubrequest = new InsertCompositeSubrequestBuilder()
             .sObjectType('Account')
             .named('MyAccount ' + new Date())
             .build();
@@ -355,12 +357,12 @@ describe('CompositeApi Tests', () => {
                 ],
             });
 
-        const compositeApi: ICompositeApi = CompositeApi.newCompositeApi(connectionConfig);
-        const compositeResponse: ICompositeResponse = await compositeApi.invoke(compositeRequest);
+        const compositeApi: CompositeApi = new CompositeApi(connectionConfig, NO_OP_LOGGER);
+        const compositeResponse: CompositeResponse = await compositeApi.invoke(compositeRequest);
 
         expect(compositeResponse).to.exist;
 
-        const nonExistentCompositeSubRequest: ICompositeSubrequest = CompositeApi.insertBuilder()
+        const nonExistentCompositeSubRequest: CompositeSubrequest = new InsertCompositeSubrequestBuilder()
             .sObjectType('Account')
             .named('MyAccount ' + new Date())
             .build();

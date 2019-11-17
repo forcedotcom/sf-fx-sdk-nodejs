@@ -2,25 +2,17 @@ import { BearerCredentialHandler } from 'typed-rest-client/Handlers';
 import { HttpClient, HttpClientResponse, HttpCodes } from 'typed-rest-client/HttpClient';
 import { IHeaders } from 'typed-rest-client/Interfaces';
 
-import {
-    ICompositeApi,
-    ICompositeRequest,
-    ICompositeResponse,
-    ICompositeSubrequest,
-    ICompositeSubresponse,
-    IConnectionConfig,
-    IError,
-} from '../Interfaces';
-import { Logger } from '../sf-sdk';
+import { CompositeRequest, CompositeSubrequest } from './';
+import { ConnectionConfig, Error, Logger } from './../..';
 
-class CompositeSubresponse implements ICompositeSubresponse {
+export class CompositeSubresponse {
     private static HEADER_LOCATION: string = 'Location';
     private static KEY_ID: string = 'id';
 
     public readonly httpHeaders: { [key: string]: string };
     public readonly httpStatusCode: number;
     public readonly referenceId: string;
-    private readonly _errors: ReadonlyArray<IError>;
+    private readonly _errors: ReadonlyArray<Error>;
     private readonly _body: { [key: string]: any };
 
     public get body(): { [key: string]: any } {
@@ -31,7 +23,7 @@ class CompositeSubresponse implements ICompositeSubresponse {
         }
     }
 
-    public get errors(): ReadonlyArray<IError> {
+    public get errors(): ReadonlyArray<Error> {
         if (this.httpStatusCode >= HttpCodes.BadRequest) {
             return this._errors;
         } else {
@@ -59,7 +51,7 @@ class CompositeSubresponse implements ICompositeSubresponse {
         }
     }
 
-    constructor(compositeSubresponse: ICompositeSubresponse) {
+    constructor(compositeSubresponse: CompositeSubresponse) {
         this.httpHeaders = compositeSubresponse.httpHeaders;
         this.httpStatusCode = compositeSubresponse.httpStatusCode;
         this.referenceId = compositeSubresponse.referenceId;
@@ -67,9 +59,9 @@ class CompositeSubresponse implements ICompositeSubresponse {
         if (compositeSubresponse.httpStatusCode < HttpCodes.BadRequest) {
             this._body = compositeSubresponse.body;
         } else {
-            const errors: IError[] = [];
+            const errors: Error[] = [];
             if (compositeSubresponse.body) {
-                compositeSubresponse.body.forEach((element: IError) => {
+                compositeSubresponse.body.forEach((element: Error) => {
                     errors.push(element);
                 });
             }
@@ -82,27 +74,27 @@ class CompositeSubresponse implements ICompositeSubresponse {
  * Used to avoid string access to json object below.
  */
 interface CompositeResponseJsonObject {
-    compositeResponse: ICompositeSubresponse[];
+    compositeResponse: CompositeSubresponse[];
 }
 
-class CompositeResponse implements ICompositeResponse {
-    public readonly compositeSubresponses: ReadonlyArray<ICompositeSubresponse>;
+export  class CompositeResponse {
+    public readonly compositeSubresponses: ReadonlyArray<CompositeSubresponse>;
 
     public constructor(json: string) {
         const compositeResponseJsonObject: CompositeResponseJsonObject = JSON.parse(
             json,
         ) as CompositeResponseJsonObject;
-        const compositeSubResponses: ICompositeSubresponse[] = compositeResponseJsonObject.compositeResponse;
+        const compositeSubResponses: CompositeSubresponse[] = compositeResponseJsonObject.compositeResponse;
         if (compositeSubResponses) {
-            compositeSubResponses.forEach((element: ICompositeSubresponse, index: number) => {
+            compositeSubResponses.forEach((element: CompositeSubresponse, index: number) => {
                 // Replace the json object with one that contains the location method
                 compositeSubResponses[index] = new CompositeSubresponse(element);
             });
         }
-        this.compositeSubresponses = compositeSubResponses as ReadonlyArray<ICompositeSubresponse>;
+        this.compositeSubresponses = compositeSubResponses as ReadonlyArray<CompositeSubresponse>;
     }
 
-    public getCompositeSubresponse(compositeSubrequest: ICompositeSubrequest): ICompositeSubresponse {
+    public getCompositeSubresponse(compositeSubrequest: CompositeSubrequest): CompositeSubresponse {
         const referenceId: string = compositeSubrequest.referenceId;
 
         for (const compositeSubResponse of this.compositeSubresponses) {
@@ -115,18 +107,18 @@ class CompositeResponse implements ICompositeResponse {
     }
 }
 
-class CompositeApi implements ICompositeApi {
-    private _connectionConfig: IConnectionConfig;
+export class CompositeApi {
+    private _connectionConfig: ConnectionConfig;
     private logger: Logger;
 
-    constructor(connectionConfig: IConnectionConfig, logger: Logger) {
+    constructor(connectionConfig: ConnectionConfig, logger: Logger) {
         this._connectionConfig = connectionConfig;
         this.logger = logger;
     }
 
-    public async invoke(compositeRequest: ICompositeRequest): Promise<ICompositeResponse> {
+    public async invoke(compositeRequest: CompositeRequest): Promise<CompositeResponse> {
         const bearerCredentialHandler: BearerCredentialHandler = new BearerCredentialHandler(
-            this._connectionConfig.sessionId,
+            this._connectionConfig.accessToken,
         );
         const httpClient: HttpClient = new HttpClient('sf-fx-node', [bearerCredentialHandler]);
         const path: string = `/services/data/v${this._connectionConfig.apiVersion}/composite/`;
@@ -140,20 +132,14 @@ class CompositeApi implements ICompositeApi {
             data,
             headers,
         );
+
         if (response.message.statusCode === HttpCodes.OK) {
             const body: string = await response.readBody();
-            const compositeResponse: ICompositeResponse = new CompositeResponse(body);
+            const compositeResponse: CompositeResponse = new CompositeResponse(body);
 
             return compositeResponse;
         } else {
             throw new Error('Server returned status code: ' + response.message.statusCode);
         }
     }
-}
-
-export function newCompositeApi(
-    connectionConfig: IConnectionConfig,
-    logger: Logger = Logger.create(false),
-): ICompositeApi {
-    return new CompositeApi(connectionConfig, logger);
 }

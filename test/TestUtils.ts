@@ -3,7 +3,17 @@ import { expect } from 'chai';
 import 'mocha';
 import * as sinon from 'sinon';
 
-import * as sdk from '../lib';
+import {
+    CompositeApi,
+    CompositeRequest,
+    CompositeResponse,
+    CompositeSubrequest,
+    CompositeSubresponse,
+    ConnectionConfig,
+    Context,
+    InsertCompositeSubrequestBuilder,
+    NO_OP_LOGGER }
+from '../lib';
 
 const httpCodeCreated:number = 201;
 
@@ -12,20 +22,20 @@ export interface IInsertResponse {
     readonly name: string;
 }
 
-export async function insertAccount(connectionConfig: sdk.IConnectionConfig): Promise<IInsertResponse> {
+export async function insertAccount(connectionConfig: ConnectionConfig): Promise<IInsertResponse> {
     const accountName: string = `Account ${new Date()}`;
-    const compositeApi: sdk.ICompositeApi = sdk.CompositeApi.newCompositeApi(connectionConfig);
-    const compositeRequest: sdk.ICompositeRequest = sdk.CompositeApi.newCompositeRequest();
-    const compositeSubRequest: sdk.ICompositeSubrequest =
-    sdk.CompositeApi.insertBuilder().sObjectType('Account').named(accountName).build();
+    const compositeApi: CompositeApi = new CompositeApi(connectionConfig, NO_OP_LOGGER);
+    const compositeRequest: CompositeRequest = new CompositeRequest();
+    const compositeSubRequest: CompositeSubrequest =
+    (new InsertCompositeSubrequestBuilder()).sObjectType('Account').named(accountName).build();
     compositeRequest.addSubrequest(compositeSubRequest);
 
-    const compositeResponse: sdk.ICompositeResponse = await compositeApi.invoke(compositeRequest);
+    const compositeResponse: CompositeResponse = await compositeApi.invoke(compositeRequest);
     expect(compositeResponse).to.exist;
     expect(compositeResponse.compositeSubresponses).to.exist;
     expect(compositeResponse.compositeSubresponses).lengthOf(1);
 
-    const compositeSubresponse: sdk.ICompositeSubresponse = compositeResponse.compositeSubresponses[0];
+    const compositeSubresponse: CompositeSubresponse = compositeResponse.compositeSubresponses[0];
     expect(compositeSubresponse.isSuccess).to.be.true;
     expect(compositeSubresponse.httpStatusCode).to.equal(httpCodeCreated);
 
@@ -48,15 +58,7 @@ export class FakeFunction {
         return this.constructor.name;
     }
 
-    public init(config: sdk.Config, logger: sdk.Logger): Promise<any> {
-        this.initParams = { config, logger };
-        this.sandbox.stub(logger, 'error').callsFake((message: string) => {
-            this.errors.push(message);
-        });
-        return Promise.resolve(null);
-    }
-
-    public invoke(context: sdk.Context, event: sdk.SfCloudevent): Promise<any> {
+    public invoke(event:any, context: Context): Promise<any> {
         this.invokeParams = { context, event };
 
         if (this.doFxInvocation) {

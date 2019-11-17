@@ -1,9 +1,9 @@
 // https://github.com/cloudevents/sdk-javascript/issues/9
 // https://platformcloud.slack.com/archives/C4LRY7WQ1/p1556242806009100
 declare module 'cloudevents-sdk' {
-    type SpecPayload = {
+    interface SpecPayload {
         [key: string]: any;
-    };
+    }
 
     class Spec01 {
         public payload: SpecPayload & {
@@ -79,9 +79,9 @@ declare module 'cloudevents-sdk' {
         public addExtension(key: string, value: any): Spec02;
     }
 
-    type Extensions = {
+    interface Extensions {
         [key: string]: any;
-    };
+    }
 
     class JSONFormatter01 {
         public format(payload: SpecPayload): SpecPayload;

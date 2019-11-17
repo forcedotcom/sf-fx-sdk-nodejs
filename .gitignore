@@ -9,3 +9,5 @@ npm-debug.log
 dist
 
 .sfdx
+
+.nyc_output/
