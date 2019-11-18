@@ -10,14 +10,10 @@ import { ConnectionConfig, Constants, ErrorResult, ForceApi, Logger, SObject, Su
 // payload and context will be a fully setup sdk.Context instance.
 // Until then, event is a CloudEvent object that we'll parse either to
 // setup sdk.Context.
-export function applySfFxMiddleware(event: any, context: any): any {
+export function applySfFxMiddleware(event: any): any {
 
     if (!event) {
         throw new Error('Data not provided');
-    }
-
-    if (!context) {
-        throw new Error('Context not provided');
     }
 
     const data = event.data;
@@ -26,8 +22,8 @@ export function applySfFxMiddleware(event: any, context: any): any {
     }
 
     // Again, this is temp: context param will be fully setup sdk.Context instance.
-    const contextData = data.context;
-    if (!contextData) {
+    const context = data.context;
+    if (!context) {
         throw new Error('Context not provided');
     }
 
@@ -45,7 +41,7 @@ export function applySfFxMiddleware(event: any, context: any): any {
 
 
     return {
-        context: Context.create(contextData, Logger.create(true), accessToken, functionInvocationId),
+        context: Context.create(context, Logger.create(true), accessToken, functionInvocationId),
         event: data.payload };
 }
 
