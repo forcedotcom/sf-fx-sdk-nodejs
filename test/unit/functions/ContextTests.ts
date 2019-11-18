@@ -7,22 +7,28 @@ import { generateData } from './FunctionTestUtils';
 
 describe('Context Tests', () => {
 
-    const validateContext = (data: any, context: Context) => {
+    const validateContext = (data: any, context: Context, hasOnBehalfOfUserId: boolean = false) => {
         expect(context.apiVersion).to.exist;
         expect(context.apiVersion).to.equal(Constants.CURRENT_API_VERSION);
 
         expect(context.userContext).to.exist;
+        expect(context.userContext.orgDomainUrl).to.equal(data.context.userContext.orgDomainUrl);
         expect(context.userContext.orgId).to.equal(data.context.userContext.orgId);
+        expect(context.userContext.salesforceBaseUrl).to.equal(data.context.userContext.salesforceBaseUrl);
         expect(context.userContext.username).to.equal(data.context.userContext.username);
         expect(context.userContext.userId).to.equal(data.context.userContext.userId);
-        expect(context.userContext.salesforceBaseUrl).to.equal(data.context.userContext.salesforceBaseUrl);
-        expect(context.userContext.orgDomainUrl).to.equal(data.context.userContext.orgDomainUrl);
+
+        if (hasOnBehalfOfUserId) {
+            expect(context.userContext.onBehalfOfUserId).to.equal(data.context.userContext.onBehalfOfUserId);
+        } else {
+            expect(context.userContext.onBehalfOfUserId).to.be.undefined;
+        }
 
         expect(context.logger).to.exist;
     }
 
     it('validate context WITH accessToken', async () => {
-        const data = generateData(true);
+        const data = generateData(true, true);
         expect(data.context).to.exist;
         expect(data.sfContext.accessToken).to.exist;
         expect(data.sfContext.functionInvocationId).to.exist;
@@ -31,7 +37,7 @@ describe('Context Tests', () => {
         const context: Context = Context.create(data.context, logger, data.sfContext.accessToken,
             data.sfContext.functionInvocationId);
 
-        validateContext(data, context);
+        validateContext(data, context, true);
 
         // Requires accessToken
         expect(context.forceApi).to.exist;
