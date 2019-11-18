@@ -19,6 +19,7 @@
     "test": "nyc --extension .ts mocha --forbid-only -r ts-node/register 'test/unit/**/*.ts'",
     "test-all": "mocha -r ts-node/register 'test/**/*.ts'",
     "test-integration": "mocha -r ts-node/register 'test/integration/**/*.ts'",
+    "tirekick": "mocha -r ts-node/register 'test/integration/functions/InvokeFunctionIntegrationTests.ts'",
     "version": "npm run format && git add -A src",
     "watch-ts": "tsc -w"
   },
@@ -40,8 +41,6 @@
   "dependencies": {
     "cloudevents-sdk": "0.2.1",
     "jsforce": "^1.9.3",
-    "request": "^2.88.0",
-    "request-promise-native": "^1.0.7",
     "tslib": "1.10.0",
     "typed-rest-client": "~1.5.0"
   },
@@ -59,11 +58,14 @@
     "nyc": "^14.1.1",
     "pre-commit": "^1.2.2",
     "prettier": "^1.15.3",
+    "request": "^2.88.0",
+    "request-promise-native": "^1.0.7",
     "sinon": "^7.2.3",
     "ts-node": "7.0.0",
     "tslint": "^5.12.1",
     "tslint-config-prettier": "^1.17.0",
     "tslint-plugin-prettier": "^2.0.1",
-    "typescript": "3.2.2"
+    "typescript": "3.2.2",
+    "valid-url": "^1.0.9"
   }
 }

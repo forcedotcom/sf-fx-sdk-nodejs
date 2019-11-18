@@ -1,10 +1,7 @@
-import Cloudevent = require('cloudevents-sdk');
-import * as request from 'request-promise-native';
-
 import { ConnectionConfig, Constants, ErrorResult, ForceApi, Logger, SObject, SuccessResult, UnitOfWork } from '..';
 
 
-// TODO: Migrate to an Evergreen middleware layer.  Convenice here to not dupe
+// TODO: Migrate to an Evergreen middleware layer.  Convenience method to not dupe
 // code across existing functions.
 // Once SF middleware is in place, the event param will be the function's
 // payload and context will be a fully setup sdk.Context instance.
@@ -39,12 +36,15 @@ export function applySfFxMiddleware(event: any): any {
         delete data.sfContext;
     }
 
-
+    // Transformed CloudEvent into function consumable payload (event) and context.
     return {
         context: Context.create(context, Logger.create(true), accessToken, functionInvocationId),
         event: data.payload };
 }
 
+/**
+ * Represents invoking user.
+ */
 export class UserContext {
     public static create(context: any): UserContext {
         const userContext = context.userContext;
@@ -58,7 +58,8 @@ export class UserContext {
             userContext.orgId,
             userContext.salesforceBaseUrl,
             userContext.username,
-            userContext.userId
+            userContext.userId,
+            userContext.onBehalfOfUserId
         );
     }
 
@@ -67,7 +68,8 @@ export class UserContext {
         public readonly orgId: string,
         public readonly salesforceBaseUrl: string,
         public readonly username: string,
-        public readonly userId: string
+        public readonly userId: string,
+        public readonly onBehalfOfUserId?: string,
     ) {}
 }
 
@@ -81,8 +83,7 @@ export class FunctionInvocationRequest {
     }
 
     /**
-     * Saves FunctionInvocationRequest either through API w/ accessToken or
-     * FunctionInvocationRequestServlet w/ c2cJWT.
+     * Saves FunctionInvocationRequest either through API w/ accessToken.
      *
      * @throws err if response not provided or on failed save
      */
@@ -91,9 +92,9 @@ export class FunctionInvocationRequest {
             throw new Error('Response not provided');
         }
 
-        const responseBase64 = Buffer.from(JSON.stringify(this.response)).toString('base64');
-
         if (this.forceApi) {
+            const responseBase64 = Buffer.from(JSON.stringify(this.response)).toString('base64');
+
             try {
                 // Prime pump (W-6841389)
                 const soql = `SELECT Id, FunctionName, Status, CreatedById, CreatedDate FROM FunctionInvocationRequest WHERE Id ='${this.id}'`;
@@ -117,14 +118,14 @@ export class FunctionInvocationRequest {
             throw new Error('Authorization not provided');
         }
     }
-
-    private async post(payload): Promise<any> {
-        return await request.post(payload);
-    }
 }
 
+/**
+ * Respresents the context of the function invocation including objects needed by functions to 
+ * perform their action(s), eg ForceAPI to interact with the invoking org.
+ */
 export class Context {
-    // data contains salesforce stuff (user context, etc) and function's payload (data.payload)
+    // context contains salesforce stuff (user context, etc)
     public static create(context: any, logger: Logger, accessToken?: string, functionInvocationId?: string): Context {
         if (!context) {
             throw new Error('Context not provided.');
@@ -155,10 +156,8 @@ export class Context {
             }
         }
 
-        const newCtx = new Context(apiVersion, userCtx, logger, context.payloadVersion, forceApi, unitOfWork,
+        return new Context(apiVersion, userCtx, logger, context.payloadVersion, forceApi, unitOfWork,
             fxInvocation);
-
-        return newCtx;
     }
 
     private constructor(
@@ -169,7 +168,5 @@ export class Context {
         public readonly forceApi?: ForceApi,
         public readonly unitOfWork?: UnitOfWork,
         public readonly fxInvocation?: FunctionInvocationRequest
-
-    ) {
-    }
+        ) { }
 }
