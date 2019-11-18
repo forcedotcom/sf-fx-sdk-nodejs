@@ -156,10 +156,8 @@ export class Context {
             }
         }
 
-        const newCtx = new Context(apiVersion, userCtx, logger, context.payloadVersion, forceApi, unitOfWork,
+        return new Context(apiVersion, userCtx, logger, context.payloadVersion, forceApi, unitOfWork,
             fxInvocation);
-
-        return newCtx;
     }
 
     private constructor(
@@ -170,7 +168,5 @@ export class Context {
         public readonly forceApi?: ForceApi,
         public readonly unitOfWork?: UnitOfWork,
         public readonly fxInvocation?: FunctionInvocationRequest
-
-        ) {
-    }
+        ) { }
 }
