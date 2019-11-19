@@ -19,7 +19,7 @@ describe('Invoke Function Integration Tests', () => {
         return await request.get(url);
     }
 
-    beforeEach(async () => {
+    beforeEach(() => {
     });
 
     it('successfully invokes function (no payload)', async () => {
