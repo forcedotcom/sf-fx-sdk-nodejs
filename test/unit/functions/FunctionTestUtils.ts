@@ -10,7 +10,7 @@ export const generateData = (setAccessToken: boolean = true, setOnBehalfOfUserId
     }
 
     if (setOnBehalfOfUserId) {
-        // Workaround readonly
+        // Workaround readonly prop
         userContext['onBehalfOfUserId' as UserContext['onBehalfOfUserId']] = '005xx000001X7dy';
     }
 

@@ -6,19 +6,10 @@ import { ConnectionConfig, Logger, SObject } from './..';
 export { Query, QueryResult, Connection, RecordResult, SuccessResult, ErrorResult } from 'jsforce';
 
 export class ForceApi {
+
     private conn: Connection;
 
     constructor(private connConfig: ConnectionConfig, private logger: Logger) {}
-
-    public connect(): Connection {
-        return this.conn
-            ? this.conn
-            : (this.conn = new Connection({
-                  accessToken: this.connConfig.accessToken,
-                  instanceUrl: this.connConfig.instanceUrl,
-                  version: this.connConfig.apiVersion,
-              }));
-    }
 
     /**
      * Execute the given SOQL by using "/query" API.
@@ -67,7 +58,7 @@ export class ForceApi {
     }
 
     /**
-     * TODO
+     * Invoke given URI.
      *
      * @param method
      * @param url
@@ -82,5 +73,15 @@ export class ForceApi {
                 method,
                 url,
             });
+    }
+
+    private connect(): Connection {
+        return this.conn
+            ? this.conn
+            : (this.conn = new Connection({
+                  accessToken: this.connConfig.accessToken,
+                  instanceUrl: this.connConfig.instanceUrl,
+                  version: this.connConfig.apiVersion,
+              }));
     }
 }

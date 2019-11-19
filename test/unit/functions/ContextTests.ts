@@ -2,7 +2,7 @@
 import { expect } from 'chai';
 import 'mocha';
 
-import { Constants, Context, Logger } from '../../../lib';
+import { Constants, Context, Logger, ConnectionConfig } from '../../../lib';
 import { generateData } from './FunctionTestUtils';
 
 describe('Context Tests', () => {
@@ -30,6 +30,7 @@ describe('Context Tests', () => {
     it('validate context WITH accessToken', async () => {
         const data = generateData(true, true);
         expect(data.context).to.exist;
+        expect(data.context.apiVersion).to.exist;
         expect(data.sfContext.accessToken).to.exist;
         expect(data.sfContext.functionInvocationId).to.exist;
 
@@ -43,6 +44,29 @@ describe('Context Tests', () => {
         expect(context.forceApi).to.exist;
         expect(context.unitOfWork).to.exist;
         expect(context.fxInvocation).to.exist;
+
+        // Validate ConnectionConfig has expected values
+        // TODO: Prevent this, somehow.
+        const connConfig: ConnectionConfig = context.forceApi['connConfig'];
+        expect(connConfig).to.exist;
+        // TODO: Prevent access to accessToken
+        expect(connConfig.accessToken).to.equal(data.sfContext.accessToken);
+        expect(connConfig.apiVersion).to.equal(data.context.apiVersion);
+        expect(connConfig.instanceUrl).to.equal(data.context.userContext.salesforceBaseUrl);
+
+        // Ensure accessToken was not serialized
+        const forceApiJSON = JSON.stringify(context.forceApi);
+        expect(forceApiJSON).to.exist;
+        expect(forceApiJSON).to.not.contain('accessToken');
+
+        // Validate Connection has expected values
+        // TODO: Prevent this, somehow.
+        const conn = context.forceApi['connect']();
+        expect(conn).to.exist;
+        // TODO: Prevent access to accessToken
+        expect(conn.accessToken).to.equal(data.sfContext.accessToken);
+        expect(conn.version).to.equal(data.context.apiVersion);
+        expect(conn.instanceUrl).to.equal(data.context.userContext.salesforceBaseUrl);
     });
 
     it('validate context WITHOUT accessToken', async () => {
