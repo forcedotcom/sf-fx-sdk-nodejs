@@ -33,6 +33,7 @@ describe('Invoke Function Integration Tests', () => {
             json: true, // Automatically parses the JSON string in the response
             method: 'POST',
             resolveWithFullResponse: true,
+            timeout: 5000,
             uri: functionResource,
         };
 
@@ -40,7 +41,7 @@ describe('Invoke Function Integration Tests', () => {
         if (functionRequestBody || functionRequestBodyFilePath || functionRequestBodyUrl) {
             let body;
             try {
-                body = JSON.parse(functionRequestBody 
+                body = JSON.parse(functionRequestBody
                     || (functionRequestBodyFilePath && fs.readFileSync(functionRequestBodyFilePath).toString())
                     || await fetchRequestBody(functionRequestBodyUrl));
             } catch(err) {
@@ -48,7 +49,7 @@ describe('Invoke Function Integration Tests', () => {
             }
             options['body'] = body;
         }
-        
+
         console.log(`Invoking ${functionResource}...`)
         const response = await request(options);
         expect(response).to.exist;
