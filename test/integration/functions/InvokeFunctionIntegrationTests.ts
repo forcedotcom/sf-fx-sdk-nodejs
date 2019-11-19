@@ -33,7 +33,7 @@ describe('Invoke Function Integration Tests', () => {
             json: true, // Automatically parses the JSON string in the response
             method: 'POST',
             resolveWithFullResponse: true,
-            timeout: 5000,
+            timeout: 10000,
             uri: functionResource,
         };
 
