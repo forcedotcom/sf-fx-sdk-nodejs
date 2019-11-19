@@ -108,8 +108,8 @@ export  class CompositeResponse {
 }
 
 export class CompositeApi {
-    private _connectionConfig: ConnectionConfig;
-    private logger: Logger;
+    private readonly _connectionConfig: ConnectionConfig;
+    private readonly logger: Logger;
 
     constructor(connectionConfig: ConnectionConfig, logger: Logger) {
         this._connectionConfig = connectionConfig;

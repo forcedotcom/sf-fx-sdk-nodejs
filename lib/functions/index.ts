@@ -121,7 +121,7 @@ export class FunctionInvocationRequest {
 }
 
 /**
- * Respresents the context of the function invocation including objects needed by functions to 
+ * Respresents the context of the function invocation including objects needed by functions to
  * perform their action(s), eg ForceAPI to interact with the invoking org.
  */
 export class Context {
@@ -144,9 +144,9 @@ export class Context {
         let fxInvocation: FunctionInvocationRequest;
         if (accessToken) {
             const config: ConnectionConfig = new ConnectionConfig(
-                userCtx.salesforceBaseUrl,
+                accessToken,
                 apiVersion,
-                accessToken
+                userCtx.salesforceBaseUrl
             );
             unitOfWork = new UnitOfWork(config, logger);
             forceApi = new ForceApi(config, logger);
