@@ -44,28 +44,3 @@ export async function insertAccount(connectionConfig: ConnectionConfig): Promise
     return { id: accountId, name: accountName } as IInsertResponse;
 }
 
-export class FakeFunction {
-
-    public initParams: any;
-    public invokeParams: any;
-    public errors: string[];
-
-    constructor(public sandbox: sinon.SinonSandbox, private doFxInvocation: boolean = false) {
-        this.errors = [];
-    }
-
-    public getName() {
-        return this.constructor.name;
-    }
-
-    public invoke(event:any, context: Context): Promise<any> {
-        this.invokeParams = { context, event };
-
-        if (this.doFxInvocation) {
-            context.fxInvocation.response = '{}';
-            context.fxInvocation.save();
-        }
-
-        return Promise.resolve(null);
-    }
-};
