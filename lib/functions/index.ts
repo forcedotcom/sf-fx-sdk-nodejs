@@ -25,7 +25,6 @@ export class Context {
         public readonly logger: Logger,
         public readonly payloadVersion: string,
         public readonly forceApi?: ForceApi,
-        public readonly unitOfWork?: UnitOfWork,
-        public readonly fxInvocation?: any
+        public readonly unitOfWork?: UnitOfWork
         ) { }
 }
