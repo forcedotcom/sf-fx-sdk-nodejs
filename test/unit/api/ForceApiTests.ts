@@ -6,7 +6,7 @@ import * as sinon from 'sinon';
 use(chaiAsPromised);
 import * as jsforce from 'jsforce';
 
-import { ForceApi, NO_OP_LOGGER, SObject } from '../../../lib';
+import { ForceApi, NO_OP_LOGGER, SObject } from '../../../src';
 
 
 //   T E S T S

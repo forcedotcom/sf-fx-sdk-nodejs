@@ -17,7 +17,7 @@ import {
     Error,
     InsertCompositeSubrequestBuilder,
     NO_OP_LOGGER }
-from '../../../../lib';
+from '../../../../src';
 
 describe('CompositeApi Tests', () => {
 

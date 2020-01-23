@@ -16,11 +16,11 @@
         "alwaysStrict": true,
         "pretty": true,
         "typeRoots": [
-            "./node_modules/@types", "./lib/@types"
+            "./node_modules/@types", "./src/@types"
         ]
     },
     "include": [
-        "./lib/**/*"
+        "./src/**/*"
     ],
     "exclude": [
         "./node_modules",

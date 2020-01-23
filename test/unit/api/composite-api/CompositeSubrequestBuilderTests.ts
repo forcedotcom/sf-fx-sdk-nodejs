@@ -14,7 +14,7 @@ import {
     PutCompositeSubrequestBuilder,
     Method,
     SObject }
-from '../../../../lib';
+from '../../../../src';
 
 describe('CompositeSubrequest Builder Tests', () => {
     /**

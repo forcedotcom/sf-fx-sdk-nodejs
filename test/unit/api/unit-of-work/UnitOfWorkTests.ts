@@ -14,7 +14,7 @@ import {
     UnitOfWork,
     UnitOfWorkResponse,
     UnitOfWorkResult }
-from '../../../../lib';
+from '../../../../src';
 
 const instanceUrl: string = 'http://localhost:3000';
 const apiVersion: string = '45.0';
