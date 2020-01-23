@@ -1,7 +1,7 @@
 {
   "name": "@heroku/salesforce-sdk",
   "version": "0.0.1-develop.10",
-  "description": "Salesforce Function SDK for Node.js",
+  "description": "Salesforce SDK for Node.js",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "directories": {
@@ -9,11 +9,11 @@
   },
   "scripts": {
     "build": "tsc -p .",
-    "format": "prettier --write \"lib/**/*.ts\" \"lib/**/*.js\"",
-    "lint": "tslint -c tslint.json 'lib/**/*.ts'",
+    "format": "prettier --write \"src/**/*.ts\" \"src/**/*.js\"",
+    "lint": "tslint -c tslint.json 'src/**/*.ts'",
     "prepare": "npm run build",
     "prepublishOnly": "npm test && npm run lint",
-    "posttest": "tslint -c tslint.json 'lib/**/*.ts'",
+    "posttest": "tslint -c tslint.json 'src/**/*.ts'",
     "preversion": "npm run lint",
     "postversion": "git push && git push --tags",
     "test": "nyc --extension .ts mocha --forbid-only -r ts-node/register 'test/unit/**/*.ts'",
@@ -39,7 +39,6 @@
   },
   "homepage": "https://github.com/forcedotcom/sf-fx-sdk-nodejs#readme",
   "dependencies": {
-    "cloudevents-sdk": "0.2.1",
     "jsforce": "^1.9.3",
     "tslib": "1.10.0",
     "typed-rest-client": "~1.5.0"

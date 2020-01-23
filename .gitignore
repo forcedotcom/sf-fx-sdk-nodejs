@@ -7,7 +7,7 @@ npm-debug.log
 .idea
 .DS_Store
 dist
-
 .sfdx
+*.swp
 
 .nyc_output/

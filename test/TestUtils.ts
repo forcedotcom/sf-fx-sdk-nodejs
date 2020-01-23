@@ -13,7 +13,7 @@ import {
     Context,
     InsertCompositeSubrequestBuilder,
     NO_OP_LOGGER }
-from '../lib';
+from '../src';
 
 const httpCodeCreated:number = 201;
 

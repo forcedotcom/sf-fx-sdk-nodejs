@@ -2,7 +2,7 @@
 import { expect } from 'chai';
 import 'mocha';
 
-import { CompositeApi, CompositeRequest, CompositeSubrequest, InsertCompositeSubrequestBuilder, PatchCompositeSubrequestBuilder, SObject } from '../../../../lib';
+import { CompositeApi, CompositeRequest, CompositeSubrequest, InsertCompositeSubrequestBuilder, PatchCompositeSubrequestBuilder, SObject } from '../../../../src';
 
 describe('CompositeRequest Tests', () => {
     let compositeRequest:CompositeRequest = null;

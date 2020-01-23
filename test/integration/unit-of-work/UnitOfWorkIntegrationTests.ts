@@ -3,7 +3,7 @@ import { expect } from 'chai';
 import 'mocha';
 import { beforeEach } from 'mocha';
 
-import { ConnectionConfig, Constants, Context, Logger, Method, SObject, UnitOfWork, UnitOfWorkResponse, UnitOfWorkResult } from '../../../lib';
+import { ConnectionConfig, Constants, Context, Logger, Method, SObject, UnitOfWork, UnitOfWorkResponse, UnitOfWorkResult } from '../../../src';
 import * as tu from '../../TestUtils';
 
 const instanceUrl: string = process.env.SFDC_URL || '<put your server url here>';
