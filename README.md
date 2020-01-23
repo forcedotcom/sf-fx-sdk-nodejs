@@ -33,11 +33,11 @@ export default class HelloFunction {
 
 ## Publish salesforce-sdk
 
-`salesforce-sdk` is published to [https://www.npmjs.com/package/@heroku/salesforce-sdk](https://www.npmjs.com/package/@heroku/salesforce-sdk).
+`salesforce-sdk` is published to [https://www.npmjs.com/package/@salesforce/salesforce-sdk](https://www.npmjs.com/package/@salesforce/salesforce-sdk).
 
-Note: Requires access to `@heroku/salesforce-sdk`.
+Note: Requires access to `@salesforce/salesforce-sdk`.
 
-To publish to `@heroku/salesforce-sdk`:
+To publish to `@salesforce/salesforce-sdk`:
 
 1. Ensure you have latest source locally.
 ```bash
