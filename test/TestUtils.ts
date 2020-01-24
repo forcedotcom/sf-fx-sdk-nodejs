@@ -2,6 +2,7 @@
 import { expect } from 'chai';
 import 'mocha';
 import * as sinon from 'sinon';
+import { Logger } from '@salesforce/core';
 
 import {
     CompositeApi,
@@ -11,9 +12,10 @@ import {
     CompositeSubresponse,
     ConnectionConfig,
     Context,
-    InsertCompositeSubrequestBuilder,
-    NO_OP_LOGGER }
+    InsertCompositeSubrequestBuilder }
 from '../src';
+
+const NO_OP_LOGGER = new Logger({name: 'test', level: 100});
 
 const httpCodeCreated:number = 201;
 

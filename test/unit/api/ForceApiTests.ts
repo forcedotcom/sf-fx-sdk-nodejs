@@ -5,9 +5,11 @@ import 'mocha';
 import * as sinon from 'sinon';
 use(chaiAsPromised);
 import * as jsforce from 'jsforce';
+import { Logger } from '@salesforce/core';
 
-import { ForceApi, NO_OP_LOGGER, SObject } from '../../../src';
+import { ForceApi, SObject } from '../../../src';
 
+const NO_OP_LOGGER = new Logger({name: 'test', level: 100});
 
 //   T E S T S
 

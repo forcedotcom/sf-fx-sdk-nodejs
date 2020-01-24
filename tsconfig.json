@@ -1,14 +1,14 @@
 {
     "compilerOptions": {
         "module": "commonjs",
-        "outDir": "./dist",
+        "outDir": "./lib",
         "target": "es2017",
         "lib": [
             "es2017"
         ],
         "sourceMap": true,
         "declaration":true,
-        "declarationDir": "./dist",
+        "declarationDir": "./lib",
         "moduleResolution": "node",
         "emitDecoratorMetadata": true,
         "experimentalDecorators": true,
@@ -16,7 +16,7 @@
         "alwaysStrict": true,
         "pretty": true,
         "typeRoots": [
-            "./node_modules/@types", "./src/@types"
+            "./node_modules/@types"
         ]
     },
     "include": [
@@ -24,6 +24,7 @@
     ],
     "exclude": [
         "./node_modules",
-        "./dist"
+        "./dist",
+        "./lib"
     ]
 }
