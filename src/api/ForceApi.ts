@@ -18,8 +18,7 @@ export class ForceApi {
      * @param soql - SOQL to be executed.
      * @return Query<QueryResult<T>>
      */
-    public query<T>(soql: string): Query<QueryResult<T>> {
-        // REVIEWME: return sdk.SObject?
+    public query<T extends SObject = SObject>(soql: string): Query<QueryResult<T>> {
         return this.connect().query(soql);
     }
 
@@ -29,8 +28,7 @@ export class ForceApi {
      * @param locator - query locator.
      * @return Promise<QueryResult<T>>
      */
-    public queryMore<T>(locator: string): Promise<QueryResult<T>> {
-        // REVIEWME: return sdk.SObject?
+    public queryMore<T extends SObject = SObject>(locator: string): Promise<QueryResult<T>> {
         return this.connect().query(locator);
     }
 
