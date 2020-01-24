@@ -2,8 +2,10 @@ import { BearerCredentialHandler } from 'typed-rest-client/Handlers';
 import { HttpClient, HttpClientResponse, HttpCodes } from 'typed-rest-client/HttpClient';
 import { IHeaders } from 'typed-rest-client/Interfaces';
 
-import { CompositeRequest, CompositeSubrequest } from './';
-import { ConnectionConfig, Error, Logger } from './../..';
+import { ConnectionConfig, Error, Logger } from '../..';
+
+import { CompositeRequest } from './CompositeRequest';
+import { CompositeSubrequest } from './CompositeSubrequest';
 
 export class CompositeSubresponse {
     private static HEADER_LOCATION: string = 'Location';

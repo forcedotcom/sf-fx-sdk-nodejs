@@ -1,19 +1,26 @@
 import {
-    CompositeApi,
-    CompositeRequest,
-    CompositeResponse,
-    CompositeSubrequest,
-    CompositeSubrequestBuilder,
-    CompositeSubresponse,
     ConnectionConfig,
-    DeleteCompositeSubrequestBuilder,
     Error,
-    InsertCompositeSubrequestBuilder,
     Logger,
     Method,
-    PatchCompositeSubrequestBuilder,
     SObject
 } from './../..';
+
+import { CompositeRequest } from './CompositeRequest';
+
+import {
+    CompositeApi,
+    CompositeResponse,
+    CompositeSubresponse
+} from './CompositeApi';
+
+import {
+    CompositeSubrequest,
+    CompositeSubrequestBuilder,
+    DeleteCompositeSubrequestBuilder,
+    InsertCompositeSubrequestBuilder,
+    PatchCompositeSubrequestBuilder
+} from './CompositeSubrequest';
 
 interface IReferenceIdToCompositeSubrequests {
     [key: string]: CompositeSubrequest;

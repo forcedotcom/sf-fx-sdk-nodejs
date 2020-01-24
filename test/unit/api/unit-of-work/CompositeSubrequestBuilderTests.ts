@@ -3,7 +3,10 @@ import { expect } from 'chai';
 import 'mocha';
 
 import {
-    CompositeApi,
+    Method,
+    SObject
+} from '../../../../src';
+import {
     CompositeSubrequest,
     CompositeSubrequestBuilder,
     DeleteCompositeSubrequestBuilder,
@@ -11,10 +14,8 @@ import {
     HttpGETCompositeSubrequestBuilder,
     InsertCompositeSubrequestBuilder,
     PatchCompositeSubrequestBuilder,
-    PutCompositeSubrequestBuilder,
-    Method,
-    SObject }
-from '../../../../src';
+    PutCompositeSubrequestBuilder
+} from '../../../../src/api/unit-of-work/CompositeSubrequest';
 
 describe('CompositeSubrequest Builder Tests', () => {
     /**

@@ -8,16 +8,17 @@ import { HttpCodes } from 'typed-rest-client/HttpClient';
 const httpCodeCreated: number = 201;
 
 import {
-    CompositeApi,
-    CompositeRequest,
-    CompositeResponse,
-    CompositeSubrequest,
-    CompositeSubresponse,
     ConnectionConfig,
     Error,
-    InsertCompositeSubrequestBuilder,
-    NO_OP_LOGGER }
-from '../../../../src';
+    NO_OP_LOGGER
+} from '../../../../src';
+import {
+    CompositeApi,
+    CompositeResponse,
+    CompositeSubresponse,
+} from '../../../../src/api/unit-of-work/CompositeApi';
+import { CompositeRequest } from '../../../../src/api/unit-of-work/CompositeRequest';
+import { CompositeSubrequest, InsertCompositeSubrequestBuilder } from '../../../../src/api/unit-of-work/CompositeSubrequest';
 
 describe('CompositeApi Tests', () => {
 
