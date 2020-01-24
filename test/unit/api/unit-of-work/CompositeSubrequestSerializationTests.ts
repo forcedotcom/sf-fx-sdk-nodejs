@@ -3,7 +3,7 @@ import { expect } from 'chai';
 import 'mocha';
 import { beforeEach } from 'mocha';
 
-import { CompositeApi, CompositeSubrequest, CompositeSubrequestBuilder, InsertCompositeSubrequestBuilder } from '../../../../src';
+import { CompositeSubrequest, CompositeSubrequestBuilder, InsertCompositeSubrequestBuilder } from '../../../../src/api/unit-of-work/CompositeSubrequest';
 
 describe('CompositeSubrequest Serialization Tests', () => {
     let builder:CompositeSubrequestBuilder = null;

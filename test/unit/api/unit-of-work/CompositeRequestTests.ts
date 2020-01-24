@@ -2,7 +2,10 @@
 import { expect } from 'chai';
 import 'mocha';
 
-import { CompositeApi, CompositeRequest, CompositeSubrequest, InsertCompositeSubrequestBuilder, PatchCompositeSubrequestBuilder, SObject } from '../../../../src';
+import { SObject } from '../../../../src';
+import { CompositeRequest } from '../../../../src/api/unit-of-work/CompositeRequest';
+import { CompositeSubrequest, InsertCompositeSubrequestBuilder, PatchCompositeSubrequestBuilder } from '../../../../src/api/unit-of-work/CompositeSubrequest';
+
 
 describe('CompositeRequest Tests', () => {
     let compositeRequest:CompositeRequest = null;
