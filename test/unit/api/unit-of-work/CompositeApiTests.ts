@@ -1,17 +1,15 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* tslint:disable: no-unused-expression */
 import { fail } from 'assert';
 import { expect } from 'chai';
 import 'mocha';
 import nock = require('nock');
 import { HttpCodes } from 'typed-rest-client/HttpClient';
+import { Logger } from '@salesforce/core';
 
-const httpCodeCreated: number = 201;
+const httpCodeCreated = 201;
 
-import {
-    ConnectionConfig,
-    Error,
-    NO_OP_LOGGER
-} from '../../../../src';
+import { ConnectionConfig, Error } from '../../../../src';
 import {
     CompositeApi,
     CompositeResponse,
@@ -20,11 +18,13 @@ import {
 import { CompositeRequest } from '../../../../src/api/unit-of-work/CompositeRequest';
 import { CompositeSubrequest, InsertCompositeSubrequestBuilder } from '../../../../src/api/unit-of-work/CompositeSubrequest';
 
+const NO_OP_LOGGER = new Logger({name: 'test', level: 100});
+
 describe('CompositeApi Tests', () => {
 
-    const instanceUrl: string = 'http://localhost:3000';
-    const apiVersion: string = '45.0';
-    const accessToken: string = 'accessToken1234';
+    const instanceUrl = 'http://localhost:3000';
+    const apiVersion = '45.0';
+    const accessToken = 'accessToken1234';
     const connectionConfig: ConnectionConfig = new ConnectionConfig(accessToken, apiVersion, instanceUrl);
 
     afterEach(() => {
@@ -74,6 +74,7 @@ describe('CompositeApi Tests', () => {
 
         nock(instanceUrl, {
             reqheaders: {
+                // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
                 Authorization(headerValue) {
                     capturedAuthorizationHeader = headerValue;
                     return true;

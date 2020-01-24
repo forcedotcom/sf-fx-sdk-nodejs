@@ -1,4 +1,5 @@
-import { ForceApi, Logger, UnitOfWork } from '..';
+import { Logger } from '@salesforce/core';
+import { ForceApi, UnitOfWork } from '..';
 
 /**
  * Represents invoking user.

@@ -1,7 +1,8 @@
+import { Logger } from '@salesforce/core';
+
 import {
     ConnectionConfig,
     Error,
-    Logger,
     Method,
     SObject
 } from './../..';

@@ -5,24 +5,25 @@ import nock = require('nock');
 import { restore, stub } from 'sinon';
 import { HttpCodes } from 'typed-rest-client/HttpClient';
 import { v4 as uuid } from 'uuid';
+import { Logger } from '@salesforce/core';
 
 import {
     ConnectionConfig,
     Method,
-    NO_OP_LOGGER,
     SObject,
     UnitOfWork,
     UnitOfWorkResponse,
     UnitOfWorkResult }
 from '../../../../src';
 
-const instanceUrl: string = 'http://localhost:3000';
-const apiVersion: string = '45.0';
-const accessToken: string = 'accessToken1234';
+const NO_OP_LOGGER = new Logger({name: 'test', level: 100});
+const instanceUrl = 'http://localhost:3000';
+const apiVersion = '45.0';
+const accessToken = 'accessToken1234';
 const connectionConfig: ConnectionConfig = new ConnectionConfig(accessToken, apiVersion, instanceUrl);
 
-const httpCodeCreated:number = 201;
-const httpCodeNoContent:number = 204;
+const httpCodeCreated = 201;
+const httpCodeNoContent = 204;
 
 describe('UnitOfWork Tests', () => {
     afterEach(() => {
@@ -197,7 +198,7 @@ describe('UnitOfWork Tests', () => {
     });
 
     it('Unit Insert Account and Contact', async () => {
-        let mockedReferenceIds: string[] = [];
+        const mockedReferenceIds: string[] = [];
 
         stub(SObject, 'generateReferenceId').callsFake((type: string) => {
             const mockedReferenceId:string = type + '_' + uuid().replace(/-/g, '');

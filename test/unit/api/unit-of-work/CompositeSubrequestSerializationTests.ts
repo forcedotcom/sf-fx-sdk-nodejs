@@ -53,10 +53,10 @@ describe('CompositeSubrequest Serialization Tests', () => {
     });
 
     it('Body is serialized', () => {
-        const key1: string = 'key1';
-        const value1: string = 'value1';
-        const key2: string = 'key2';
-        const value2: string = 'value2';
+        const key1 = 'key1';
+        const value1 = 'value1';
+        const key2 = 'key2';
+        const value2  = 'value2';
         builder.addValue(key1, value1);
         builder.addValue(key2, value2);
         const jsonObject:object = convertToAndFromJson(builder.build());
@@ -69,10 +69,10 @@ describe('CompositeSubrequest Serialization Tests', () => {
     });
 
     it('Headers are serialized', () => {
-        const key1: string = 'key1';
-        const value1: string = 'value1';
-        const key2: string = 'key2';
-        const value2: string = 'value2';
+        const key1 = 'key1';
+        const value1 = 'value1';
+        const key2 = 'key2';
+        const value2 = 'value2';
         builder.header(key1, value1);
         builder.header(key2, value2);
         const jsonObject:object = convertToAndFromJson(builder.build());

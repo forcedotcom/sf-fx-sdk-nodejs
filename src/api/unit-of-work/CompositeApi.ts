@@ -2,8 +2,9 @@
 import { BearerCredentialHandler } from 'typed-rest-client/Handlers';
 import { HttpClient, HttpClientResponse, HttpCodes } from 'typed-rest-client/HttpClient';
 import { IHeaders } from 'typed-rest-client/Interfaces';
+import { Logger } from '@salesforce/core';
 
-import { ConnectionConfig, Error, Logger } from '../..';
+import { ConnectionConfig, Error } from '../..';
 
 import { CompositeRequest } from './CompositeRequest';
 import { CompositeSubrequest } from './CompositeSubrequest';

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* tslint:disable: no-unused-expression */
 import { expect } from 'chai';
 import 'mocha';
@@ -32,10 +33,10 @@ describe('CompositeSubrequest Builder Tests', () => {
         ];
     };
 
-    const assertSetValuesSucceeds = (builderFactory: any) => {
+    const assertSetValuesSucceeds = (builderFactory: any): void => {
         it(builderFactory.name + ' set values with single value', () => {
-            const key: string = 'key1';
-            const value: string = 'a_string';
+            const key = 'key1';
+            const value = 'a_string';
 
             const builder: CompositeSubrequestBuilder =  new builderFactory().sObjectType('Account');
             expect(builder.addValue(key, value)).to.equal(builder);
@@ -53,10 +54,10 @@ describe('CompositeSubrequest Builder Tests', () => {
         });
 
         it(builderFactory.name + ' set values with multiple values', () => {
-            const key1: string = 'key1';
-            const key2: string = 'key2';
-            const value1: string = 'a_string_1';
-            const value2: string = 'a_string_2';
+            const key1 = 'key1';
+            const key2 = 'key2';
+            const value1 = 'a_string_1';
+            const value2 = 'a_string_2';
             const expectedHeaders: { [key: string]: string } = { key1: value1, key2: value2 };
 
             const builder: CompositeSubrequestBuilder =  new builderFactory().sObjectType('Account');
@@ -78,7 +79,7 @@ describe('CompositeSubrequest Builder Tests', () => {
 
         // Name is syntactic sugar over the value method
         it(builderFactory.name + ' set name', () => {
-            const name: string = 'A Name';
+            const name = 'A Name';
             const builder: CompositeSubrequestBuilder =  new builderFactory().sObjectType('Account');
             expect(builder.named(name)).to.equal(builder);
 
@@ -94,7 +95,7 @@ describe('CompositeSubrequest Builder Tests', () => {
         });
     };
 
-    const assertSetValuesThrows = (builderFactory: any) => {
+    const assertSetValuesThrows = (builderFactory: any): void => {
         it(builderFactory.name + ' value throws', () => {
             const builder: CompositeSubrequestBuilder =  new builderFactory();
             expect(builder.addValue.bind(builder, 'key', 'value')).to.throw(`This request doesn't have a body`);
@@ -144,7 +145,7 @@ describe('CompositeSubrequest Builder Tests', () => {
             });
 
             it(builderFactory.name + ' set api version', () => {
-                const version: string = '4933';
+                const version = '4933';
                 const builder: CompositeSubrequestBuilder =  new builderFactory().sObjectType('Account');
                 expect(builder.apiVersion(version)).to.equal(builder);
 
@@ -155,8 +156,8 @@ describe('CompositeSubrequest Builder Tests', () => {
             });
 
             it(builderFactory.name + ' set header with single header', () => {
-                const key: string = 'key1';
-                const value: string = 'a_string';
+                const key = 'key1';
+                const value = 'a_string';
 
                 const builder: CompositeSubrequestBuilder =  new builderFactory().sObjectType('Account');
                 expect(builder.header(key, value)).to.equal(builder);
@@ -174,10 +175,10 @@ describe('CompositeSubrequest Builder Tests', () => {
             });
 
             it(builderFactory.name + ' set header with multiple headers', () => {
-                const key1: string = 'key1';
-                const key2: string = 'key2';
-                const value1: string = 'a_string_1';
-                const value2: string = 'a_string_2';
+                const key1 = 'key1';
+                const key2 = 'key2';
+                const value1 = 'a_string_1';
+                const value2 = 'a_string_2';
                 const expectedHeaders: { [key: string]: string } = { key1: value1, key2: value2 };
 
                 const builder: CompositeSubrequestBuilder =  new builderFactory().sObjectType('Account');
@@ -255,7 +256,7 @@ describe('CompositeSubrequest Builder Tests', () => {
             const compositeSubrequest: CompositeSubrequest = builder.build();
             expect(compositeSubrequest).to.exist;
 
-            const regExp: RegExp = new RegExp('\\/\\@{' + compositeSubrequest.referenceId + '.id}');
+            const regExp = new RegExp('\\/\\@{' + compositeSubrequest.referenceId + '.id}');
             expect(compositeSubrequest.url).to.match(regExp);
         });
 
@@ -312,7 +313,7 @@ describe('CompositeSubrequest Builder Tests', () => {
             const compositeSubrequest: CompositeSubrequest = builder.build();
             expect(compositeSubrequest).to.exist;
 
-            const regExp: RegExp = new RegExp('\\/\\@{' + compositeSubrequest.referenceId + '.id}');
+            const regExp = new RegExp('\\/\\@{' + compositeSubrequest.referenceId + '.id}');
             expect(compositeSubrequest.url).to.match(regExp);
         });
 
@@ -339,7 +340,7 @@ describe('CompositeSubrequest Builder Tests', () => {
             const compositeSubrequest: CompositeSubrequest = builder.build();
             expect(compositeSubrequest).to.exist;
 
-            const regExp: RegExp = new RegExp('\\/\\@{' + compositeSubrequest.referenceId + '.id}');
+            const regExp = new RegExp('\\/\\@{' + compositeSubrequest.referenceId + '.id}');
             expect(compositeSubrequest.url).to.match(regExp);
         });
 
@@ -367,7 +368,7 @@ describe('CompositeSubrequest Builder Tests', () => {
             const compositeSubrequest: CompositeSubrequest = builder.build();
             expect(compositeSubrequest).to.exist;
 
-            const regExp: RegExp = new RegExp('\\/\\@{' + compositeSubrequest.referenceId + '.id}');
+            const regExp = new RegExp('\\/\\@{' + compositeSubrequest.referenceId + '.id}');
             expect(compositeSubrequest.url).to.match(regExp);
         });
 
