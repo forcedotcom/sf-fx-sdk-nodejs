@@ -1,5 +1,7 @@
+/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars, @typescript-eslint/no-empty-function */
 export class Logger {
     public static create(verbose: boolean): Logger {
+        // eslint-disable-next-line @typescript-eslint/no-use-before-define
         return verbose ? new Logger() : NO_OP_LOGGER;
     }
 
@@ -27,7 +29,7 @@ export class Logger {
         this.emitLogMessage('info', msg, supportingData);
     }
 
-    private emitLogMessage(msgType: 'debug' | 'info' | 'warn' | 'error', msg: string, supportingDetails: any[]) {
+    private emitLogMessage(msgType: 'debug' | 'info' | 'warn' | 'error', msg: string, supportingDetails: any[]): void {
         if (supportingDetails.length > 0) {
             console[msgType](msg, supportingDetails);
         } else {
@@ -48,7 +50,7 @@ class NoOpLogger extends Logger {
 export const NO_OP_LOGGER = new NoOpLogger();
 
 export class Constants {
-    public static CURRENT_API_VERSION: string = '48.0';
+    public static CURRENT_API_VERSION = '48.0';
 }
 
 export interface Error {

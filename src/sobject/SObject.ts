@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { v4 as uuid } from 'uuid';
 
 export interface Values {
@@ -27,7 +28,7 @@ export class SObject {
         return this;
     }
 
-    public setValue(key: string, value: any) {
+    public setValue(key: string, value: any): void {
         this._values[key] = value;
     }
 

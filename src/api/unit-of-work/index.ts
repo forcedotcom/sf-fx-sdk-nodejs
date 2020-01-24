@@ -1,4 +1,8 @@
-export { UnitOfWork, UnitOfWorkResponse, UnitOfWorkResult } from './UnitOfWork';
+export {
+    UnitOfWork,
+    UnitOfWorkResponse,
+    UnitOfWorkResult
+} from './UnitOfWork';
 
 export enum Method {
     DELETE = 'DELETE',
@@ -6,4 +10,4 @@ export enum Method {
     PATCH = 'PATCH',
     POST = 'POST',
     PUT = 'PUT',
-};
+}

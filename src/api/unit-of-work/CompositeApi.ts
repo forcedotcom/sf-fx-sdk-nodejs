@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { BearerCredentialHandler } from 'typed-rest-client/Handlers';
 import { HttpClient, HttpClientResponse, HttpCodes } from 'typed-rest-client/HttpClient';
 import { IHeaders } from 'typed-rest-client/Interfaces';
@@ -8,8 +9,8 @@ import { CompositeRequest } from './CompositeRequest';
 import { CompositeSubrequest } from './CompositeSubrequest';
 
 export class CompositeSubresponse {
-    private static HEADER_LOCATION: string = 'Location';
-    private static KEY_ID: string = 'id';
+    private static HEADER_LOCATION = 'Location';
+    private static KEY_ID = 'id';
 
     public readonly httpHeaders: { [key: string]: string };
     public readonly httpStatusCode: number;
@@ -123,7 +124,7 @@ export class CompositeApi {
             this._connectionConfig.accessToken,
         );
         const httpClient: HttpClient = new HttpClient('sf-fx-node', [bearerCredentialHandler]);
-        const path: string = `/services/data/v${this._connectionConfig.apiVersion}/composite/`;
+        const path = `/services/data/v${this._connectionConfig.apiVersion}/composite/`;
         const headers: IHeaders = { 'Content-Type': 'application/json' };
         const data: string = JSON.stringify(compositeRequest);
 

@@ -1,5 +1,4 @@
-import * as _ from 'lodash';
-import {CompositeSubrequest} from './CompositeSubrequest';
+import { CompositeSubrequest } from './CompositeSubrequest';
 
 export class CompositeRequest {
     private allOrNone: boolean;
