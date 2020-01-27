@@ -75,12 +75,15 @@ export class ForceApi {
     }
 
     private connect(): Connection {
-        return this.conn
-            ? this.conn
-            : (this.conn = new Connection({
-                  accessToken: this.connConfig.accessToken,
-                  instanceUrl: this.connConfig.instanceUrl,
-                  version: this.connConfig.apiVersion,
-              }));
+        if (!this.conn) {
+            this.conn = new Connection({
+                accessToken: this.connConfig.accessToken,
+                instanceUrl: this.connConfig.instanceUrl,
+                version: this.connConfig.apiVersion,
+            });
+            this.logger.trace('connected to instanceUrl=%s version=%s',
+                this.connConfig.instanceUrl, this.connConfig.apiVersion);
+        }
+        return this.conn;
     }
 }

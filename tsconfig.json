@@ -1,26 +1,15 @@
 {
+    "extends": "./node_modules/@salesforce/dev-config/tsconfig",
     "compilerOptions": {
-        "module": "commonjs",
         "outDir": "./lib",
-        "target": "es2017",
-        "lib": [
-            "es2017"
-        ],
-        "sourceMap": true,
-        "declaration":true,
-        "declarationDir": "./lib",
         "moduleResolution": "node",
         "emitDecoratorMetadata": true,
         "experimentalDecorators": true,
         "allowSyntheticDefaultImports": true,
-        "alwaysStrict": true,
         "pretty": true,
-        "typeRoots": [
-            "./node_modules/@types"
-        ]
     },
     "include": [
-        "./src/**/*"
+        "./src/**/*.ts"
     ],
     "exclude": [
         "./node_modules",

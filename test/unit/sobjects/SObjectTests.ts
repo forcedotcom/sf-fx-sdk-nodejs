@@ -1,5 +1,5 @@
 /* tslint:disable: no-unused-expression */
-import { assert, expect } from 'chai';
+import { expect } from 'chai';
 import 'mocha';
 
 import { SObject } from '../../../src';
