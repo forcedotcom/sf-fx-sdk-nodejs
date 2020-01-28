@@ -1,9 +1,9 @@
 {
   "name": "@salesforce/salesforce-sdk",
-  "version": "0.0.2-develop.11",
+  "version": "0.0.1-develop.12",
   "description": "Salesforce SDK for Node.js",
-  "main": "lib/index.js",
-  "types": "lib/index.d.ts",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "directories": {
     "lib": "./dist"
   },
