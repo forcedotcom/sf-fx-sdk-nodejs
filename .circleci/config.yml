@@ -22,9 +22,13 @@ jobs:
             # fallback to using the latest cache if no exact match is found
             - v1-dependencies-
 
-      - run: yarn install
+      - run:
+          name: Install Dependencies
+          command: yarn install
 
-      - run: yarn build
+      - run:
+          name: Build
+          command: yarn build
 
       - save_cache:
           paths:
@@ -32,10 +36,19 @@ jobs:
           key: v1-dependencies-{{ checksum "package.json" }}
 
       # run build (again, to be sure)
-      - run: yarn build
+      - run:
+          name: Build again
+          command: yarn build
 
       # run tests!
-      - run: yarn test
+      - run:
+          name: Run tests
+          command: yarn test
 
       # run tirekick test!
-      - run: yarn tirekick
+      - run:
+          name: Run tirekick Integration test
+          command: yarn tirekick
+          environment:
+            FUNCTION_RESOURCE: http://basic-puffin-6927.descriptive-turnip-7558.morning-ocean-4277.herokuspace.com
+
