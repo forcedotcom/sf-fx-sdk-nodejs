@@ -1,6 +1,8 @@
-export * from './CompositeApi';
-export * from './CompositeRequest';
-export * from './CompositeSubrequest';
+export {
+    UnitOfWork,
+    UnitOfWorkResponse,
+    UnitOfWorkResult
+} from './UnitOfWork';
 
 export enum Method {
     DELETE = 'DELETE',

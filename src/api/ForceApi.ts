@@ -1,6 +1,7 @@
 import { Connection, Query, QueryResult, RecordResult } from 'jsforce';
+import { Logger } from '@salesforce/core';
 
-import { ConnectionConfig, Logger, SObject } from './..';
+import { ConnectionConfig, SObject } from './..';
 
 // REVIEWME: ForceApi exposes jsforce objects.  Re-think.
 export { Query, QueryResult, Connection, RecordResult, SuccessResult, ErrorResult } from 'jsforce';
@@ -17,8 +18,7 @@ export class ForceApi {
      * @param soql - SOQL to be executed.
      * @return Query<QueryResult<T>>
      */
-    public query<T>(soql: string): Query<QueryResult<T>> {
-        // REVIEWME: return sdk.SObject?
+    public query<T extends SObject = SObject>(soql: string): Query<QueryResult<T>> {
         return this.connect().query(soql);
     }
 
@@ -28,8 +28,7 @@ export class ForceApi {
      * @param locator - query locator.
      * @return Promise<QueryResult<T>>
      */
-    public queryMore<T>(locator: string): Promise<QueryResult<T>> {
-        // REVIEWME: return sdk.SObject?
+    public queryMore<T extends SObject = SObject>(locator: string): Promise<QueryResult<T>> {
         return this.connect().query(locator);
     }
 
@@ -76,12 +75,15 @@ export class ForceApi {
     }
 
     private connect(): Connection {
-        return this.conn
-            ? this.conn
-            : (this.conn = new Connection({
-                  accessToken: this.connConfig.accessToken,
-                  instanceUrl: this.connConfig.instanceUrl,
-                  version: this.connConfig.apiVersion,
-              }));
+        if (!this.conn) {
+            this.conn = new Connection({
+                accessToken: this.connConfig.accessToken,
+                instanceUrl: this.connConfig.instanceUrl,
+                version: this.connConfig.apiVersion,
+            });
+            this.logger.trace('connected to instanceUrl=%s version=%s',
+                this.connConfig.instanceUrl, this.connConfig.apiVersion);
+        }
+        return this.conn;
     }
 }

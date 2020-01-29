@@ -1,13 +1,16 @@
 # Node build artifacts
-node_modules
+/node_modules
 npm-debug.log
+**/package-lock.json
 
 # Local development
 .vscode
 .idea
 .DS_Store
-dist
-
+/dist
+/lib
 .sfdx
+*.swp
+*.log
 
-.nyc_output/
+/.nyc_output/

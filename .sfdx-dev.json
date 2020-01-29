@@ -1,0 +1,6 @@
+{
+  "clean": {
+    "skipDefaults": false,
+    "dirs": ["dist"]
+  }
+}

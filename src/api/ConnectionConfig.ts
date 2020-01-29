@@ -8,7 +8,7 @@ export class ConnectionConfig {
         Object.defineProperty(this, 'accessToken', { value: accessToken, writable: false });
     }
 
-    get accessToken() {
+    get accessToken(): string {
         return this.accessToken;
-      }
+    }
 }

@@ -1,5 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import * as _ from 'lodash';
-
 import { Constants, Method, SObject } from '../..';
 
 export class CompositeSubrequest {
@@ -155,6 +155,7 @@ abstract class NoBodyCompositeSubrequestBuilder extends CompositeSubrequestBuild
         super(method, undefined /*This request can't accept any values*/);
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     public addValue(key: string, value: any): CompositeSubrequestBuilder {
         throw new Error(`This request doesn't have a body`);
     }

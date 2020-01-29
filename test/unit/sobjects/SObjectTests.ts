@@ -1,8 +1,8 @@
 /* tslint:disable: no-unused-expression */
-import { assert, expect } from 'chai';
+import { expect } from 'chai';
 import 'mocha';
 
-import { SObject } from '../../../lib';
+import { SObject } from '../../../src';
 
 describe('SObject Tests', () => {
     let sObject: SObject = null;

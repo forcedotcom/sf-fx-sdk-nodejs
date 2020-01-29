@@ -2,7 +2,7 @@
 import { expect } from 'chai';
 import 'mocha';
 
-import { ConnectionConfig } from '../../../lib';
+import { ConnectionConfig } from '../../../src';
 
 describe('Connection Config Tests', () => {
 
