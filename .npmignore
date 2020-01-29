@@ -1,4 +1,10 @@
+DEVELOPING.md
+.circleci
+.eslint*
 lib/
+.prettierrc
+.sfdx-dev.*
+src/
+*.tgz
 tsconfig.json
 tslint.json
-.prettierrc
