@@ -50,5 +50,5 @@ jobs:
           name: Run tirekick Integration test
           command: yarn tirekick
           environment:
-            FUNCTION_RESOURCE: http://basic-puffin-6927.descriptive-turnip-7558.morning-ocean-4277.herokuspace.com
+            FUNCTION_RESOURCE: http://fitted-rattlesnake-5922.still-coconut-4422.blooming-dawn-7421.herokuspace.com
 
