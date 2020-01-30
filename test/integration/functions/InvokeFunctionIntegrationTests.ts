@@ -12,6 +12,7 @@ const functionResource: string = process.env.FUNCTION_RESOURCE || 'http://system
 const functionRequestBody: string = process.env.FUNCTION_REQUEST_BODY;
 const functionRequestBodyFilePath: string = process.env.FUNCTION_REQUEST_BODY_FILEPATH || path.join(__dirname, 'hello-payload.json');
 const functionRequestBodyUrl: string = process.env.FUNCTION_REQUEST_BODY_URL;
+const functionRequestTimeout: number = parseInt(process.env.FUNCTION_REQUEST_TIMEOUT || '60000');
 
 describe('Invoke Function Integration Tests', () => {
 
@@ -33,7 +34,7 @@ describe('Invoke Function Integration Tests', () => {
             json: true, // Automatically parses the JSON string in the response
             method: 'POST',
             resolveWithFullResponse: true,
-            timeout: 10000,
+            timeout: functionRequestTimeout,
             uri: functionResource,
         };
 

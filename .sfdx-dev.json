@@ -1,6 +1,7 @@
 {
   "clean": {
     "skipDefaults": false,
-    "dirs": ["dist"]
+    "dirs": ["dist"],
+    "files": ["*.tgz"]
   }
 }
