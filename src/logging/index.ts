@@ -4,7 +4,7 @@ import * as LoggerTypes from './types/logger';
 
 export class MyLogger implements LoggerTypes.Methods {
 
-    private static formatMessage(msg1: object | string, msg2?: string): object {
+    private static formatMessage(msg1: object | string, msg2?: string) {
         let logEntry: object;
         if (msg2) {
             logEntry = { ...msg1 as object, ...{ message: msg2 } };
@@ -23,19 +23,19 @@ export class MyLogger implements LoggerTypes.Methods {
         this.log = this.createLogger(level, requestId);
     }
 
-    public info(msg1: object | string, msg2?: string): void {
+    public info(msg1: object | string, msg2?: string) {
         this.log.info(MyLogger.formatMessage(msg1, msg2))
     }
 
-    public error(msg1: object | string, msg2?: string): void {
+    public error(msg1: object | string, msg2?: string) {
         this.log.error(MyLogger.formatMessage(msg1, msg2))
     }
 
-    public debug(msg1: object | string, msg2?: string): void {
+    public debug(msg1: object | string, msg2?: string) {
         this.log.debug(MyLogger.formatMessage(msg1, msg2))
     }
 
-    public setLevel(level: LoggerTypes.Level): void {
+    public setLevel(level: LoggerTypes.Level) {
         this.log = this.createLogger(level, this.requestId)
     }
 
@@ -48,7 +48,7 @@ export class MyLogger implements LoggerTypes.Methods {
         });
         if (requestId) {
             winstonLogger = winstonLogger.child({
-                requestId,
+                request_id: requestId,
             });
         }
 
