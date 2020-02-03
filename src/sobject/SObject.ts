@@ -13,7 +13,7 @@ export class SObject {
     public readonly referenceId: string;
     public readonly sObjectType: string;
     public readonly uuid: string;
-    private _id: string;
+    private _id: string | undefined;
     private _values: { [key: string]: any };
 
     constructor(sObjectType: string) {
@@ -37,7 +37,7 @@ export class SObject {
         return this;
     }
 
-    public get id(): string {
+    public get id(): string | undefined {
         return this._id;
     }
 

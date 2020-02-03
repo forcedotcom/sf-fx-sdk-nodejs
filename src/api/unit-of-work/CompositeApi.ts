@@ -16,10 +16,10 @@ export class CompositeSubresponse {
     public readonly httpHeaders: { [key: string]: string };
     public readonly httpStatusCode: number;
     public readonly referenceId: string;
-    private readonly _errors: ReadonlyArray<Error>;
-    private readonly _body: { [key: string]: any };
+    private readonly _errors: ReadonlyArray<Error> | undefined;
+    private readonly _body: { [key: string]: any } | undefined;
 
-    public get body(): { [key: string]: any } {
+    public get body(): { [key: string]: any } | undefined {
         if (this.httpStatusCode < HttpCodes.BadRequest) {
             return this._body;
         } else {
@@ -27,7 +27,7 @@ export class CompositeSubresponse {
         }
     }
 
-    public get errors(): ReadonlyArray<Error> {
+    public get errors(): ReadonlyArray<Error> | undefined {
         if (this.httpStatusCode >= HttpCodes.BadRequest) {
             return this._errors;
         } else {
@@ -35,24 +35,17 @@ export class CompositeSubresponse {
         }
     }
 
-    public get id(): string {
-        if (this.body && this.body[CompositeSubresponse.KEY_ID]) {
-            return this.body[CompositeSubresponse.KEY_ID];
-        } else {
-            return undefined;
-        }
+    public get id(): string | undefined {
+        return this.body == null ? undefined : this.body[CompositeSubresponse.KEY_ID];
     }
 
     public get isSuccess(): boolean {
-        return this.httpStatusCode && this.httpStatusCode < HttpCodes.BadRequest;
+        return this.httpStatusCode != null && this.httpStatusCode < HttpCodes.BadRequest;
     }
 
-    public get location(): string {
-        if (this.httpHeaders && this.httpHeaders[CompositeSubresponse.HEADER_LOCATION]) {
-            return this.httpHeaders[CompositeSubresponse.HEADER_LOCATION];
-        } else {
-            return undefined;
-        }
+    public get location(): string | undefined {
+        return this.httpHeaders != null && this.httpHeaders[CompositeSubresponse.HEADER_LOCATION] != null ?
+            this.httpHeaders[CompositeSubresponse.HEADER_LOCATION] : undefined;
     }
 
     constructor(compositeSubresponse: CompositeSubresponse) {

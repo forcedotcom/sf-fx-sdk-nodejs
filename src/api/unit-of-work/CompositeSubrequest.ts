@@ -31,12 +31,12 @@ export abstract class CompositeSubrequestBuilder {
     public readonly method: Method;
     public readonly httpHeaders: { [key: string]: string };
     public readonly values: { [key: string]: any };
-    protected _referenceId: string;
-    protected _rootReferenceId: string;
+    protected _referenceId: string | undefined;
+    protected _rootReferenceId: string | undefined;
     private _apiVersion: string;
-    private _id: string;
-    private _sObjectType: string;
-    private _url: string;
+    private _id: string | undefined;
+    private _sObjectType: string | undefined;
+    private _url: string | undefined;
 
     protected constructor(method: Method, values: { [key: string]: any } = {}) {
         this._apiVersion = Constants.CURRENT_API_VERSION;
@@ -49,23 +49,32 @@ export abstract class CompositeSubrequestBuilder {
         return this._apiVersion;
     }
 
-    public getId(): string {
+    public getId(): string | undefined {
         return this._id;
     }
 
     public getReferenceId(): string {
+        if (this._referenceId == null) {
+            this._referenceId = SObject.generateReferenceId(this.getSObjectType());
+        }
         return this._referenceId;
     }
 
     public getSObjectType(): string {
+        if (this._sObjectType == null) {
+            throw new Error('Type is required');
+        }
         return this._sObjectType;
     }
 
     public getUrl(): string {
+        if (this._url == null) {
+            this._url = this._internalGetUrl();
+        }
         return this._url;
     }
 
-    public id(id: string): CompositeSubrequestBuilder {
+    public id(id: string | undefined): CompositeSubrequestBuilder {
         this._id = id;
         return this;
     }
@@ -117,17 +126,6 @@ export abstract class CompositeSubrequestBuilder {
     }
 
     public build(): CompositeSubrequest {
-        if (!this._sObjectType) {
-            throw new Error('Type is required');
-        }
-
-        // TODO: What is the preferred way to check for null
-        if (!this._referenceId) {
-            this._referenceId = SObject.generateReferenceId(this._sObjectType);
-        }
-
-        this._url = this._internalGetUrl();
-
         return new CompositeSubrequest(this);
     }
 

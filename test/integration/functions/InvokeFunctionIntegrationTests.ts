@@ -21,6 +21,7 @@ describe('Invoke Function Integration Tests', () => {
     }
 
     beforeEach(() => {
+        // noop
     });
 
     it('successfully invokes function (no payload)', async () => {

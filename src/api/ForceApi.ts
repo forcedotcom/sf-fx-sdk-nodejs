@@ -8,7 +8,7 @@ export { Query, QueryResult, Connection, RecordResult, SuccessResult, ErrorResul
 
 export class ForceApi {
 
-    private conn: Connection;
+    private conn: Connection | undefined;
 
     constructor(private connConfig: ConnectionConfig, private logger: Logger) {}
 

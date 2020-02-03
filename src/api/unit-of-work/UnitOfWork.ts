@@ -32,11 +32,11 @@ interface UuidToReferenceIds {
 
 export class UnitOfWorkResult {
     public readonly method: Method;
-    public readonly id: string;
+    public readonly id: string | undefined;
     public readonly isSuccess: boolean;
-    public readonly errors: ReadonlyArray<Error>;
+    public readonly errors: ReadonlyArray<Error> | undefined;
 
-    constructor(method: Method, id: string, isSuccess: boolean, errors: ReadonlyArray<Error>) {
+    constructor(method: Method, id: string | undefined, isSuccess: boolean, errors: ReadonlyArray<Error> | undefined) {
         this.method = method;
         this.id = id;
         this.isSuccess = isSuccess;
@@ -67,7 +67,7 @@ export class UnitOfWorkResponse {
             const compositeSubresponses: ReadonlyArray<CompositeSubresponse> = this._compositeResponse
                 .compositeSubresponses;
 
-            if (compositeSubresponses) {
+            if (compositeSubresponses != undefined) {
                 // Use some so that it can short circuit after finding all relevant elements
                 compositeSubresponses.some((compositeSubresponse: CompositeSubresponse) => {
                     const referenceId: string = compositeSubresponse.referenceId;
@@ -80,9 +80,9 @@ export class UnitOfWorkResponse {
                         }
 
                         const method: Method = compositeSubrequest.method;
-                        const id: string = compositeSubresponse.id;
+                        const id: string | undefined = compositeSubresponse.id;
                         const success: boolean = compositeSubresponse.isSuccess;
-                        let errors: ReadonlyArray<Error>;
+                        let errors: ReadonlyArray<Error> | undefined;
                         if (!success) {
                             errors = compositeSubresponse.errors;
                         }
@@ -92,6 +92,7 @@ export class UnitOfWorkResponse {
                         // 1:1 relationship. Exit if we have found everything
                         return results.length === referenceIds.size;
                     }
+                    return false;
                 });
             }
         }
@@ -99,7 +100,7 @@ export class UnitOfWorkResponse {
         return results;
     }
 
-    public getId(sObject: SObject): string {
+    public getId(sObject: SObject): string | undefined {
         const results: ReadonlyArray<UnitOfWorkResult> = this.getResults(sObject);
         if (results && results.length > 0) {
             return results[0].id;
@@ -112,7 +113,7 @@ export class UnitOfWork {
     private readonly _config: ConnectionConfig;
     private readonly _uuidToReferenceIds: UuidToReferenceIds;
     private readonly _referenceIdToCompositeSubrequests: IReferenceIdToCompositeSubrequests;
-    private logger;
+    private logger: Logger;
 
     constructor(config: ConnectionConfig, logger: Logger) {
         this._config = config;
@@ -137,8 +138,8 @@ export class UnitOfWork {
     }
 
     public registerDeleted(sObject: SObject): void {
-        const id: string = sObject.id;
-        if (!id) {
+        const id: string | undefined = sObject.id;
+        if (id == undefined) {
             throw new Error('Id not provided');
         }
 
