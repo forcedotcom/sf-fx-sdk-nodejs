@@ -2,43 +2,50 @@
 import { expect } from 'chai';
 import 'mocha';
 
-import { SObject } from '../../../src';
+import { Event } from '../../../src';
 
-describe('SObject Tests', () => {
-    let sObject: SObject = null;
+describe('Event Tests', () => {
+    const eventType = 'SomethingHappened__e';
+    let event: Event;
 
     beforeEach(function () {
-        sObject = new SObject('Account');
+        event = new Event(eventType);
     });
 
-    it('sObjectType is Account', () => {
-        expect(sObject.sObjectType).to.equal('Account');
+    it(`sObjectType is ${eventType}`, () => {
+        expect(event.sObjectType).to.equal(eventType);
+    });
+
+    it(`sObjectType has __e`, () => {
+        const anotherEvent = new Event('SomethingHappened');
+        expect(anotherEvent.sObjectType).to.equal(eventType);
     });
 
     it('uuid exists', () => {
-        expect(sObject.uuid).to.exist;
-        expect(sObject.uuid).to.have.lengthOf(36);
+        expect(event.uuid).to.exist;
+        expect(event.uuid).to.have.lengthOf(36);
     });
 
     it('id is set/get', () => {
         const expectedId = 'an_id';
 
-        sObject.withId(expectedId);
-        expect(sObject.id).to.equal(expectedId);
+        event.withId(expectedId);
+        expect(event.id).to.equal(expectedId);
     });
 
     it('getReferenceId starts with sObjectType Name', () => {
-        expect(sObject.referenceId).to.match(/^Account_/);
-        expect(sObject.referenceId).to.have.lengthOf(40);
+        const regex = new RegExp(`^${eventType}`);
+        expect(event.referenceId).to.match(regex);
+        expect(event.referenceId).to.have.lengthOf(53);
     });
 
     it('setValue with single value', () => {
         const key = 'key1';
         const value: object = { 'Name': 'a_name' };
 
-        sObject.setValue(key, value);
+        event.setValue(key, value);
 
-        const values = sObject.values;
+        const values = event.values;
         expect(values).to.exist;
 
         const keys: string[] = Object.keys(values);
@@ -54,10 +61,10 @@ describe('SObject Tests', () => {
         const value1: object = { 'Name': 'a_name' };
         const value2 = 'a_string';
 
-        sObject.setValue(key1, value1);
-        sObject.setValue(key2, value2);
+        event.setValue(key1, value1);
+        event.setValue(key2, value2);
 
-        const values = sObject.values;
+        const values = event.values;
         expect(values).to.exist;
 
         const keys: string[] = Object.keys(values);

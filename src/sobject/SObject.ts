@@ -5,6 +5,9 @@ export interface Values {
     [key: string]: any;
 }
 
+/**
+ * Represents a SObject instance.
+ */
 export class SObject {
     public static generateReferenceId(type: string): string {
         return `${type}_` + uuid().replace(/-/g, '');
@@ -17,6 +20,9 @@ export class SObject {
     private _values: { [key: string]: any };
 
     constructor(sObjectType: string) {
+        if (!sObjectType) {
+            throw new Error('SObject type is required.')
+        }
         this.referenceId = SObject.generateReferenceId(sObjectType);
         this.sObjectType = sObjectType;
         this.uuid = uuid();

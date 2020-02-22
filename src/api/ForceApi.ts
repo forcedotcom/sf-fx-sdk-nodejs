@@ -1,9 +1,8 @@
 import { Connection, Query, QueryResult, RecordResult } from 'jsforce';
 import { Logger } from '@salesforce/core';
 
-import { ConnectionConfig, SObject } from './..';
+import { ConnectionConfig, Event, SObject } from './..';
 
-// REVIEWME: ForceApi exposes jsforce objects.  Re-think.
 export { Query, QueryResult, Connection, RecordResult, SuccessResult, ErrorResult } from 'jsforce';
 
 export class ForceApi {
@@ -33,9 +32,9 @@ export class ForceApi {
     }
 
     /**
-     * Insert a salesforce object.
+     * Insert an SObject.
      *
-     * @param sobjects - same typed Salesforce objects to save
+     * @param sobject - sobject to insert
      * @returns Promise<(RecordResult)>
      */
     public insert(sobject: SObject): Promise<RecordResult> {
@@ -45,10 +44,10 @@ export class ForceApi {
     }
 
     /**
-     * Update a salesforce object.
+     * Update an SObject.
      *
-     * @param sobjects - same typed Salesforce object to save
-     * @returns Promise<ForceResponse>
+     * @param sobject - sobject to update
+     * @returns Promise<RecordResult>
      */
     public update(sobject: SObject): Promise<RecordResult> {
         return this.connect()
@@ -57,7 +56,22 @@ export class ForceApi {
     }
 
     /**
-     * Invoke given URI.
+     * Publish Platform Event.
+     *
+     * @param event - event to insert
+     * @returns Promise<(RecordResult)>
+     */
+    public publishEvent(event: Event): Promise<RecordResult> {
+        return this.insert(event);
+    }
+
+    /**
+     * Invoke given endpoint.
+     * 
+     * Endpoint can be:
+     *   - absolute URL,
+     *   - relative path from root ('/services/data/v32.0/sobjects/Account/describe'), or 
+     *   - relative path from version root ('/sobjects/Account/describe').
      *
      * @param method
      * @param url
