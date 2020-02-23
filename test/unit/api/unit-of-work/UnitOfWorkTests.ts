@@ -9,6 +9,7 @@ import { Logger } from '@salesforce/core';
 
 import {
     ConnectionConfig,
+    Constants,
     Method,
     SObject,
     UnitOfWork,
@@ -18,7 +19,7 @@ from '../../../../src';
 
 const NO_OP_LOGGER = new Logger({name: 'test', level: 100});
 const instanceUrl = 'http://localhost:3000';
-const apiVersion = '45.0';
+const apiVersion = Constants.CURRENT_API_VERSION;
 const accessToken = 'accessToken1234';
 const connectionConfig: ConnectionConfig = new ConnectionConfig(accessToken, apiVersion, instanceUrl);
 
@@ -41,7 +42,7 @@ describe('UnitOfWork Tests', () => {
                 'compositeResponse':
                     [{
                         'body': { 'id': '001xx000003EG4jAAG', 'success': true, 'errors': [] },
-                        'httpHeaders': { 'Location': '/services/data/v45.0/sobjects/Account/001xx000003EG4jAAG' },
+                        'httpHeaders': { 'Location': `/services/data/v${Constants.CURRENT_API_VERSION}/sobjects/Account/001xx000003EG4jAAG` },
                         'httpStatusCode': httpCodeCreated,
                         'referenceId': account.referenceId
                     }]
@@ -127,7 +128,7 @@ describe('UnitOfWork Tests', () => {
                 'compositeResponse': [
                     {
                         'body': { 'id': '001xx000003EG6oAAG', 'success': true, 'errors': [] },
-                        'httpHeaders': { 'Location': '/services/data/v45.0/sobjects/Account/001xx000003EG6oAAG' },
+                        'httpHeaders': { 'Location': `/services/data/v${Constants.CURRENT_API_VERSION}/sobjects/Account/001xx000003EG6oAAG` },
                         'httpStatusCode': httpCodeCreated,
                         'referenceId': account.referenceId
                     },
@@ -222,13 +223,13 @@ describe('UnitOfWork Tests', () => {
             .reply(HttpCodes.OK, {
                 'compositeResponse': [{
                     'body': { 'id': '001xx000003EG4jAAG', 'success': true, 'errors': [] },
-                    'httpHeaders': { 'Location': '/services/data/v45.0/sobjects/Account/003xx000003EG4jAAG' },
+                    'httpHeaders': { 'Location': `/services/data/v${Constants.CURRENT_API_VERSION}/sobjects/Account/003xx000003EG4jAAG` },
                     'httpStatusCode': httpCodeCreated,
                     'referenceId': mockedReferenceIds[0]
                 },
                 {
                     'body': { 'id': '003xx000003EG4jAAG', 'success': true, 'errors': [] },
-                    'httpHeaders': { 'Location': '/services/data/v45.0/sobjects/Contact/003xx000003EG4jAAG' },
+                    'httpHeaders': { 'Location': `/services/data/v${Constants.CURRENT_API_VERSION}/sobjects/Contact/003xx000003EG4jAAG` },
                     'httpStatusCode': httpCodeCreated,
                     'referenceId': mockedReferenceIds[1]
                 }]

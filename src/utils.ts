@@ -1,5 +1,5 @@
 export class Constants {
-    public static CURRENT_API_VERSION = '48.0';
+    public static CURRENT_API_VERSION = process.env.SALESFORCE_API_VERSION || '48.0';
 }
 
 export interface Error {

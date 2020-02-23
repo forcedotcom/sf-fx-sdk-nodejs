@@ -1,3 +1,3 @@
 export * from './ConnectionConfig';
-export * from './ForceApi';
+export * from './DataApi';
 export * from './unit-of-work';

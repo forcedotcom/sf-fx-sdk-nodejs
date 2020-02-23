@@ -1,12 +1,11 @@
 import { Connection, Query, QueryResult, RecordResult } from 'jsforce';
 import { Logger } from '@salesforce/core';
 
-import { ConnectionConfig, SObject } from './..';
+import { ConnectionConfig, SObject } from '..';
 
-// REVIEWME: ForceApi exposes jsforce objects.  Re-think.
 export { Query, QueryResult, Connection, RecordResult, SuccessResult, ErrorResult } from 'jsforce';
 
-export class ForceApi {
+export class DataApi {
 
     private conn: Connection;
 

@@ -9,7 +9,7 @@ import { Logger } from '@salesforce/core';
 
 const httpCodeCreated = 201;
 
-import { ConnectionConfig, Error } from '../../../../src';
+import { ConnectionConfig, Constants, Error } from '../../../../src';
 import {
     CompositeApi,
     CompositeResponse,
@@ -23,7 +23,7 @@ const NO_OP_LOGGER = new Logger({name: 'test', level: 100});
 describe('CompositeApi Tests', () => {
 
     const instanceUrl = 'http://localhost:3000';
-    const apiVersion = '45.0';
+    const apiVersion = Constants.CURRENT_API_VERSION;
     const accessToken = 'accessToken1234';
     const connectionConfig: ConnectionConfig = new ConnectionConfig(accessToken, apiVersion, instanceUrl);
 
@@ -107,7 +107,7 @@ describe('CompositeApi Tests', () => {
                 compositeResponse: [
                     {
                         body: { id: '001xx000003EG3oAAG', success: true, errors: [] },
-                        httpHeaders: { Location: '/services/data/v45.0/sobjects/Account/001xx000003EG3oAAG' },
+                        httpHeaders: { Location: `/services/data/v${Constants.CURRENT_API_VERSION}/sobjects/Account/001xx000003EG3oAAG` },
                         httpStatusCode: httpCodeCreated,
                         referenceId: compositeSubRequest.referenceId,
                     },
@@ -150,7 +150,7 @@ describe('CompositeApi Tests', () => {
                 compositeResponse: [
                     {
                         body: { id: '001xx000003EG3oAAG', success: true, errors: [] },
-                        httpHeaders: { Location: '/services/data/v45.0/sobjects/Account/001xx000003EG3oAAG' },
+                        httpHeaders: { Location: `/services/data/v${Constants.CURRENT_API_VERSION}/sobjects/Account/001xx000003EG3oAAG` },
                         httpStatusCode: httpCodeCreated,
                         referenceId: compositeSubRequest.referenceId,
                     },
@@ -167,9 +167,9 @@ describe('CompositeApi Tests', () => {
         const headers: { [key: string]: string } = compositeSubResponse.httpHeaders;
         expect(headers).to.exist;
         expect(Object.keys(headers)).lengthOf(1);
-        expect(headers.Location).to.equal('/services/data/v45.0/sobjects/Account/001xx000003EG3oAAG');
+        expect(headers.Location).to.equal(`/services/data/v${Constants.CURRENT_API_VERSION}/sobjects/Account/001xx000003EG3oAAG`);
         expect(compositeSubResponse.location).to.exist;
-        expect(compositeSubResponse.location).to.equal('/services/data/v45.0/sobjects/Account/001xx000003EG3oAAG');
+        expect(compositeSubResponse.location).to.equal(`/services/data/v${Constants.CURRENT_API_VERSION}/sobjects/Account/001xx000003EG3oAAG`);
     });
 
     it('Composite Api Correctly Parses response body', async () => {
@@ -188,7 +188,7 @@ describe('CompositeApi Tests', () => {
                 compositeResponse: [
                     {
                         body: { id: '001xx000003EG3oAAG', success: true, errors: [] },
-                        httpHeaders: { Location: '/services/data/v45.0/sobjects/Account/001xx000003EG3oAAG' },
+                        httpHeaders: { Location: `/services/data/v${Constants.CURRENT_API_VERSION}/sobjects/Account/001xx000003EG3oAAG` },
                         httpStatusCode: httpCodeCreated,
                         referenceId: compositeSubRequest.referenceId,
                     },
@@ -229,7 +229,7 @@ describe('CompositeApi Tests', () => {
                 compositeResponse: [
                     {
                         body: { id: '001xx000003EG3oAAG', success: true, errors: [] },
-                        httpHeaders: { Location: '/services/data/v45.0/sobjects/Account/001xx000003EG3oAAG' },
+                        httpHeaders: { Location: `/services/data/v${Constants.CURRENT_API_VERSION}/sobjects/Account/001xx000003EG3oAAG` },
                         httpStatusCode: httpCodeCreated,
                         referenceId: compositeSubRequest.referenceId,
                     },
@@ -352,7 +352,7 @@ describe('CompositeApi Tests', () => {
                 compositeResponse: [
                     {
                         body: { id: '001xx000003EG3oAAG', success: true, errors: [] },
-                        httpHeaders: { Location: '/services/data/v45.0/sobjects/Account/001xx000003EG3oAAG' },
+                        httpHeaders: { Location: `/services/data/v${Constants.CURRENT_API_VERSION}/sobjects/Account/001xx000003EG3oAAG` },
                         httpStatusCode: httpCodeCreated,
                         referenceId: compositeSubRequest.referenceId,
                     },

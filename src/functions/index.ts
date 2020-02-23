@@ -1,5 +1,5 @@
 import { Logger } from '@salesforce/core';
-import { ForceApi, UnitOfWork } from '..';
+import { DataApi, UnitOfWork } from '..';
 
 /**
  * Represents invoking user.
@@ -17,14 +17,14 @@ export class UserContext {
 
 /**
  * Respresents the context of the function invocation including objects needed by functions to
- * perform their action(s), eg ForceAPI to interact with the invoking org.
+ * perform their action(s), eg DataAPI to interact with the invoking org.
  */
 export class Context {
     public constructor(
         public readonly apiVersion: string,
         public readonly userContext: UserContext,
         public readonly logger: Logger,
-        public readonly forceApi?: ForceApi,
+        public readonly dataApi?: DataApi,
         public readonly unitOfWork?: UnitOfWork
         ) { }
 }
