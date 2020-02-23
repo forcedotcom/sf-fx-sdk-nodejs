@@ -2,14 +2,14 @@
 import { expect } from 'chai';
 import 'mocha';
 
-import { Event } from '../../../src';
+import { PlatformEvent } from '../../../src';
 
-describe('Event Tests', () => {
+describe('Platform Event Tests', () => {
     const eventType = 'SomethingHappened__e';
-    let event: Event;
+    let event: PlatformEvent;
 
     beforeEach(function () {
-        event = new Event(eventType);
+        event = new PlatformEvent(eventType);
     });
 
     it(`sObjectType is ${eventType}`, () => {
@@ -17,7 +17,7 @@ describe('Event Tests', () => {
     });
 
     it(`sObjectType has __e`, () => {
-        const anotherEvent = new Event('SomethingHappened');
+        const anotherEvent = new PlatformEvent('SomethingHappened');
         expect(anotherEvent.sObjectType).to.equal(eventType);
     });
 

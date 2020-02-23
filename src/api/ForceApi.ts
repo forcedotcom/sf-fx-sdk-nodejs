@@ -1,7 +1,7 @@
 import { Connection, Query, QueryResult, RecordResult } from 'jsforce';
 import { Logger } from '@salesforce/core';
 
-import { ConnectionConfig, Event, SObject } from './..';
+import { ConnectionConfig, PlatformEvent, SObject } from './..';
 
 export { Query, QueryResult, Connection, RecordResult, SuccessResult, ErrorResult } from 'jsforce';
 
@@ -58,10 +58,10 @@ export class ForceApi {
     /**
      * Publish Platform Event.
      *
-     * @param event - event to insert
+     * @param event - Platform Event to insert
      * @returns Promise<(RecordResult)>
      */
-    public publishEvent(event: Event): Promise<RecordResult> {
+    public publishEvent(event: PlatformEvent): Promise<RecordResult> {
         return this.insert(event);
     }
 

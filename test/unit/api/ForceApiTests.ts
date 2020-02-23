@@ -11,10 +11,10 @@ import {
     Connection,
     Constants,
     ErrorResult,
-    Event,
     ForceApi,
     Logger,
     QueryResult,
+    PlatformEvent,
     RecordResult,
     SObject,
     SuccessResult,
@@ -169,9 +169,9 @@ describe('ForceApi Tests', () => {
         }
     });
 
-    it('should publish event (SuccessResult)', async () => {
+    it('should publish platform event (SuccessResult)', async () => {
         const forceApi = new ForceApi(undefined, NO_OP_LOGGER);
-        const event: Event = new Event('SomethingHappened__e');
+        const event = new PlatformEvent('SomethingHappened__e');
         event.setValue('Value', 'Value');
         const fakeResult: SuccessResult = {
             id: 'IDHERE',

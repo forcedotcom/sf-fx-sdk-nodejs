@@ -9,8 +9,8 @@ import { Logger } from '@salesforce/core';
 
 import {
     ConnectionConfig,
-    Event,
     Method,
+    PlatformEvent,
     SObject,
     UnitOfWork,
     UnitOfWorkResponse,
@@ -198,7 +198,7 @@ describe('UnitOfWork Tests', () => {
         expect(uowResult.id).to.not.exist;
     });
 
-    it('Unit Insert Account, Contact, and Event', async () => {
+    it('Unit Insert Account, Contact, and PlatformEvent', async () => {
         const mockedReferenceIds: string[] = [];
 
         stub(SObject, 'generateReferenceId').callsFake((type: string) => {
@@ -214,7 +214,7 @@ describe('UnitOfWork Tests', () => {
         contact.setValue('LastName', `LastName - ${new Date()}`);
         contact.setValue('AccountId', account.fkId);
 
-        const event = new Event('SomethingHappened');
+        const event = new PlatformEvent('SomethingHappened');
         event.setValue('Value', `Value - ${new Date()}`);
 
         const uow: UnitOfWork = new UnitOfWork(connectionConfig, NO_OP_LOGGER);
