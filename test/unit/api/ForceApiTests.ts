@@ -14,6 +14,7 @@ import {
     ForceApi,
     Logger,
     QueryResult,
+    PlatformEvent,
     RecordResult,
     SObject,
     SuccessResult,
@@ -168,6 +169,32 @@ describe('ForceApi Tests', () => {
         }
     });
 
+    it('should publish platform event (SuccessResult)', async () => {
+        const forceApi = new ForceApi(undefined, NO_OP_LOGGER);
+        const event = new PlatformEvent('SomethingHappened__e');
+        event.setValue('Value', 'Value');
+        const fakeResult: SuccessResult = {
+            id: 'IDHERE',
+            success: true
+        };
+        mockConnection.sobject.callsFake((sobject: string): any => {
+            return {
+                insert(record: jsforce.Record<object>): Promise<RecordResult> {
+                    return Promise.resolve(fakeResult);
+                }
+            };
+        });
+        sandbox.stub(forceApi, 'connect' as any).returns(mockConnection);
+
+        const result = await forceApi.publishEvent(event);
+        assert(result.success);
+        if ('id' in result) { // type narrow
+            expect(result.id).to.equal(fakeResult.id);
+        } else {
+            assert(false);
+        }
+    });
+
     it('should perform request', async () => {
         const forceApi = new ForceApi(undefined, NO_OP_LOGGER);
         const mockResult = {
@@ -181,7 +208,7 @@ describe('ForceApi Tests', () => {
         });
         sandbox.stub(forceApi, 'connect' as any).returns(mockConnection);
 
-        const result = await forceApi.request('GET', '/services/data/v32.0/sobjects/Account/describe', '', { });
+        const result = await forceApi.request('GET', '/services/data/v48.0/sobjects/Account/describe', '', { });
         expect(result['maxBatchSize']).to.equal(mockResult.maxBatchSize);
     });
 

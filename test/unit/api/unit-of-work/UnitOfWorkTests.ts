@@ -10,6 +10,7 @@ import { Logger } from '@salesforce/core';
 import {
     ConnectionConfig,
     Method,
+    PlatformEvent,
     SObject,
     UnitOfWork,
     UnitOfWorkResponse,
@@ -197,7 +198,7 @@ describe('UnitOfWork Tests', () => {
         expect(uowResult.id).to.not.exist;
     });
 
-    it('Unit Insert Account and Contact', async () => {
+    it('Unit Insert Account, Contact, and PlatformEvent', async () => {
         const mockedReferenceIds: string[] = [];
 
         stub(SObject, 'generateReferenceId').callsFake((type: string) => {
@@ -213,9 +214,13 @@ describe('UnitOfWork Tests', () => {
         contact.setValue('LastName', `LastName - ${new Date()}`);
         contact.setValue('AccountId', account.fkId);
 
+        const event = new PlatformEvent('SomethingHappened');
+        event.setValue('Value', `Value - ${new Date()}`);
+
         const uow: UnitOfWork = new UnitOfWork(connectionConfig, NO_OP_LOGGER);
         uow.registerNew(account);
         uow.registerNew(contact);
+        uow.registerNew(event);
 
         nock(instanceUrl)
             .post('/services/data/v' + connectionConfig.apiVersion + '/composite/')
@@ -231,7 +236,18 @@ describe('UnitOfWork Tests', () => {
                     'httpHeaders': { 'Location': '/services/data/v45.0/sobjects/Contact/003xx000003EG4jAAG' },
                     'httpStatusCode': httpCodeCreated,
                     'referenceId': mockedReferenceIds[1]
-                }]
+                },
+                {
+                    'body': { 'id': 'e01xx0000000001AAA', 'success': true,
+                        'errors': [ {
+                            'statusCode': 'OPERATION_ENQUEUED',
+                            'message': '85d962fb-f05c-4ccf-9ee1-ac751d0fc07f',
+                            'fields': [ ]
+                        } ]
+                    },
+                    'httpStatusCode': httpCodeCreated,
+                    'referenceId': mockedReferenceIds[2]
+                  }]
             }
             );
 
@@ -256,5 +272,14 @@ describe('UnitOfWork Tests', () => {
         expect(uowResultContact.method).to.equal(Method.POST);
         expect(uowResultContact.id).to.exist;
         expect(uowResultContact.id).to.match(/^003[A-Za-z0-9]{15}/);
+
+        const eventResults: ReadonlyArray<UnitOfWorkResult> = uowResponse.getResults(event);
+        expect(eventResults).to.exist;
+        expect(eventResults).lengthOf(1);
+        const uowResultEvent: UnitOfWorkResult = eventResults[0];
+        expect(uowResultEvent.isSuccess).to.be.true;
+        expect(uowResultEvent.method).to.equal(Method.POST);
+        expect(uowResultEvent.id).to.exist;
+        expect(uowResultEvent.id).to.match(/^e01[A-Za-z0-9]{15}/);
     });
 });
