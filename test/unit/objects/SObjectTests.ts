@@ -5,7 +5,7 @@ import 'mocha';
 import { SObject } from '../../../src';
 
 describe('SObject Tests', () => {
-    let sObject: SObject = null;
+    let sObject: SObject = new SObject('Undefined');
 
     beforeEach(function () {
         sObject = new SObject('Account');
@@ -34,7 +34,7 @@ describe('SObject Tests', () => {
 
     it('setValue with single value', () => {
         const key = 'key1';
-        const value: object = { 'Name': 'a_name' };
+        const value = { 'Name': 'a_name' };
 
         sObject.setValue(key, value);
 
@@ -51,7 +51,7 @@ describe('SObject Tests', () => {
     it('setValue with multiple values', () => {
         const key1 = 'key1';
         const key2 = 'key2';
-        const value1: object = { 'Name': 'a_name' };
+        const value1 = { 'Name': 'a_name' };
         const value2 = 'a_string';
 
         sObject.setValue(key1, value1);

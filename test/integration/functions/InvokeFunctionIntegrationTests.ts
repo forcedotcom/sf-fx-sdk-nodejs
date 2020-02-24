@@ -9,9 +9,9 @@ import * as validUrl from 'valid-url';
 
 const functionResource: string = process.env.FUNCTION_RESOURCE || 'http://systematic-mamenchisaurus-1957.closed-cauliflower-6487.secret-hamlet-5094.herokuspace.com';
 // Body or filepath to body
-const functionRequestBody: string = process.env.FUNCTION_REQUEST_BODY;
+const functionRequestBody: string | undefined = process.env.FUNCTION_REQUEST_BODY;
 const functionRequestBodyFilePath: string = process.env.FUNCTION_REQUEST_BODY_FILEPATH || path.join(__dirname, 'hello-payload.json');
-const functionRequestBodyUrl: string = process.env.FUNCTION_REQUEST_BODY_URL;
+const functionRequestBodyUrl: string | undefined = process.env.FUNCTION_REQUEST_BODY_URL;
 const functionRequestTimeout: number = parseInt(process.env.FUNCTION_REQUEST_TIMEOUT || '60000');
 
 describe('Invoke Function Integration Tests', () => {
@@ -41,7 +41,7 @@ describe('Invoke Function Integration Tests', () => {
 
         // TODO: Assert none or one of.
         if (functionRequestBody || functionRequestBodyFilePath || functionRequestBodyUrl) {
-            let body;
+            let body = undefined;
             try {
                 body = JSON.parse(functionRequestBody
                     || (functionRequestBodyFilePath && fs.readFileSync(functionRequestBodyFilePath).toString())

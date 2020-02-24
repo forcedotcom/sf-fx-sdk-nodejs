@@ -105,6 +105,7 @@ export class UnitOfWorkResponse {
         if (results && results.length > 0) {
             return results[0].id;
         }
+        return undefined;
     }
 }
 

@@ -68,7 +68,7 @@ describe('UnitOfWork Tests', () => {
     it('Update Existing Account', async () => {
         const account: SObject = new SObject('Account').withId('001xx000003EG4jAAG').named('New Account Name');
 
-        let mockedReferenceId: string;
+        let mockedReferenceId: string | undefined;
 
         stub(SObject, 'generateReferenceId').callsFake((type: string) => {
             mockedReferenceId = type + '_' + uuid().replace(/-/g, '');
@@ -109,7 +109,7 @@ describe('UnitOfWork Tests', () => {
         const account: SObject = new SObject('Account');
         account.setValue('Name', originalName);
 
-        let mockedReferenceId: string;
+        let mockedReferenceId: string | undefined;
 
         stub(SObject, 'generateReferenceId').callsFake((type: string) => {
             mockedReferenceId = type + '_' + uuid().replace(/-/g, '');
@@ -163,7 +163,7 @@ describe('UnitOfWork Tests', () => {
     it('Delete Existing Account', async () => {
         const account: SObject = new SObject('Account').withId('001xx000003EG4jAAG').named('New Account Name');
 
-        let mockedReferenceId: string;
+        let mockedReferenceId: string | undefined;
 
         stub(SObject, 'generateReferenceId').callsFake((type: string) => {
             mockedReferenceId = type + '_' + uuid().replace(/-/g, '');
