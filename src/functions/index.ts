@@ -1,5 +1,5 @@
 import { Logger } from '@salesforce/core';
-import { ForceApi, UnitOfWork } from '..';
+import { ForceApi, Secrets, UnitOfWork } from '..';
 
 /**
  * Represents invoking user.
@@ -25,6 +25,7 @@ export class Context {
         public readonly userContext: UserContext,
         public readonly logger: Logger,
         public readonly forceApi?: ForceApi,
-        public readonly unitOfWork?: UnitOfWork
+        public readonly unitOfWork?: UnitOfWork,
+        public readonly secrets?: Secrets
         ) { }
 }
