@@ -7,13 +7,14 @@ import * as sinon from 'sinon';
 use(chaiAsPromised);
 import * as jsforce from 'jsforce';
 
-import { 
+import {
     Connection,
     Constants,
     DataApi,
     ErrorResult,
     Logger,
     QueryResult,
+    PlatformEvent,
     RecordResult,
     SObject,
     SuccessResult,
@@ -163,6 +164,32 @@ describe('DataApi Tests', () => {
         assert(!result.success);
         if ('errors' in result) { // type narrow
             expect(result.errors).to.equal(fakeResult.errors);
+        } else {
+            assert(false);
+        }
+    });
+
+    it('should publish platform event (SuccessResult)', async () => {
+        const forceApi = new DataApi(undefined, NO_OP_LOGGER);
+        const event = new PlatformEvent('SomethingHappened__e');
+        event.setValue('Value', 'Value');
+        const fakeResult: SuccessResult = {
+            id: 'IDHERE',
+            success: true
+        };
+        mockConnection.sobject.callsFake((sobject: string): any => {
+            return {
+                insert(record: jsforce.Record<object>): Promise<RecordResult> {
+                    return Promise.resolve(fakeResult);
+                }
+            };
+        });
+        sandbox.stub(forceApi, 'connect' as any).returns(mockConnection);
+
+        const result = await forceApi.publishPlatformEvent(event);
+        assert(result.success);
+        if ('id' in result) { // type narrow
+            expect(result.id).to.equal(fakeResult.id);
         } else {
             assert(false);
         }

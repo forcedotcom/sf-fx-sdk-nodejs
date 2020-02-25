@@ -4,18 +4,17 @@ import { DataApi, UnitOfWork } from '..';
 /**
  * Represents a function invocation event.
  */
-export class Event {
+export class InvocationEvent {
     public constructor(
-        public readonly id: string,
-        public readonly type: string,
-        public readonly source: string,
-        public readonly dataContentType: string,
-        public readonly dataSchema: string,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         public readonly data: any,
-        public readonly time: string,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        public readonly headers?: Array<any>,
+        public readonly dataContentType: string,
+        public readonly dataSchema: string,
+        public readonly id: string,
+        public readonly source: string,
+        public readonly time: number,
+        public readonly type: string,
+        public readonly headers?: ReadonlyMap<string, ReadonlyArray<string>>,
     ) {}
 }
 
@@ -32,16 +31,16 @@ export class User {
 
 /**
  * Represents invoking org and user.
- * 
- * For convenience and if the request provides org access, API instances 
- * are initialize and set on this object.
+ *
+ * For convenience and if the request provides org access, API instances
+ * are initialized and set on this object.
  */
 export class Org {
     public constructor(
-        public readonly id: string,
+        public readonly apiVersion: string,
         public readonly baseUrl: string,
         public readonly domainUrl: string,
-        public readonly apiVersion: string,
+        public readonly id: string,
         public readonly user: User,
         public readonly data?: DataApi,
         public readonly unitOfWork?: UnitOfWork,
@@ -60,8 +59,8 @@ export class Org {
 
 /**
  * Respresents the context of the function invocation.
- * 
- * If the request originates from an org, the org object repesents 
+ *
+ * If the request originates from an org, the org object repesents
  * the invoking org and user.
  */
 export class Context {

@@ -2,7 +2,16 @@
 import { expect } from 'chai';
 import 'mocha';
 
-import { ConnectionConfig, Constants, Context, DataApi, Event, Logger, Org, UnitOfWork, User } from '../../../src';
+import {
+  ConnectionConfig,
+  Constants,
+  Context,
+  DataApi,
+  InvocationEvent,
+  Logger,
+  Org,
+  UnitOfWork,
+  User } from '../../../src';
 
 const NO_OP_LOGGER = new Logger({name: 'test', level: 100});
 const instanceUrl = 'http://localhost:3000';
@@ -11,15 +20,17 @@ const accessToken = 'accessToken1234';
 const connectionConfig: ConnectionConfig = new ConnectionConfig(accessToken, apiVersion, instanceUrl);
 
 describe('Function Tests', () => {
-    let event: Event;
+    let event: InvocationEvent;
     let user: User;
     let org: Org;
     let context: Context;
 
     beforeEach(function () {
-        event = new Event('id', 'type', 'source', 'dataContentType', 'dataSchema', 'data', 'time', ['header']);
+        const headers = new Map<string, ReadonlyArray<string>>();
+        headers.set('header1', ['value1', 'value2'])
+        event = new InvocationEvent('data', 'dataContentType', 'dataSchema', 'id', 'source', Date.now(), 'type', headers);
         user = new User('id', 'username', 'onBehalfOfUserId');
-        org = new Org('id', 'baseUrl', 'domainUrl', apiVersion, user, new DataApi(undefined, NO_OP_LOGGER), new UnitOfWork(connectionConfig, NO_OP_LOGGER))
+        org = new Org(apiVersion, 'baseUrl', 'domainUrl', 'id', user, new DataApi(undefined, NO_OP_LOGGER), new UnitOfWork(connectionConfig, NO_OP_LOGGER))
         context = new Context('id', NO_OP_LOGGER, org);
     });
 
@@ -31,7 +42,8 @@ describe('Function Tests', () => {
         expect(event.dataSchema).to.equal('dataSchema');
         expect(event.data).to.equal('data');
         expect(event.data).to.equal('data');
-        expect(event.headers).to.have.lengthOf(1);
+        expect(event.headers.size).to.have.equal(1);
+        expect(event.headers.get('header1')).to.have.lengthOf(2);
     });
 
     it('validate user object', () => {

@@ -21,7 +21,7 @@ describe('SObject Tests', () => {
     });
 
     it('id is set/get', () => {
-        const expectedId: string = 'an_id';
+        const expectedId = 'an_id';
 
         sObject.withId(expectedId);
         expect(sObject.id).to.equal(expectedId);
@@ -33,12 +33,12 @@ describe('SObject Tests', () => {
     });
 
     it('setValue with single value', () => {
-        const key: string = 'key1';
+        const key = 'key1';
         const value: object = { 'Name': 'a_name' };
 
         sObject.setValue(key, value);
 
-        const values: { [key: string]: any } = sObject.values;
+        const values = sObject.values;
         expect(values).to.exist;
 
         const keys: string[] = Object.keys(values);
@@ -49,15 +49,15 @@ describe('SObject Tests', () => {
 
 
     it('setValue with multiple values', () => {
-        const key1: string = 'key1';
-        const key2: string = 'key2';
+        const key1 = 'key1';
+        const key2 = 'key2';
         const value1: object = { 'Name': 'a_name' };
-        const value2: string = 'a_string';
+        const value2 = 'a_string';
 
         sObject.setValue(key1, value1);
         sObject.setValue(key2, value2);
 
-        const values: { [key: string]: any } = sObject.values;
+        const values = sObject.values;
         expect(values).to.exist;
 
         const keys: string[] = Object.keys(values);
