@@ -1,5 +1,5 @@
 import { Logger } from '@salesforce/core';
-import { fs } from '@salesforce/core';
+import * as fs from 'fs';
 import * as path from 'path';
 
 export class Secrets {
@@ -13,14 +13,27 @@ export class Secrets {
         if (kv) {
             return kv;
         }
+
+        // Attempt read of secret file
         const jsonPath = path.join(this.basePath, secretName);
+        let fileBody: string | undefined;
         try {
-            // cache successful reads
-            kv = fs.readJson(jsonPath, false);
-            this.cache[secretName] = kv;
+            fileBody = fs.readFileSync(jsonPath).toString('utf-8');
         } catch (e) {
             this.logger.warn('Failed to read secret file ' + jsonPath + ': ' + e);
-            kv = undefined;
+        }
+
+        // Attempt JSON decode to type: object
+        try {
+            const decoded = JSON.parse(fileBody);
+            if (typeof decoded === 'object') {
+                kv = decoded;
+                this.cache[secretName] = kv;
+            } else {
+                this.logger.warn('Invalid secret (' + secretName + ') content of type: ' + (typeof decoded));
+            }
+        } catch (e) {
+            this.logger.warn('Failed to decode secret file ' + jsonPath + ' as json: ' + e);
         }
         return kv;
     }
