@@ -8,14 +8,24 @@ Note: This feature is in beta and has been released early so we can collect feed
 ```javascript
 import * as sdk from 'salesforce-sdk';
 
-export default class HelloFunction {
+export default async function execute(event: sdk.InvocationEvent, context: sdk.Context, logger: sdk.Logger): Promise<any> {
+    debugger;
 
-    private readonly logger: sdk.Logger;
+    // Invoke function
+    const fx: HelloFunction = new HelloFunction(event, context, logger);
+    const response = await fx.invoke();
 
-    constructor(private readonly event: any,
-                private readonly context: sdk.Context) {
+    return JSON.stringify(response);
+}
+
+
+class HelloFunction {
+
+    constructor(private readonly event: sdk.InvocationEvent,
+                private readonly context: sdk.Context,
+                private readonly logger: sdk.Logger) {
         this.logger = context.logger;
-        this.logger.shout(`${this.getName()}.init()`);
+        this.logger.info(`${this.getName()}.init()`);
     }
 
     public getName(): string {
@@ -23,9 +33,9 @@ export default class HelloFunction {
     }
 
     public async invoke(): Promise<any>  {
-        this.logger.shout(`${this.getName()}.invoke()`);
+        this.logger.info(`${this.getName()}.invoke()`);
 
-        const results = await this.context.forceApi.query('SELECT Name FROM Account');
+        const results = await this.context.org.data.query('SELECT Name FROM Account');
         this.logger.info(JSON.stringify(query));
 
         return results;
@@ -47,16 +57,23 @@ git pull
 ...
 ```
 
-2. Build & test.
+2. Install, build & test.
 ```bash
-npm run build
+yarn install
 ...
 
-npm run test
+yarn test
 ...
+  134 passing (176ms)
+
+...
+$ eslint src --ext .ts
+Done in 11.43s.
+
 ```
 
 Ensure that code coverage meets standards.
+
 
 3. Increment version in `package.json`.
 
@@ -72,12 +89,12 @@ npm publish
 
 May use `np`, eg:
 ```bash
-np 0.0.18-develop.1 --no-release-draft --tag=develop.1 --any-branch
+np 1.0.1 --no-release-draft --tag=1.0.1 --any-branch
 ```
 
 5. Test and push to repo.
 ```bash
-npm install
+yarn install
 ...
 
 git commit -a -m "<updated-version>"
