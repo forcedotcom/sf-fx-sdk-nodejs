@@ -7,11 +7,11 @@ import * as sinon from 'sinon';
 use(chaiAsPromised);
 import * as jsforce from 'jsforce';
 
-import { 
+import {
     Connection,
     Constants,
+    DataApi,
     ErrorResult,
-    ForceApi,
     Logger,
     QueryResult,
     PlatformEvent,
@@ -25,7 +25,7 @@ const NO_OP_LOGGER = new Logger({name: 'test', level: 100});
 
 //   T E S T S
 
-describe('ForceApi Tests', () => {
+describe('DataApi Tests', () => {
 
     let sandbox: sinon.SinonSandbox;
     let mockConnection;
@@ -40,7 +40,7 @@ describe('ForceApi Tests', () => {
     });
 
     it('should perform query', async () => {
-        const forceApi = new ForceApi(undefined, NO_OP_LOGGER);
+        const dataApi = new DataApi(undefined, NO_OP_LOGGER);
         const acct = new SObject('Account').withId('IDHERE').named('NameHere');
         const fakeResult: QueryResult<object> = {
             done: true,
@@ -50,9 +50,9 @@ describe('ForceApi Tests', () => {
         mockConnection.query.callsFake(async(soql: string): Promise<QueryResult<object>> => {
             return Promise.resolve(fakeResult);
         });
-        sandbox.stub(forceApi, 'connect' as any).returns(mockConnection);
+        sandbox.stub(dataApi, 'connect' as any).returns(mockConnection);
 
-        const result = await forceApi.query('SOQL HERE');
+        const result = await dataApi.query('SOQL HERE');
         assert(result.done);
         expect(result.totalSize).to.equal(fakeResult.totalSize);
         expect(result.records).to.equal(fakeResult.records);
@@ -65,7 +65,7 @@ describe('ForceApi Tests', () => {
     });
 
     it('should perform queryMore', async () => {
-        const forceApi = new ForceApi(undefined, NO_OP_LOGGER);
+        const dataApi = new DataApi(undefined, NO_OP_LOGGER);
         const acct2 = new SObject('Account').withId('ID2HERE').named('Name2Here');
         const fakeResult: QueryResult<object> = {
             done: true,
@@ -75,9 +75,9 @@ describe('ForceApi Tests', () => {
         mockConnection.query.callsFake(async(locator: string): Promise<QueryResult<object>> => {
             return Promise.resolve(fakeResult);
         });
-        sandbox.stub(forceApi, 'connect' as any).returns(mockConnection);
+        sandbox.stub(dataApi, 'connect' as any).returns(mockConnection);
 
-        const result = await forceApi.queryMore('LOCATOR_HERE');
+        const result = await dataApi.queryMore('LOCATOR_HERE');
         assert(result.done);
         expect(result.totalSize).to.equal(fakeResult.totalSize);
         expect(result.records).to.equal(fakeResult.records);
@@ -90,7 +90,7 @@ describe('ForceApi Tests', () => {
     });
 
     it('should perform insert', async () => {
-        const forceApi = new ForceApi(undefined, NO_OP_LOGGER);
+        const dataApi = new DataApi(undefined, NO_OP_LOGGER);
         const acct: SObject = new SObject('Account');
         acct.setValue('Name', 'Whatever');
         const fakeResult: SuccessResult = {
@@ -104,9 +104,9 @@ describe('ForceApi Tests', () => {
                 }
             };
         });
-        sandbox.stub(forceApi, 'connect' as any).returns(mockConnection);
+        sandbox.stub(dataApi, 'connect' as any).returns(mockConnection);
 
-        const result = await forceApi.insert(acct);
+        const result = await dataApi.insert(acct);
         assert(result.success);
         if ('id' in result) { // type narrow
             expect(result.id).to.equal(fakeResult.id);
@@ -116,7 +116,7 @@ describe('ForceApi Tests', () => {
     });
 
     it('should perform update (SuccessResult)', async () => {
-        const forceApi = new ForceApi(undefined, NO_OP_LOGGER);
+        const dataApi = new DataApi(undefined, NO_OP_LOGGER);
         const acct: SObject = new SObject('Account');
         acct.setValue('Id', 'IDHERE');
         acct.setValue('Name', 'Whatever');
@@ -131,9 +131,9 @@ describe('ForceApi Tests', () => {
                 }
             };
         });
-        sandbox.stub(forceApi, 'connect' as any).returns(mockConnection);
+        sandbox.stub(dataApi, 'connect' as any).returns(mockConnection);
 
-        const result = await forceApi.update(acct);
+        const result = await dataApi.update(acct);
         assert(result.success);
         if ('id' in result) { // type narrow
             expect(result.id).to.equal(fakeResult.id);
@@ -143,7 +143,7 @@ describe('ForceApi Tests', () => {
     });
 
     it('should perform update (ErrorResult)', async () => {
-        const forceApi = new ForceApi(undefined, NO_OP_LOGGER);
+        const dataApi = new DataApi(undefined, NO_OP_LOGGER);
         const acct: SObject = new SObject('Account');
         acct.setValue('Id', 'IDHERE');
         acct.setValue('Name', 'Whatever');
@@ -158,9 +158,9 @@ describe('ForceApi Tests', () => {
                 }
             };
         });
-        sandbox.stub(forceApi, 'connect' as any).returns(mockConnection);
+        sandbox.stub(dataApi, 'connect' as any).returns(mockConnection);
 
-        const result = await forceApi.update(acct);
+        const result = await dataApi.update(acct);
         assert(!result.success);
         if ('errors' in result) { // type narrow
             expect(result.errors).to.equal(fakeResult.errors);
@@ -170,7 +170,7 @@ describe('ForceApi Tests', () => {
     });
 
     it('should publish platform event (SuccessResult)', async () => {
-        const forceApi = new ForceApi(undefined, NO_OP_LOGGER);
+        const forceApi = new DataApi(undefined, NO_OP_LOGGER);
         const event = new PlatformEvent('SomethingHappened__e');
         event.setValue('Value', 'Value');
         const fakeResult: SuccessResult = {
@@ -186,7 +186,7 @@ describe('ForceApi Tests', () => {
         });
         sandbox.stub(forceApi, 'connect' as any).returns(mockConnection);
 
-        const result = await forceApi.publishEvent(event);
+        const result = await forceApi.publishPlatformEvent(event);
         assert(result.success);
         if ('id' in result) { // type narrow
             expect(result.id).to.equal(fakeResult.id);
@@ -196,7 +196,7 @@ describe('ForceApi Tests', () => {
     });
 
     it('should perform request', async () => {
-        const forceApi = new ForceApi(undefined, NO_OP_LOGGER);
+        const dataApi = new DataApi(undefined, NO_OP_LOGGER);
         const mockResult = {
             encoding: 'UTF-8',
             maxBatchSize : 200,
@@ -206,26 +206,26 @@ describe('ForceApi Tests', () => {
         mockConnection.request.callsFake(async({ }): Promise<object> => {
             return Promise.resolve(mockResult);
         });
-        sandbox.stub(forceApi, 'connect' as any).returns(mockConnection);
+        sandbox.stub(dataApi, 'connect' as any).returns(mockConnection);
 
-        const result = await forceApi.request('GET', '/services/data/v48.0/sobjects/Account/describe', '', { });
+        const result = await dataApi.request('GET', `/services/data/v${Constants.CURRENT_API_VERSION}/sobjects/Account/describe`, '', { });
         expect(result['maxBatchSize']).to.equal(mockResult.maxBatchSize);
     });
 
     it('should lazily connect on first request', async() => {
         // Bad connection config that should fail on first request due to invalid url
         const connConfig = new ConnectionConfig('BadAccessToken', Constants.CURRENT_API_VERSION, 'http://127.0.0.1:99999');
-        const forceApi = new ForceApi(connConfig, NO_OP_LOGGER);
+        const dataApi = new DataApi(connConfig, NO_OP_LOGGER);
 
         // whitebox assertion, connection is lazy
-        expect(forceApi['conn']).to.be.undefined;
+        expect(dataApi['conn']).to.be.undefined;
 
         // conn gets set on first query (even if query errors out, this time due to range of url bad port number)
-        await expect(forceApi.query('FIRST SOQL HERE')).to.be.rejectedWith(RangeError);
-        expect(forceApi['conn']).to.be.ok;
+        await expect(dataApi.query('FIRST SOQL HERE')).to.be.rejectedWith(RangeError);
+        expect(dataApi['conn']).to.be.ok;
 
         // Second invocation retains conn propery
-        await expect(forceApi.query('SECOND SOQL HERE')).to.be.rejectedWith(RangeError);
-        expect(forceApi['conn']).to.be.ok;
+        await expect(dataApi.query('SECOND SOQL HERE')).to.be.rejectedWith(RangeError);
+        expect(dataApi['conn']).to.be.ok;
     });
 });
