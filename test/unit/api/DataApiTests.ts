@@ -170,7 +170,7 @@ describe('DataApi Tests', () => {
     });
 
     it('should publish platform event (SuccessResult)', async () => {
-        const forceApi = new DataApi(undefined, NO_OP_LOGGER);
+        const dataApi = new DataApi(undefined, NO_OP_LOGGER);
         const event = new PlatformEvent('SomethingHappened__e');
         event.setValue('Value', 'Value');
         const fakeResult: SuccessResult = {
@@ -184,9 +184,9 @@ describe('DataApi Tests', () => {
                 }
             };
         });
-        sandbox.stub(forceApi, 'connect' as any).returns(mockConnection);
+        sandbox.stub(dataApi, 'connect' as any).returns(mockConnection);
 
-        const result = await forceApi.publishPlatformEvent(event);
+        const result = await dataApi.publishPlatformEvent(event);
         assert(result.success);
         if ('id' in result) { // type narrow
             expect(result.id).to.equal(fakeResult.id);
