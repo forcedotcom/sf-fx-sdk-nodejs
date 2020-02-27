@@ -5,7 +5,7 @@ import { ConnectionConfig, PlatformEvent, SObject } from './..';
 
 export { Query, QueryResult, Connection, RecordResult, SuccessResult, ErrorResult } from 'jsforce';
 
-export class ForceApi {
+export class DataApi {
 
     private conn: Connection;
 
@@ -61,16 +61,16 @@ export class ForceApi {
      * @param event - Platform Event to insert
      * @returns Promise<(RecordResult)>
      */
-    public publishEvent(event: PlatformEvent): Promise<RecordResult> {
+    public publishPlatformEvent(event: PlatformEvent): Promise<RecordResult> {
         return this.insert(event);
     }
 
     /**
      * Invoke given endpoint.
-     * 
+     *
      * Endpoint can be:
      *   - absolute URL,
-     *   - relative path from root ('/services/data/v32.0/sobjects/Account/describe'), or 
+     *   - relative path from root ('/services/data/v32.0/sobjects/Account/describe'), or
      *   - relative path from version root ('/sobjects/Account/describe').
      *
      * @param method

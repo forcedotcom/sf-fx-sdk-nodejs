@@ -7,7 +7,7 @@ import { ConnectionConfig, Constants, Context, Logger, Method, SObject, UnitOfWo
 import * as tu from '../../TestUtils';
 
 const instanceUrl: string = process.env.SFDC_URL || '<put your server url here>';
-const apiVersion: string = process.env.SFDC_API_VERSION || '45.0';
+const apiVersion: string = Constants.CURRENT_API_VERSION;
 const sessionId: string = process.env.SFDC_SID || '<Put your session id here>';
 const connectionConfig: ConnectionConfig = new ConnectionConfig(instanceUrl, apiVersion, sessionId);
 let uow: UnitOfWork;
@@ -19,7 +19,7 @@ describe('UnitOfWork Integration Tests', () => {
     beforeEach(async () => {
         // This needs to be reinitialized each time becauase Context#create deletes it
         const payload = {
-            Context__c: {
+            context: {
                 apiVersion: Constants.CURRENT_API_VERSION,
                 userContext: {
                     orgDomainUrl: instanceUrl,
@@ -31,8 +31,8 @@ describe('UnitOfWork Integration Tests', () => {
                 },
             }
         };
-        logger = Logger.create(false /*verbose*/);
-        const context: Context = await Context.create(payload, logger);
+        logger = new Logger({name: 'test', level: 100});
+        const context = new Context(payload, logger);
         uow = context.unitOfWork;
     });
 
