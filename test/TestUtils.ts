@@ -2,9 +2,20 @@
 import { expect } from 'chai';
 import 'mocha';
 import * as sinon from 'sinon';
+import { Logger } from '@salesforce/core';
 
-import { CompositeApi, sdk } from '../lib';
-import { ICompositeApi, ICompositeRequest, ICompositeResponse, ICompositeSubrequest, ICompositeSubresponse, IConnectionConfig } from '../lib/Interfaces';
+import {
+    CompositeApi,
+    CompositeRequest,
+    CompositeResponse,
+    CompositeSubrequest,
+    CompositeSubresponse,
+    ConnectionConfig,
+    Context,
+    InsertCompositeSubrequestBuilder }
+from '../src';
+
+const NO_OP_LOGGER = new Logger({name: 'test', level: 100});
 
 const httpCodeCreated:number = 201;
 
@@ -13,20 +24,20 @@ export interface IInsertResponse {
     readonly name: string;
 }
 
-export async function insertAccount(connectionConfig: IConnectionConfig): Promise<IInsertResponse> {
+export async function insertAccount(connectionConfig: ConnectionConfig): Promise<IInsertResponse> {
     const accountName: string = `Account ${new Date()}`;
-    const compositeApi: ICompositeApi = CompositeApi.newCompositeApi(connectionConfig);
-    const compositeRequest: ICompositeRequest = CompositeApi.newCompositeRequest();
-    const compositeSubRequest: ICompositeSubrequest =
-    CompositeApi.insertBuilder().sObjectType('Account').named(accountName).build();
+    const compositeApi: CompositeApi = new CompositeApi(connectionConfig, NO_OP_LOGGER);
+    const compositeRequest: CompositeRequest = new CompositeRequest();
+    const compositeSubRequest: CompositeSubrequest =
+    (new InsertCompositeSubrequestBuilder()).sObjectType('Account').named(accountName).build();
     compositeRequest.addSubrequest(compositeSubRequest);
 
-    const compositeResponse: ICompositeResponse = await compositeApi.invoke(compositeRequest);
+    const compositeResponse: CompositeResponse = await compositeApi.invoke(compositeRequest);
     expect(compositeResponse).to.exist;
     expect(compositeResponse.compositeSubresponses).to.exist;
     expect(compositeResponse.compositeSubresponses).lengthOf(1);
 
-    const compositeSubresponse: ICompositeSubresponse = compositeResponse.compositeSubresponses[0];
+    const compositeSubresponse: CompositeSubresponse = compositeResponse.compositeSubresponses[0];
     expect(compositeSubresponse.isSuccess).to.be.true;
     expect(compositeSubresponse.httpStatusCode).to.equal(httpCodeCreated);
 
@@ -35,30 +46,3 @@ export async function insertAccount(connectionConfig: IConnectionConfig): Promis
     return { id: accountId, name: accountName } as IInsertResponse;
 }
 
-export class FakeFunction implements sdk.SfFunction {
-
-    public initParams: any;
-    public invokeParams: any;
-    public errors: string[];
-
-    constructor(public sandbox: sinon.SinonSandbox) {
-        this.errors = [];
-    }
-
-    public getName() {
-        return this.constructor.name;
-    }
-
-    public init(config: sdk.Config, logger: sdk.Logger): Promise<any> {
-        this.initParams = { config, logger };
-        this.sandbox.stub(logger, 'error').callsFake((message: string) => {
-            this.errors.push(message);
-        });
-        return Promise.resolve(null);
-    }
-
-    public invoke(context: sdk.Context, event: sdk.SfCloudevent): Promise<any> {
-        this.invokeParams = { context, event };
-        return Promise.resolve(null);
-    }
-};
