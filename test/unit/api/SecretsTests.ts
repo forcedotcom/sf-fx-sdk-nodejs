@@ -17,55 +17,33 @@ describe('Secrets Tests', () => {
 
     it('should read good object secret', async () => {
         const secrets = new Secrets(NO_OP_LOGGER, TEST_BASEPATH);
-        const result = secrets.get('testGoodObject');
+        const result = secrets.get('testRegularSecret');
 
         // assert secret properties
-        assert(typeof result === 'object', 'get call returns a JS object');
+        assert(typeof result === 'object', 'get call returns a string -> string Map');
+        console.log(`**DBG result:`);
+        for (const k in result) { console.log(`**DBG ${k}=${result[k]}`); }
         expect(result['key1']).to.equal('value1');
-        expect(result['key2']).to.equal(222);
-        expect(result['key3']).to.equal(true);
+        expect(result['key2']).to.equal('222');  // result is string, not number
+        expect(result['key3']).to.equal('true'); // result is string not boolean
 
         // Second read should return the same object from cache
-        const chk2 = secrets.get('testGoodObject');
+        const chk2 = secrets.get('testRegularSecret');
         assert(Object.is(chk2, result), 'Second get call pulls from cache, not filesystem');
     });
 
-    it('should read good array secret', async () => {
-        const secrets = new Secrets(NO_OP_LOGGER, TEST_BASEPATH);
-        const result = secrets.get('testGoodArray');
-
-        // if secret file happens to be in [x,y,z] array format, is also treated as js object
-        assert(typeof result === 'object', 'get call returns a JS object');
-        expect(result[0]).to.equal('one');
-        expect(result[1]).to.equal(2);
-        expect(result[2]).to.equal(true);
-
-        // Second read should return the same object from cache
-        const chk2 = secrets.get('testGoodArray');
-        assert(Object.is(chk2, result), 'Second get call pulls from cache, not filesystem');
-    });
-
-    it('should fail silently on malformed boolean-only secret file', async () => {
+    it('should get undefined for secret dir that does not exist', async () => {
         const secrets = new Secrets(NO_OP_LOGGER, TEST_BASEPATH);
 
-        // Getting a secret file that contains a bare non-object json value should return undefined
-        const result = secrets.get('testBareBoolean');
+        const result = secrets.get('nonExistentSecret');
         expect(result).to.be.undefined;
     });
 
-    it('should fail silently on malformed badString secret file', async () => {
+    it('should get empty map for secret dir that only contains dotfile(s)', async () => {
         const secrets = new Secrets(NO_OP_LOGGER, TEST_BASEPATH);
 
         // Getting a malformed secret file should return undefined
-        const result = secrets.get('testBadString');
-        expect(result).to.be.undefined;
-    });
-
-    it('should fail silently on non-existent secret', async () => {
-        const secrets = new Secrets(NO_OP_LOGGER, TEST_BASEPATH);
-
-        // Getting non-existent secret file should return undefined
-        const result = secrets.get('testDoesNotExist');
-        expect(result).to.be.undefined;
+        const result = secrets.get('testEmptySecret');
+        expect(result.keys()).to.be.empty;
     });
 });
