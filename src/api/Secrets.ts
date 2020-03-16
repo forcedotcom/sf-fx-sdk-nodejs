@@ -36,14 +36,12 @@ class CacheEntry {
             // Ignore dotfiles or dotdirs in secret dir
             if (!key.startsWith('.')) {
                 const fullPath = path.join(dirPath, key);
-                console.log(`**DBG checking fullPath=${fullPath}`);
                 try {
                     // Only load secrets from readable *files*, ignore directories
                     const pathStat = fs.statSync(fullPath);
                     if (pathStat.isFile()) {
                         const buf = fs.readFileSync(fullPath);
                         ret[key] = buf.toString();
-                        console.log(`**DBG loaded key=${key} value=${ret[key]}`);
                     }
                 } catch (reason) {
                     // Silently ignore unreadable files
@@ -56,14 +54,12 @@ class CacheEntry {
 
     static load(logger: Logger, secretName: string, dirPath: string): CacheEntry {
         const now = Date.now();
-        console.log(`**DBG BEGIN secret=${secretName} dirPath=${dirPath}`);
         try {
             // only load secrets from a parent `secret` dir that exists, is a directory, and
             // has not changed since the last time we loaded secrets from that dir.
             const dirStat = fs.statSync(dirPath);
             if (dirStat.isDirectory()) {
                 const ents = CacheEntry.readDirEntries(logger, dirPath, fs.readdirSync(dirPath));
-                console.log(`**DBG ISDIR found entries=${Object.keys(ents)}`);
                 return new CacheEntry(secretName, now, dirStat.mtimeMs, ents);
             }
         } catch (reason) {
