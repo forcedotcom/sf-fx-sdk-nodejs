@@ -44,7 +44,6 @@ export class Org {
         public readonly user: User,
         public readonly data?: DataApi,
         public readonly unitOfWork?: UnitOfWork,
-        public readonly secrets?: Secrets,
     ) {}
 
     /**
@@ -69,5 +68,6 @@ export class Context {
         public readonly id: string,
         public readonly logger: Logger,
         public readonly org?: Org,
+        public readonly secrets?: Secrets,
         ) {}
 }
