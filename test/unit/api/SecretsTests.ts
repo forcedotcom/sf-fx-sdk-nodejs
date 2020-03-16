@@ -21,8 +21,6 @@ describe('Secrets Tests', () => {
 
         // assert secret properties
         assert(typeof result === 'object', 'get call returns a string -> string Map');
-        console.log(`**DBG result:`);
-        for (const k in result) { console.log(`**DBG ${k}=${result[k]}`); }
         expect(result['key1']).to.equal('value1');
         expect(result['key2']).to.equal('222');  // result is string, not number
         expect(result['key3']).to.equal('true'); // result is string not boolean
