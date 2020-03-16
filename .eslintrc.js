@@ -12,5 +12,7 @@ module.exports = {
   ],
   rules: {
     '@typescript-eslint/interface-name-prefix': 'off',
+    'semi': 'off',
+    '@typescript-eslint/semi': ['error'],
   }
 };

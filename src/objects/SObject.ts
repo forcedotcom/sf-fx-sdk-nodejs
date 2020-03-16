@@ -21,7 +21,7 @@ export class SObject {
 
     constructor(sObjectType: string) {
         if (!sObjectType) {
-            throw new Error('SObject type is required.')
+            throw new Error('SObject type is required.');
         }
         this.referenceId = SObject.generateReferenceId(sObjectType);
         this.sObjectType = sObjectType;

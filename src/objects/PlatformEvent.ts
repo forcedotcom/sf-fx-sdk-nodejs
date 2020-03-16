@@ -1,4 +1,4 @@
-import { SObject } from './SObject'
+import { SObject } from './SObject';
 
 /**
  * Represents a Platform Event.
