@@ -1,5 +1,5 @@
 import { Logger } from '@salesforce/core';
-import { DataApi, UnitOfWork } from '..';
+import { DataApi, Secrets, UnitOfWork } from '..';
 
 /**
  * Represents a function invocation event.
@@ -68,5 +68,6 @@ export class Context {
         public readonly id: string,
         public readonly logger: Logger,
         public readonly org?: Org,
+        public readonly secrets?: Secrets,
         ) {}
 }

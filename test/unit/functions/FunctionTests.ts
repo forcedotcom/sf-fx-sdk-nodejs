@@ -9,9 +9,10 @@ import {
   DataApi,
   InvocationEvent,
   Logger,
-  Org,
+  Org,  
   UnitOfWork,
-  User } from '../../../src';
+  User,
+  Secrets} from '../../../src';
 
 const NO_OP_LOGGER = new Logger({name: 'test', level: 100});
 const instanceUrl = 'http://localhost:3000';
@@ -23,6 +24,7 @@ describe('Function Tests', () => {
     let event: InvocationEvent;
     let user: User;
     let org: Org;
+    let secrets: Secrets;
     let context: Context;
 
     beforeEach(function () {
@@ -30,8 +32,9 @@ describe('Function Tests', () => {
         headers.set('header1', ['value1', 'value2'])
         event = new InvocationEvent('data', 'dataContentType', 'dataSchema', 'id', 'source', Date.now(), 'type', headers);
         user = new User('id', 'username', 'onBehalfOfUserId');
-        org = new Org(apiVersion, 'baseUrl', 'domainUrl', 'id', user, new DataApi(undefined, NO_OP_LOGGER), new UnitOfWork(connectionConfig, NO_OP_LOGGER))
-        context = new Context('id', NO_OP_LOGGER, org);
+        org = new Org(apiVersion, 'baseUrl', 'domainUrl', 'id', user, new DataApi(undefined, NO_OP_LOGGER), new UnitOfWork(connectionConfig, NO_OP_LOGGER));
+        secrets = new Secrets(NO_OP_LOGGER);        
+        context = new Context('id', NO_OP_LOGGER, org, secrets);
     });
 
     it('validate event object', () => {
