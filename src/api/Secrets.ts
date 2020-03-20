@@ -41,7 +41,9 @@ class CacheEntry {
                     const pathStat = fs.statSync(fullPath);
                     if (pathStat.isFile()) {
                         const buf = fs.readFileSync(fullPath);
+                        // make the map result available to both index ([]) and Map.get
                         ret[key] = buf.toString();
+                        ret.set(key, ret[key]);
                     }
                 } catch (reason) {
                     // Silently ignore unreadable files
@@ -105,6 +107,21 @@ export class Secrets {
             ent = this.loadCacheEntry(secretName);
         }
         return ent.getValues();
+    }
+
+    /**
+     * Get a secret value.
+     *
+     * @param secretName name of the secret to load.
+     * @param keyName key within the secret
+     * @returns secret value if successfully looked up, undefined if secret or key does not exist
+     */
+    public getValue(secretName: string, keyName: string): string|undefined {
+        const secret: ReadonlyMap<string, string>|undefined = this.get(secretName);
+        if (secret && secret.has(keyName)) {
+            return secret.get(keyName);
+        }
+        return undefined;
     }
 
     private loadCacheEntry(secretName: string): CacheEntry {
