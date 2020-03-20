@@ -25,6 +25,16 @@ describe('Secrets Tests', () => {
         expect(result['key2']).to.equal('222');  // result is string, not number
         expect(result['key3']).to.equal('true'); // result is string not boolean
 
+        // Verify same results with .get call:
+        expect(result.get('key1')).to.equal('value1');
+        expect(result.get('key2')).to.equal('222');
+        expect(result.get('key3')).to.equal('true');
+
+        // Verify same results with Secrets.getValue call:
+        expect(secrets.getValue('testRegularSecret', 'key1')).to.equal('value1');
+        expect(secrets.getValue('testRegularSecret', 'key2')).to.equal('222');
+        expect(secrets.getValue('testRegularSecret', 'key3')).to.equal('true');
+
         // Second read should return the same object from cache
         const chk2 = secrets.get('testRegularSecret');
         assert(Object.is(chk2, result), 'Second get call pulls from cache, not filesystem');
@@ -35,6 +45,9 @@ describe('Secrets Tests', () => {
 
         const result = secrets.get('nonExistentSecret');
         expect(result).to.be.undefined;
+
+        const resultVal = secrets.getValue('nonExistentSecret', 'key1');
+        expect(resultVal).to.be.undefined;
     });
 
     it('should get empty map for secret dir that only contains dotfile(s)', async () => {
@@ -43,5 +56,11 @@ describe('Secrets Tests', () => {
         // Getting a malformed secret file should return undefined
         const result = secrets.get('testEmptySecret');
         expect(result.keys()).to.be.empty;
+
+        // result should be a Map object that implements a .get method
+        expect(result.get('key1')).to.be.undefined;
+
+        // getValue should also be undefined
+        expect(secrets.getValue('testEmptySecret', 'key1')).to.be.undefined;
     });
 });
