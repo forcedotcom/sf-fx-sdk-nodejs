@@ -1,6 +1,6 @@
 {
   "name": "@salesforce/salesforce-sdk",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "Salesforce SDK for Node.js",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
