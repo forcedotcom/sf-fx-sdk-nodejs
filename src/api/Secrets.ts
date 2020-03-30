@@ -66,7 +66,7 @@ class CacheEntry {
             }
         } catch (reason) {
             // hide dir stat/listing error from caller, just log and return back w/undefined values
-            logger.info(`Failed secret ${secretName} dir listing: ${reason}`);
+            logger.debug(`Failed secret ${secretName} dir listing: ${reason}`);
         }
         return new CacheEntry(secretName, now, undefined, undefined);
     }
