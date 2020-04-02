@@ -5,6 +5,7 @@ lib/
 .prettierrc
 .sfdx-dev.*
 src/
+test/
 *.tgz
 tsconfig.json
 tslint.json
