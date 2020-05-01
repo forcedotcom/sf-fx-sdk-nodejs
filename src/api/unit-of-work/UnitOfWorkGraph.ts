@@ -29,9 +29,13 @@ export class UnitOfWorkGraph {
         }
     }
 
+    public addGraph(unitOfWork: UnitOfWork): UnitOfWorkGraph {
+        this._graphs.push(unitOfWork);
+        return this;
+    }
+
     public newUnitOfWork(): UnitOfWork {
         const uow: UnitOfWork = new UnitOfWork(this._config, this.logger);
-        this.addGraph(uow);
         return uow;
     }
 
@@ -57,9 +61,4 @@ export class UnitOfWorkGraph {
         //     compositeResponse,
         // );
     }
-
-    private addGraph(unitOfWork: UnitOfWork): void {
-        this._graphs.push(unitOfWork);
-    }
-
 }

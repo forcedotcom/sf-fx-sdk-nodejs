@@ -7,3 +7,9 @@ export interface Error {
     readonly errorCode: string;
     readonly fields: ReadonlyArray<string>;
 }
+
+export enum APIVersion {
+    V48 = '48.0',   //CORE version 224
+    V49 = '49.0',   //CORE version 226
+    V50 = '50.0'    //CORE version 228
+}

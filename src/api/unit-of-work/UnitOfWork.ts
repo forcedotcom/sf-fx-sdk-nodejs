@@ -1,6 +1,7 @@
 import { Logger } from '@salesforce/core';
 
 import {
+    APIVersion,
     ConnectionConfig,
     Error,
     Method,
@@ -176,8 +177,20 @@ export class UnitOfWork {
     }
 
     public async commit(): Promise<UnitOfWorkResponse> {
-        const compositeApi: CompositeApi = new CompositeApi(this._config, this.logger);
+        //Use composite API, prior to 228/apiVersion 50.0
+        //Use graph API to get higher limit, planned GA in 228/apiVersion 50.0
+        if(this._config.apiVersion < APIVersion.V50) {
+            return await this.commitComposite();
+        } else {
+            return await this.commitGraph();
+        }
+     }
 
+    /**
+     * Use composite API, prior to 228/apiVersion v50.0
+      */
+    public async commitComposite(): Promise<UnitOfWorkResponse> {
+        const compositeApi: CompositeApi = new CompositeApi(this._config, this.logger);
         const compositeResponse: CompositeResponse = await compositeApi.invoke(this._compositeRequest);
 
         return new UnitOfWorkResponse(
@@ -187,10 +200,13 @@ export class UnitOfWork {
         );
     }
 
+    /**
+     * Use graph API to get higher limit, planned GA in 228/apiVersion=50.0
+     */
     public async commitGraph(): Promise<UnitOfWorkResponse> {
         const uowGraph: UnitOfWorkGraph = new UnitOfWorkGraph(this._config, this.logger, this);
         const compositeGraphResponse: CompositeGraphResponse = await uowGraph.commit();
-        const compositeResponse: CompositeResponse = compositeGraphResponse.graphResponses[0].graphResponse;
+        const compositeResponse: CompositeResponse = compositeGraphResponse.graphResponses[0].compositeResponse;
 
         return new UnitOfWorkResponse(
             this._uuidToReferenceIds,

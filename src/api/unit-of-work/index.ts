@@ -1,8 +1,16 @@
 export {
     UnitOfWork,
     UnitOfWorkResponse,
-    UnitOfWorkResult
+    UnitOfWorkResult,
 } from './UnitOfWork';
+
+export {
+    UnitOfWorkGraph,
+} from './UnitOfWorkGraph';
+
+export {
+    CompositeGraphResponse,
+} from './CompositeApi';
 
 export enum Method {
     DELETE = 'DELETE',

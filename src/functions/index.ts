@@ -1,5 +1,5 @@
 import { Logger } from '@salesforce/core';
-import { DataApi, Secrets, UnitOfWork } from '..';
+import {DataApi, Secrets, UnitOfWork, UnitOfWorkGraph} from '..';
 
 /**
  * Represents a function invocation event.
@@ -44,6 +44,7 @@ export class Org {
         public readonly user: User,
         public readonly data?: DataApi,
         public readonly unitOfWork?: UnitOfWork,
+        public readonly unitOfWorkGraph?: UnitOfWorkGraph
     ) {}
 
     /**
