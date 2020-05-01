@@ -84,11 +84,11 @@ interface CompositeResponseJsonObject {
 export  class CompositeResponse {
     public readonly compositeSubresponses: ReadonlyArray<CompositeSubresponse>;
 
-    public constructor(json: string) {
-        const compositeResponseJsonObject: CompositeResponseJsonObject = JSON.parse(
-            json,
-        ) as CompositeResponseJsonObject;
-        const compositeSubResponses: CompositeSubresponse[] = compositeResponseJsonObject.compositeResponse;
+    public constructor(compositeSubResponses: CompositeSubresponse[]) {
+        // const compositeResponseJsonObject: CompositeResponseJsonObject = JSON.parse(
+        //     json,
+        // ) as CompositeResponseJsonObject;
+        //const compositeSubResponses: CompositeSubresponse[] = compositeResponseJsonObject.compositeResponse;
         if (compositeSubResponses) {
             compositeSubResponses.forEach((element: CompositeSubresponse, index: number) => {
                 // Replace the json object with one that contains the location method
@@ -111,6 +111,44 @@ export  class CompositeResponse {
     }
 }
 
+export class GraphResponse {
+    public readonly graphId: string;
+    public readonly isSuccessful: boolean;
+    public graphResponse: CompositeResponse;
+}
+
+interface GraphResponseJsonObject {
+    graphResponse: GraphResponse[];
+}
+
+export  class CompositeGraphResponse {
+    public readonly graphResponses: ReadonlyArray<GraphResponse>;
+
+    public constructor(json: string) {
+        const graphResponseJsonObject: GraphResponseJsonObject = JSON.parse(
+            json,
+        ) as GraphResponseJsonObject;
+        const graphResponsesArray: GraphResponse[] = graphResponseJsonObject.graphResponse;
+        if (graphResponsesArray) {
+            graphResponsesArray.forEach((graphElement: GraphResponse) => {
+                const compResponse: CompositeResponse = graphElement.graphResponse;
+
+                if (compResponse.compositeSubresponses) {
+                    const compositeSubResponses: CompositeSubresponse[] = [];
+                    compResponse.compositeSubresponses.forEach((element: CompositeSubresponse) => {
+                        // Replace the json object with one that contains the location method
+                        compositeSubResponses.push(new CompositeSubresponse(element));
+                    });
+
+                    const compositeResponse: CompositeResponse = new CompositeResponse(compositeSubResponses);
+                    graphElement.graphResponse = compositeResponse;
+                }
+            });
+        }
+        this.graphResponses = graphResponsesArray as ReadonlyArray<GraphResponse>;
+    }
+}
+
 export class CompositeApi {
     private readonly _connectionConfig: ConnectionConfig;
     private readonly logger: Logger;
@@ -127,7 +165,7 @@ export class CompositeApi {
         const httpClient: HttpClient = new HttpClient('sf-fx-node', [bearerCredentialHandler]);
         const path = `/services/data/v${this._connectionConfig.apiVersion}/composite/`;
         const headers: IHeaders = { 'Content-Type': 'application/json' };
-        const data: string = JSON.stringify(compositeRequest);
+        const data: string = JSON.stringify(compositeRequest, ['allOrNone', 'compositeRequest']);
 
         this.logger.debug(`POST ${path}`);
 
@@ -139,9 +177,41 @@ export class CompositeApi {
 
         if (response.message.statusCode === HttpCodes.OK) {
             const body: string = await response.readBody();
-            const compositeResponse: CompositeResponse = new CompositeResponse(body);
+            const compositeResponseJsonObject: CompositeResponseJsonObject = JSON.parse(
+                body,
+            ) as CompositeResponseJsonObject;
+            const compositeSubResponses: CompositeSubresponse[] = compositeResponseJsonObject.compositeResponse;
+            const compositeResponse: CompositeResponse = new CompositeResponse(compositeSubResponses);
 
             return compositeResponse;
+        } else {
+            throw new Error('Server returned status code: ' + response.message.statusCode);
+        }
+    }
+
+    public async invokeGraph(compositeRequests: CompositeRequest[]): Promise<CompositeGraphResponse> {
+        const bearerCredentialHandler: BearerCredentialHandler = new BearerCredentialHandler(
+            this._connectionConfig.accessToken,
+        );
+        const httpClient: HttpClient = new HttpClient('sf-fx-node', [bearerCredentialHandler]);
+        const path = `/services/data/v${this._connectionConfig.apiVersion}/composite/graph`;
+        const headers: IHeaders = { 'Content-Type': 'application/json' };
+        const graphObj = {graphs : compositeRequests};
+        const data: string = JSON.stringify(graphObj);
+
+        this.logger.debug(`POST ${path}`);
+
+        const response: HttpClientResponse = await httpClient.post(
+            this._connectionConfig.instanceUrl + path,
+            data,
+            headers,
+        );
+
+        if (response.message.statusCode === HttpCodes.OK) {
+            const body: string = await response.readBody();
+            const compositeGraphResponse: CompositeGraphResponse = new CompositeGraphResponse(body);
+
+            return compositeGraphResponse;
         } else {
             throw new Error('Server returned status code: ' + response.message.statusCode);
         }
