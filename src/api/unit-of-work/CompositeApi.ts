@@ -84,11 +84,11 @@ interface CompositeResponseJsonObject {
 export  class CompositeResponse {
     public readonly compositeSubresponses: ReadonlyArray<CompositeSubresponse>;
 
-    public constructor(compositeSubResponses: CompositeSubresponse[]) {
+    public constructor(compositeResponseJsonObject: CompositeResponseJsonObject) {
         // const compositeResponseJsonObject: CompositeResponseJsonObject = JSON.parse(
         //     json,
         // ) as CompositeResponseJsonObject;
-        //const compositeSubResponses: CompositeSubresponse[] = compositeResponseJsonObject.compositeResponse;
+        const compositeSubResponses: CompositeSubresponse[] = compositeResponseJsonObject.compositeResponse;
         if (compositeSubResponses) {
             compositeSubResponses.forEach((element: CompositeSubresponse, index: number) => {
                 // Replace the json object with one that contains the location method
@@ -111,15 +111,28 @@ export  class CompositeResponse {
     }
 }
 
-export class GraphResponse {
-    public readonly graphId: string;
-    public readonly isSuccessful: boolean;
-    public readonly graphResponse: CompositeResponseJsonObject;
-    public compositeResponse: CompositeResponse;
+interface GraphResponseJson {
+    graphId: string;
+    isSuccessful: boolean;
+    graphResponse: CompositeResponseJsonObject;
 }
 
 interface GraphResponseJsonObject {
-    graphs: GraphResponse[];
+    graphs: GraphResponseJson[];
+}
+
+export class GraphResponse {
+    public readonly graphId: string;
+    public readonly isSuccessful: boolean;
+    public compositeResponse: CompositeResponse;
+
+    public constructor(graphResponseJson: GraphResponseJson) {
+        this.graphId = graphResponseJson.graphId;
+        this.isSuccessful = graphResponseJson.isSuccessful;
+
+        const compResponseJson: CompositeResponseJsonObject = graphResponseJson.graphResponse;
+        this.compositeResponse = new CompositeResponse(compResponseJson);
+    }
 }
 
 export  class CompositeGraphResponse {
@@ -129,21 +142,11 @@ export  class CompositeGraphResponse {
         const graphResponseJsonObject: GraphResponseJsonObject = JSON.parse(
             json,
         ) as GraphResponseJsonObject;
-        const graphResponsesArray: GraphResponse[] = graphResponseJsonObject.graphs;
-        if (graphResponsesArray) {
-            graphResponsesArray.forEach((graphElement: GraphResponse) => {
-                const compResponseJosn: CompositeResponseJsonObject = graphElement.graphResponse;
-
-                if (compResponseJosn.compositeResponse) {
-                    const compositeSubResponses: CompositeSubresponse[] = [];
-                    compResponseJosn.compositeResponse.forEach((element: CompositeSubresponse) => {
-                        // Replace the json object with one that contains the location method
-                        compositeSubResponses.push(new CompositeSubresponse(element));
-                    });
-
-                    const compositeResponse: CompositeResponse = new CompositeResponse(compositeSubResponses);
-                    graphElement.compositeResponse = compositeResponse;
-                }
+        const graphResponsesJsonArray: GraphResponseJson[] = graphResponseJsonObject.graphs;
+        const graphResponsesArray: GraphResponse[] = [];
+        if (graphResponsesJsonArray) {
+            graphResponsesJsonArray.forEach((graphElement: GraphResponseJson) => {
+                graphResponsesArray.push(new GraphResponse(graphElement));
             });
         }
         this.graphResponses = graphResponsesArray as ReadonlyArray<GraphResponse>;
@@ -166,12 +169,13 @@ export class CompositeApi {
         const httpClient: HttpClient = new HttpClient('sf-fx-node', [bearerCredentialHandler]);
         const path = `/services/data/v${this._connectionConfig.apiVersion}/composite/`;
         const headers: IHeaders = { 'Content-Type': 'application/json' };
-        const data: string = JSON.stringify(compositeRequest,
-                                    (key,value) => {
-                                                if (key != 'graphId') {
-                                                    return value;
-                                                }
-                                            });
+
+        //Do not stringify 'graphId' field, which is for graph api
+        const data: string = JSON.stringify(compositeRequest, (key,value) => {
+            if (key != 'graphId') {
+                return value;
+            }
+        });
 
         this.logger.debug(`POST ${path}`);
 
@@ -186,8 +190,7 @@ export class CompositeApi {
             const compositeResponseJsonObject: CompositeResponseJsonObject = JSON.parse(
                 body,
             ) as CompositeResponseJsonObject;
-            const compositeSubResponses: CompositeSubresponse[] = compositeResponseJsonObject.compositeResponse;
-            const compositeResponse: CompositeResponse = new CompositeResponse(compositeSubResponses);
+            const compositeResponse: CompositeResponse = new CompositeResponse(compositeResponseJsonObject);
 
             return compositeResponse;
         } else {
