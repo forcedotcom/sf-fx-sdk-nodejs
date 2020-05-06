@@ -14,7 +14,12 @@ import {
 
 import { UnitOfWork } from './UnitOfWork';
 
-
+/**
+ * UnitOfWorkGraph provides enhancement to UnitOfWork that it allows multiple UnitOfWorks to execute in a single call
+ * where each UnitOfWork is transactional
+ *
+ * UnitOfWorkGraph requires apiVersion 50.0 (Winter '21) or above
+ */
 export class UnitOfWorkGraph {
     private _graphs: UnitOfWork[];
     private readonly _config: ConnectionConfig;
@@ -22,7 +27,7 @@ export class UnitOfWorkGraph {
 
     constructor(config: ConnectionConfig, logger: Logger, _unitOfWork?: UnitOfWork) {
         if(config.apiVersion < APIVersion.V50){
-            throw new Error(`UnitOfWorkGraph requires apiVersion v${APIVersion.V50} or up`);
+            throw new Error(`UnitOfWorkGraph requires apiVersion v${APIVersion.V50} or above`);
         }
         this._config = config;
         this.logger = logger;

@@ -48,6 +48,6 @@ describe('UnitOfWorkGraph Tests', () => {
     });
 
     it('New Unit Of Work Graph Requires apiVersion v50.0', async () => {
-        expect(() => { new UnitOfWorkGraph(connectionConfig, NO_OP_LOGGER); }).to.throw('UnitOfWorkGraph requires apiVersion v50.0 or up');
+        expect(() => { new UnitOfWorkGraph(connectionConfig, NO_OP_LOGGER); }).to.throw('UnitOfWorkGraph requires apiVersion v50.0 or above');
     });
 });

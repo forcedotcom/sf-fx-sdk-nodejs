@@ -132,7 +132,7 @@ export class GraphResponse {
     }
 }
 
-export  class CompositeGraphResponse {
+export class CompositeGraphResponse {
     public readonly graphResponses: ReadonlyArray<GraphResponse>;
 
     public constructor(json: string) {
@@ -219,7 +219,7 @@ export class CompositeApi {
 
             return compositeGraphResponse;
         } else {
-            throw new Error('Graph server returned status code: ' + response.message.statusCode);
+            throw new Error('Graph composite api returned status code: ' + response.message.statusCode);
         }
     }
 }

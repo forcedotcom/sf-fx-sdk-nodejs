@@ -110,6 +110,15 @@ export class UnitOfWorkResponse {
     }
 }
 
+/**
+ * UnitOfWork allows you to access salesforce SObject and work with them via salesforce composite API,
+ * which executes a series of REST API requests in a single call.
+ * All modifications to SObject are recorded by the UnitOfWork, at the end they may be committed as a single call.
+ * The result is transactional, if an error occurs, the entire UnitOfWork request is rolled back.
+ *
+ * See https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/resources_composite_composite.htm
+ *
+ */
 export class UnitOfWork {
     private readonly _compositeRequest: CompositeRequest;
     private readonly _config: ConnectionConfig;
