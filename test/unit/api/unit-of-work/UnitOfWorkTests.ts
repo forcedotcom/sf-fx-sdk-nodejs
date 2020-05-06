@@ -8,6 +8,7 @@ import { v4 as uuid } from 'uuid';
 import { Logger } from '@salesforce/core';
 
 import {
+    APIVersion,
     ConnectionConfig,
     Constants,
     Method,
@@ -15,14 +16,16 @@ import {
     SObject,
     UnitOfWork,
     UnitOfWorkResponse,
-    UnitOfWorkResult }
-from '../../../../src';
+    UnitOfWorkResult
+}
+    from '../../../../src';
 
 const NO_OP_LOGGER = new Logger({name: 'test', level: 100});
 const instanceUrl = 'http://localhost:3000';
 const apiVersion = Constants.CURRENT_API_VERSION;
 const accessToken = 'accessToken1234';
 const connectionConfig: ConnectionConfig = new ConnectionConfig(accessToken, apiVersion, instanceUrl);
+const connectionConfig228: ConnectionConfig = new ConnectionConfig(accessToken, APIVersion.V50, instanceUrl);
 
 const httpCodeCreated = 201;
 const httpCodeNoContent = 204;
@@ -50,6 +53,47 @@ describe('UnitOfWork Tests', () => {
             });
 
         const uow: UnitOfWork = new UnitOfWork(connectionConfig, NO_OP_LOGGER);
+
+        uow.registerNew(account);
+        const uowResponse: UnitOfWorkResponse = await uow.commit();
+
+        expect(uowResponse).to.exist;
+        const results: ReadonlyArray<UnitOfWorkResult> = uowResponse.getResults(account);
+        expect(results).to.exist;
+        expect(results).lengthOf(1);
+        const uowResult: UnitOfWorkResult = results[0];
+        expect(uowResult.isSuccess).to.be.true;
+        expect(uowResult.errors).to.not.exist;
+        expect(uowResult.method).to.equal(Method.POST);
+        expect(uowResult.id).to.exist;
+        expect(uowResult.id).to.equal('001xx000003EG4jAAG');
+    });
+
+    it('Graph Insert Account', async () => {
+        const account: SObject = new SObject('Account');
+        account.setValue('Name', 'MyAccount - uow - integration - ' + new Date());
+
+        const uow: UnitOfWork = new UnitOfWork(connectionConfig228, NO_OP_LOGGER);
+
+        nock(instanceUrl)
+            .post('/services/data/v' + connectionConfig228.apiVersion + '/composite/graph/')
+            .reply(HttpCodes.OK, {
+                graphs: [
+                    {
+                        graphId: 'graphId1abc',
+                        isSuccessful: true,
+                        graphResponse: {
+                            compositeResponse:
+                                [{
+                                    'body': { 'id': '001xx000003EG4jAAG', 'success': true, 'errors': [] },
+                                    'httpHeaders': { 'Location': `/services/data/v${Constants.CURRENT_API_VERSION}/sobjects/Account/001xx000003EG4jAAG` },
+                                    'httpStatusCode': httpCodeCreated,
+                                    'referenceId': account.referenceId
+                                }]
+                        }
+                    }
+                ]
+            });
 
         uow.registerNew(account);
         const uowResponse: UnitOfWorkResponse = await uow.commit();
@@ -204,7 +248,7 @@ describe('UnitOfWork Tests', () => {
 
         stub(SObject, 'generateReferenceId').callsFake((type: string) => {
             const mockedReferenceId:string = type + '_' + uuid().replace(/-/g, '');
-            mockedReferenceIds.push(mockedReferenceId)
+            mockedReferenceIds.push(mockedReferenceId);
             return mockedReferenceId;
         });
 

@@ -1,6 +1,7 @@
 import { Logger } from '@salesforce/core';
 
 import {
+    APIVersion,
     ConnectionConfig
 } from './../..';
 
@@ -20,6 +21,9 @@ export class UnitOfWorkGraph {
     private logger;
 
     constructor(config: ConnectionConfig, logger: Logger, _unitOfWork?: UnitOfWork) {
+        if(config.apiVersion < APIVersion.V50){
+            throw new Error(`UnitOfWorkGraph requires apiVersion v${APIVersion.V50} or up`);
+        }
         this._config = config;
         this.logger = logger;
         this._graphs = [];
@@ -55,10 +59,5 @@ export class UnitOfWorkGraph {
         const compositeGraphResponse: CompositeGraphResponse = await compositeApi.invokeGraph(compositeRequests);
 
         return compositeGraphResponse;
-        // return new UnitOfWorkResponse(
-        //     this._uuidToReferenceIds,
-        //     this._referenceIdToCompositeSubrequests,
-        //     compositeResponse,
-        // );
     }
 }

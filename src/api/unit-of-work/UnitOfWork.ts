@@ -11,7 +11,8 @@ import {
 import { CompositeRequest } from './CompositeRequest';
 
 import {
-    CompositeApi, CompositeGraphResponse,
+    CompositeApi,
+    CompositeGraphResponse,
     CompositeResponse,
     CompositeSubresponse
 } from './CompositeApi';
@@ -23,7 +24,6 @@ import {
     InsertCompositeSubrequestBuilder,
     PatchCompositeSubrequestBuilder
 } from './CompositeSubrequest';
-import * as _ from "lodash";
 import {UnitOfWorkGraph} from "./UnitOfWorkGraph";
 
 interface IReferenceIdToCompositeSubrequests {
@@ -45,11 +45,6 @@ export class UnitOfWorkResult {
         this.isSuccess = isSuccess;
         this.errors = errors;
     }
-
-    public logError() : void {
-        //if successful, log the id
-        //else log the method, detailed errors,
-    }
 }
 
 export class UnitOfWorkResponse {
@@ -65,22 +60,6 @@ export class UnitOfWorkResponse {
         this._uuidToReferenceIds = uuidToReferenceIds;
         this._referenceIdToCompositeSubrequests = referenceIdToCompositeSubrequests;
         this._compositeResponse = compositeResponse;
-    }
-
-    public isSuccessful() : boolean {
-        return true;
-    }
-
-    /**
-     * return the 1st root cause failure
-     */
-    public getRootError() : UnitOfWorkResult{
-        return null;
-    }
-
-    public logError() : void {
-        //log "Successful" if isSucessful
-        //else log error with the detailed root cause failure
     }
 
     public getResults(sObject: SObject): ReadonlyArray<UnitOfWorkResult> {
@@ -129,7 +108,6 @@ export class UnitOfWorkResponse {
             return results[0].id;
         }
     }
-
 }
 
 export class UnitOfWork {
@@ -189,7 +167,7 @@ export class UnitOfWork {
     /**
      * Use composite API, prior to 228/apiVersion v50.0
       */
-    public async commitComposite(): Promise<UnitOfWorkResponse> {
+    private async commitComposite(): Promise<UnitOfWorkResponse> {
         const compositeApi: CompositeApi = new CompositeApi(this._config, this.logger);
         const compositeResponse: CompositeResponse = await compositeApi.invoke(this._compositeRequest);
 
@@ -203,7 +181,7 @@ export class UnitOfWork {
     /**
      * Use graph API to get higher limit, planned GA in 228/apiVersion=50.0
      */
-    public async commitGraph(): Promise<UnitOfWorkResponse> {
+    private async commitGraph(): Promise<UnitOfWorkResponse> {
         const uowGraph: UnitOfWorkGraph = new UnitOfWorkGraph(this._config, this.logger, this);
         const compositeGraphResponse: CompositeGraphResponse = await uowGraph.commit();
         const compositeResponse: CompositeResponse = compositeGraphResponse.graphResponses[0].compositeResponse;

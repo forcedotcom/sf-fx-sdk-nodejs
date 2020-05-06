@@ -85,9 +85,6 @@ export  class CompositeResponse {
     public readonly compositeSubresponses: ReadonlyArray<CompositeSubresponse>;
 
     public constructor(compositeResponseJsonObject: CompositeResponseJsonObject) {
-        // const compositeResponseJsonObject: CompositeResponseJsonObject = JSON.parse(
-        //     json,
-        // ) as CompositeResponseJsonObject;
         const compositeSubResponses: CompositeSubresponse[] = compositeResponseJsonObject.compositeResponse;
         if (compositeSubResponses) {
             compositeSubResponses.forEach((element: CompositeSubresponse, index: number) => {
@@ -203,7 +200,7 @@ export class CompositeApi {
             this._connectionConfig.accessToken,
         );
         const httpClient: HttpClient = new HttpClient('sf-fx-node', [bearerCredentialHandler]);
-        const path = `/services/data/v${this._connectionConfig.apiVersion}/composite/graph`;
+        const path = `/services/data/v${this._connectionConfig.apiVersion}/composite/graph/`;
         const headers: IHeaders = { 'Content-Type': 'application/json' };
         const graphObj = {graphs : compositeRequests};
         const data: string = JSON.stringify(graphObj);
