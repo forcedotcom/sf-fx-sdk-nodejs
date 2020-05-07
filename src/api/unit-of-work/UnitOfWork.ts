@@ -1,6 +1,7 @@
 import { Logger } from '@salesforce/core';
 
 import {
+    APIVersion,
     ConnectionConfig,
     Error,
     Method,
@@ -11,6 +12,7 @@ import { CompositeRequest } from './CompositeRequest';
 
 import {
     CompositeApi,
+    CompositeGraphResponse,
     CompositeResponse,
     CompositeSubresponse
 } from './CompositeApi';
@@ -22,6 +24,7 @@ import {
     InsertCompositeSubrequestBuilder,
     PatchCompositeSubrequestBuilder
 } from './CompositeSubrequest';
+import {UnitOfWorkGraph} from "./UnitOfWorkGraph";
 
 interface IReferenceIdToCompositeSubrequests {
     [key: string]: CompositeSubrequest;
@@ -107,6 +110,15 @@ export class UnitOfWorkResponse {
     }
 }
 
+/**
+ * UnitOfWork allows you to access salesforce SObject and work with them via salesforce composite API,
+ * which executes a series of REST API requests in a single call.
+ * All modifications to SObject are recorded by the UnitOfWork, at the end they may be committed as a single call.
+ * The result is transactional, if an error occurs, the entire UnitOfWork request is rolled back.
+ *
+ * See https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/resources_composite_composite.htm
+ *
+ */
 export class UnitOfWork {
     private readonly _compositeRequest: CompositeRequest;
     private readonly _config: ConnectionConfig;
@@ -152,9 +164,36 @@ export class UnitOfWork {
     }
 
     public async commit(): Promise<UnitOfWorkResponse> {
-        const compositeApi: CompositeApi = new CompositeApi(this._config, this.logger);
+        //Use composite API, prior to 228/apiVersion 50.0
+        //Use graph API to get higher limit, planned GA in 228/apiVersion 50.0
+        if(this._config.apiVersion < APIVersion.V50) {
+            return await this.commitComposite();
+        } else {
+            return await this.commitGraph();
+        }
+     }
 
+    /**
+     * Use composite API, prior to 228/apiVersion v50.0
+      */
+    private async commitComposite(): Promise<UnitOfWorkResponse> {
+        const compositeApi: CompositeApi = new CompositeApi(this._config, this.logger);
         const compositeResponse: CompositeResponse = await compositeApi.invoke(this._compositeRequest);
+
+        return new UnitOfWorkResponse(
+            this._uuidToReferenceIds,
+            this._referenceIdToCompositeSubrequests,
+            compositeResponse,
+        );
+    }
+
+    /**
+     * Use graph API to get higher limit, planned GA in 228/apiVersion=50.0
+     */
+    private async commitGraph(): Promise<UnitOfWorkResponse> {
+        const uowGraph: UnitOfWorkGraph = new UnitOfWorkGraph(this._config, this.logger, this);
+        const compositeGraphResponse: CompositeGraphResponse = await uowGraph.commit();
+        const compositeResponse: CompositeResponse = compositeGraphResponse.graphResponses[0].compositeResponse;
 
         return new UnitOfWorkResponse(
             this._uuidToReferenceIds,
@@ -175,5 +214,9 @@ export class UnitOfWork {
         referenceIds.add(referenceId);
         this._compositeRequest.addSubrequest(compositeSubrequest);
         this._referenceIdToCompositeSubrequests[referenceId] = compositeSubrequest;
+    }
+
+    public get compositeRequest() : CompositeRequest {
+        return this._compositeRequest;
     }
 }

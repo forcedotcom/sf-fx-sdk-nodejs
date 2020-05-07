@@ -1,12 +1,15 @@
+import { v4 as uuid } from 'uuid';
 import { CompositeSubrequest } from './CompositeSubrequest';
 
 export class CompositeRequest {
+    private graphId: string;
     private allOrNone: boolean;
     // Named to match the composite api schema. This is actually an array of CompositeSubrequest
     private compositeRequest: CompositeSubrequest[];
 
     constructor() {
         this.allOrNone = true;
+        this.graphId = uuid();
         this.compositeRequest = [];
     }
 
@@ -16,6 +19,10 @@ export class CompositeRequest {
 
     public get isAllOrNone(): boolean {
         return this.allOrNone;
+    }
+
+    public getGraphId(): string {
+        return this.graphId;
     }
 
     public addSubrequest(compositeSubrequest: CompositeSubrequest): void {
