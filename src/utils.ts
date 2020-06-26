@@ -8,7 +8,7 @@ export class Constants {
     public static CURRENT_API_VERSION = process.env.SALESFORCE_API_VERSION || APIVersion.V48;
 }
 
-export interface Error {
+export interface ApiError {
     readonly message: string;
     readonly errorCode: string;
     readonly fields: ReadonlyArray<string>;

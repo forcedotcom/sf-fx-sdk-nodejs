@@ -19,6 +19,8 @@ import {
     UnitOfWorkResult
 }
     from '../../../../src';
+import { UnitOfWorkError } from '../../../../src/api/unit-of-work/UnitOfWork';
+import { fail } from 'assert';
 
 const NO_OP_LOGGER = new Logger({name: 'test', level: 100});
 const instanceUrl = 'http://localhost:3000';
@@ -69,10 +71,65 @@ describe('UnitOfWork Tests', () => {
         expect(uowResult.id).to.equal('001xx000003EG4jAAG');
     });
 
+    it('Insert Account Err w/Missing Required Property', async () => {
+        const nowHex = new Date().getTime().toString(16);
+        const a1 = new SObject('Account');
+        const a2 = new SObject('Account');
+        a1.setValue('Name', 'MyAccount - uowErr - integration ' + nowHex);
+        a2.setValue('XName', 'MyAccount - uowErr - integration ' + nowHex);
+
+        nock(instanceUrl)
+            .post('/services/data/v' + connectionConfig.apiVersion + '/composite/')
+            .reply(HttpCodes.OK, {
+                  "compositeResponse": [{                        // Real response captured from 228 endpoint
+                        "body": [{
+                            "errorCode": "PROCESSING_HALTED",    // Actually-valid submission gets PROCESSING_HALTED
+                            "message": "The transaction was rolled back since another operation in the same transaction failed."
+                        }],
+                        "httpHeaders": {},
+                        "httpStatusCode": 400,
+                        "referenceId": a1.referenceId
+                      }, {
+                        "body": [{
+                            "message": "No such column XName on sobject of type Account",
+                            "errorCode": "INVALID_FIELD"         // Real error/failure identified w/its own ERROR_CODE
+                        }],
+                        "httpHeaders": {},
+                        "httpStatusCode": 400,
+                        "referenceId": a2.referenceId
+                      }]
+            });
+
+        const uow: UnitOfWork = new UnitOfWork(connectionConfig, NO_OP_LOGGER);
+        [a1, a2].forEach(sObj => uow.registerNew(sObj));
+
+        const uowErr: UnitOfWorkError = await uow.commit()
+            .then(unexpectedSuccess => {
+                fail('Got a successfult response, was expecting an error! ' + unexpectedSuccess);
+                throw Error('Should never get here');
+            })
+            .catch(err => {
+                return err as UnitOfWorkError;
+            });
+        expect(uowErr).to.exist;
+
+        expect(uowErr.message).to.exist;
+        expect(uowErr.rootCause).to.exist;
+        expect(uowErr.httpStatus).to.equal(400);
+        expect(uowErr.rootCause.isSuccess).to.be.false;
+        expect(uowErr.rootCause.errors).to.exist;
+        expect(uowErr.rootCause.errors).lengthOf(1);
+        const acctErr = uowErr.rootCause.errors[0];
+        expect(acctErr.message).to.equal('No such column XName on sobject of type Account');
+        expect(uowErr.rootCause.method).to.equal(Method.POST);
+        expect(uowErr.rootCause.id).to.not.exist;                // object *not* inserted so no `id` defined
+    });
+
     it('Graph Insert Account', async () => {
         const account: SObject = new SObject('Account');
         account.setValue('Name', 'MyAccount - uow - integration - ' + new Date());
 
+        // release 228 and above w/API version 50.0+ have /composite/graph support
         const uow: UnitOfWork = new UnitOfWork(connectionConfig228, NO_OP_LOGGER);
 
         nock(instanceUrl)
@@ -108,6 +165,71 @@ describe('UnitOfWork Tests', () => {
         expect(uowResult.method).to.equal(Method.POST);
         expect(uowResult.id).to.exist;
         expect(uowResult.id).to.equal('001xx000003EG4jAAG');
+    });
+
+    it('Graph Insert Account Err w/Missing Required Property', async () => {
+        const nowHex = new Date().getTime().toString(16);
+        const a1 = new SObject('Account');
+        const a2 = new SObject('Account');
+        a1.setValue('Name', 'MyAccount - uowErr - integration ' + nowHex);
+        a2.setValue('XName', 'MyAccount - uowErr - integration ' + nowHex);
+
+        // release 228 and above w/API version 50.0+ have /composite/graph support
+        const uow: UnitOfWork = new UnitOfWork(connectionConfig228, NO_OP_LOGGER);
+        [a1, a2].forEach(sObj => uow.registerNew(sObj));
+
+        nock(instanceUrl)
+            .post('/services/data/v' + connectionConfig228.apiVersion + '/composite/graph/')
+            .reply(HttpCodes.OK, {
+                "graphs": [{
+                    "graphId": "2cce375a-a611-47a5-a18d-a35048840d5c",
+                    "graphResponse": {
+                      "compositeResponse": [{
+                          // Unfortunately on current 228 release, we do not get PROCESSING_HALTED error code
+                          // like standard composite endpoint so we cannot identify that the *2nd* object 
+                          // was the root cause.  In this test we can only identify root cause as first-failed
+                          "body": [{
+                              "message": "No such column XName on sobject of type Account",
+                              "errorCode": "INVALID_FIELD"
+                          }],
+                          "httpHeaders": {},
+                          "httpStatusCode": 400,
+                          "referenceId": a1.referenceId
+                        }, {
+                          "body": [{
+                              "message": "No such column XName on sobject of type Account",
+                              "errorCode": "INVALID_FIELD"
+                            }],
+                          "httpHeaders": {},
+                          "httpStatusCode": 400,
+                          "referenceId": a2.referenceId
+                      }]
+                    },
+                    "isSuccessful": false
+                }]
+            });
+
+        const uowErr: UnitOfWorkError = await uow.commit()
+            .then(unexpectedSuccess => {
+                fail('Got a successfult response, was expecting an error! ' + unexpectedSuccess);
+                throw Error('Should never get here');
+            })
+            .catch(err => {
+                return err as UnitOfWorkError;
+            });
+        expect(uowErr).to.exist;
+
+        expect(uowErr.message).to.exist;
+        expect(uowErr.rootCause).to.exist;
+        expect(uowErr.httpStatus).to.equal(400);
+        expect(uowErr.rootCause.isSuccess).to.be.false;
+        expect(uowErr.rootCause.errors).to.exist;
+        expect(uowErr.rootCause.errors).lengthOf(1);
+        const acctErr = uowErr.rootCause.errors[0];
+        expect(acctErr.message).to.equal("No such column XName on sobject of type Account");
+        expect(acctErr.errorCode).to.equal('INVALID_FIELD');
+        expect(uowErr.rootCause.method).to.equal(Method.POST);
+        expect(uowErr.rootCause.id).to.not.exist;                // object *not* inserted so no `id` defined
     });
 
     it('Update Existing Account', async () => {

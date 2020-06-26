@@ -4,7 +4,7 @@ import { HttpClient, HttpClientResponse, HttpCodes } from 'typed-rest-client/Htt
 import { IHeaders } from 'typed-rest-client/Interfaces';
 import { Logger } from '@salesforce/core';
 
-import { ConnectionConfig, Error } from '../..';
+import { ApiError, ConnectionConfig } from '../..';
 
 import { CompositeRequest } from './CompositeRequest';
 import { CompositeSubrequest } from './CompositeSubrequest';
@@ -16,7 +16,7 @@ export class CompositeSubresponse {
     public readonly httpHeaders: { [key: string]: string };
     public readonly httpStatusCode: number;
     public readonly referenceId: string;
-    private readonly _errors: ReadonlyArray<Error>;
+    private readonly _errors: ReadonlyArray<ApiError>;
     private readonly _body: { [key: string]: any };
 
     public get body(): { [key: string]: any } {
@@ -27,7 +27,7 @@ export class CompositeSubresponse {
         }
     }
 
-    public get errors(): ReadonlyArray<Error> {
+    public get errors(): ReadonlyArray<ApiError> {
         if (this.httpStatusCode >= HttpCodes.BadRequest) {
             return this._errors;
         } else {
@@ -63,9 +63,9 @@ export class CompositeSubresponse {
         if (compositeSubresponse.httpStatusCode < HttpCodes.BadRequest) {
             this._body = compositeSubresponse.body;
         } else {
-            const errors: Error[] = [];
-            if (compositeSubresponse.body) {
-                compositeSubresponse.body.forEach((element: Error) => {
+            const errors: ApiError[] = [];
+            if (compositeSubresponse.body && Array.isArray(compositeSubresponse.body)) {
+                compositeSubresponse.body.forEach((element: ApiError) => {
                     errors.push(element);
                 });
             }
