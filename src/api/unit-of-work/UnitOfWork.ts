@@ -289,7 +289,7 @@ export class UnitOfWork {
          const otherRess: ReadonlyArray<UnitOfWorkResult> = failedResponse.compositeSubresponses
                  .filter(r => !Object.is(r, subResp))
                  .map(r => resMapper.toUowResult(r));
-         this.logger.warn(`UnitOfWork failed w/root cause ${rootCause.toString()} and ${otherRess.length} rolled-back results`);
+         this.logger.warn(`UnitOfWork failed w/root cause ${rootCause} and ${otherRess.length} rolled-back results`);
          return new UnitOfWorkError(rootCause, otherRess, undefined, subResp.httpStatusCode);
      }
 
