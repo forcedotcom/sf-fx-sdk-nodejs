@@ -248,7 +248,7 @@ export class UnitOfWork {
     /**
      * Post this unit of work to be committed.
      * @returns async resolved {@see UnitOfWorkResponse} if successful, or rejected
-     *          with {@see UnitOfWorkResponseError} if unsuccessful.
+     *          (thrown on `await`) with {@see UnitOfWorkError} if unsuccessful.
      */
     public async commit(): Promise<UnitOfWorkResponse> {
         //Use composite API, prior to 228/apiVersion 50.0
