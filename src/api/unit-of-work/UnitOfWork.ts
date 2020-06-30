@@ -278,8 +278,8 @@ export class UnitOfWork {
         }
      }
 
-     // Find the first CompositeSubresponse that has a body.errorCode != "PROCESSING_HALTED"
-     private hasNonProcessingHaltedError(compositeSubresponse: CompositeSubresponse): boolean {
+     // Filter predicate for Root Cause: unsuccessful w/a body.errorCode that is *not* "PROCESSING_HALTED"
+     private isRootCause(compositeSubresponse: CompositeSubresponse): boolean {
          if (compositeSubresponse && !compositeSubresponse.isSuccess && Array.isArray(compositeSubresponse.errors)) {
              if (compositeSubresponse.errors.find(e => ('errorCode' in e) && (e['errorCode'] !== 'PROCESSING_HALTED'))) {
                  return true;
@@ -290,7 +290,7 @@ export class UnitOfWork {
 
      // Find the "root cause" failed subresponse.  If root cause not identified, find first non-success
      private rootFailedSubResponse(compositeSubresponses: ReadonlyArray<CompositeSubresponse>): CompositeSubresponse {
-         let rootSub = compositeSubresponses.find(this.hasNonProcessingHaltedError);
+         let rootSub = compositeSubresponses.find(this.isRootCause);
          if (rootSub == null) {
              // If we fail to find a subresponse that has a code other than 'PROCESSING_HALTED', grab first non `isSuccess`
              rootSub = compositeSubresponses.find(r => !r.isSuccess);
