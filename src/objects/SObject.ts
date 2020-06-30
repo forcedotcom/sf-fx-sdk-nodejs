@@ -38,6 +38,11 @@ export class SObject {
         this._values[key] = value;
     }
 
+    public withValue(key: string, value: any): SObject {
+        this._values[key] = value;
+        return this;
+    }
+
     public withId(id: string): SObject {
         this._id = id;
         return this;

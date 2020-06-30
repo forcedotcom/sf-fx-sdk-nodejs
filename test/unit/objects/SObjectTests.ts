@@ -64,6 +64,24 @@ describe('SObject Tests', () => {
         expect(keys.length).to.equal(2);
         expect(keys).to.contain(key1);
         expect(keys).to.contain(key2);
+        expect(values[key1]).to.equal(value1);
+        expect(values[key2]).to.equal(value2);
+    });
+
+    it('withValue returns self', () => {
+        const key1 = 'key1';
+        const key2 = 'key2';
+        const value1 = { 'Name': 'a_name' };
+        const value2 = 'a_string';
+
+        expect(sObject.withValue(key1, value1).withValue(key2, value2)).to.equal(sObject);  // assert method chaining
+
+        const values = sObject.values;
+        expect(values).to.exist;
+        const keys: string[] = Object.keys(values);
+        expect(keys.length).to.equal(2);
+        expect(keys).to.contain(key1);
+        expect(keys).to.contain(key2);
         expect(values[key1]).to.to.equal(value1);
         expect(values[key2]).to.to.equal(value2);
     });

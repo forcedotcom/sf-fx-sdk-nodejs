@@ -73,10 +73,10 @@ describe('UnitOfWork Tests', () => {
 
     it('Insert Account Err w/Missing Required Property', async () => {
         const nowHex = new Date().getTime().toString(16);
-        const a1 = new SObject('Account');
-        const a2 = new SObject('Account');
-        a1.setValue('Name', 'MyAccount - uowErr - integration ' + nowHex);
-        a2.setValue('XName', 'MyAccount - uowErr - integration ' + nowHex);
+        const a1 = new SObject('Account')
+            .withValue('Name', 'MyAccount - uowErr - integration ' + nowHex);
+        const a2 = new SObject('Account')
+            .withValue('XName', 'MyAccount - uowErr - integration ' + nowHex);
 
         nock(instanceUrl)
             .post('/services/data/v' + connectionConfig.apiVersion + '/composite/')
@@ -100,10 +100,11 @@ describe('UnitOfWork Tests', () => {
                       }]
             });
 
-        const uow: UnitOfWork = new UnitOfWork(connectionConfig, NO_OP_LOGGER);
-        [a1, a2].forEach(sObj => uow.registerNew(sObj));
+        const uow: UnitOfWork = new UnitOfWork(connectionConfig, NO_OP_LOGGER)
+            .registerNew(a1)
+            .registerNew(a2);
 
-        const uowErr: UnitOfWorkError = await uow.commit()
+            const uowErr: UnitOfWorkError = await uow.commit()
             .then(unexpectedSuccess => {
                 fail('Got a successfult response, was expecting an error! ' + unexpectedSuccess);
                 throw Error('Should never get here');
@@ -169,14 +170,15 @@ describe('UnitOfWork Tests', () => {
 
     it('Graph Insert Account Err w/Missing Required Property', async () => {
         const nowHex = new Date().getTime().toString(16);
-        const a1 = new SObject('Account');
-        const a2 = new SObject('Account');
-        a1.setValue('Name', 'MyAccount - uowErr - integration ' + nowHex);
-        a2.setValue('XName', 'MyAccount - uowErr - integration ' + nowHex);
+        const a1 = new SObject('Account')
+            .withValue('Name', 'MyAccount - uowErr - integration ' + nowHex);
+        const a2 = new SObject('Account')
+            .withValue('XName', 'MyAccount - uowErr - integration ' + nowHex);
 
         // release 228 and above w/API version 50.0+ have /composite/graph support
-        const uow: UnitOfWork = new UnitOfWork(connectionConfig228, NO_OP_LOGGER);
-        [a1, a2].forEach(sObj => uow.registerNew(sObj));
+        const uow: UnitOfWork = new UnitOfWork(connectionConfig228, NO_OP_LOGGER)
+            .registerNew(a1)
+            .registerNew(a2);
 
         nock(instanceUrl)
             .post('/services/data/v' + connectionConfig228.apiVersion + '/composite/graph/')

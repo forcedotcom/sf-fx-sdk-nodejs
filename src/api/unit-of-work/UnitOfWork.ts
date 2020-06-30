@@ -216,21 +216,38 @@ export class UnitOfWork {
         this.logger = logger;
     }
 
-    public registerNew(sObject: SObject): void {
+    /**
+     * Add new object to be inserted in this UOW.
+     * @param sObject new object to be inserted.
+     * @returns this to allow chaining registerNew(...).register...
+     */
+    public registerNew(sObject: SObject): UnitOfWork {
         const insertBuilder: CompositeSubrequestBuilder = new InsertCompositeSubrequestBuilder();
         const compositeSubrequest: CompositeSubrequest = insertBuilder.sObject(sObject).build();
 
         this.addCompositeSubrequest(sObject, compositeSubrequest);
+        return this;
     }
 
-    public registerModified(sObject: SObject): void {
+    /**
+     * Add modified object to be updated in this UOW.
+     * @param sObject object to be updated.
+     * @returns this to allow chaining registerModified(...).register...
+     */
+    public registerModified(sObject: SObject): UnitOfWork {
         const patchBuilder: CompositeSubrequestBuilder = new PatchCompositeSubrequestBuilder();
         const compositeSubrequest: CompositeSubrequest = patchBuilder.sObject(sObject).build();
 
         this.addCompositeSubrequest(sObject, compositeSubrequest);
+        return this;
     }
 
-    public registerDeleted(sObject: SObject): void {
+    /**
+     * Add object to be deleted in this UOW.
+     * @param sObject to be deleted.
+     * @returns this to allow chaining registerDeleted(...).register...
+     */
+    public registerDeleted(sObject: SObject): UnitOfWork {
         const id: string = sObject.id;
         if (!id) {
             throw new Error('Id not provided');
@@ -243,6 +260,7 @@ export class UnitOfWork {
             .build();
 
         this.addCompositeSubrequest(sObject, compositeSubrequest);
+        return this;
     }
 
     /**
@@ -260,7 +278,7 @@ export class UnitOfWork {
         }
      }
 
-    // Find the first CompositeSubresponse that has a body.errorCode != "PROCESSING_HALTED"
+     // Find the first CompositeSubresponse that has a body.errorCode != "PROCESSING_HALTED"
      private hasNonProcessingHaltedError(compositeSubresponse: CompositeSubresponse): boolean {
          if (compositeSubresponse && !compositeSubresponse.isSuccess && Array.isArray(compositeSubresponse.errors)) {
              if (compositeSubresponse.errors.find(e => ('errorCode' in e) && (e['errorCode'] !== 'PROCESSING_HALTED'))) {
