@@ -133,15 +133,18 @@ class UnitOfWorkResultMapper {
 }
 
 /**
- * Successful Unit of Work Response.
+ * Base Unit of Work Response.
  */
-export class UnitOfWorkResponse {
+export abstract class UnitOfWorkResponse {
     protected _resultMapper: UnitOfWorkResultMapper;
+    public readonly success: boolean;
 
     constructor(
         resultMapper: UnitOfWorkResultMapper,
+        success: boolean,
     ) {
         this._resultMapper = resultMapper;
+        this.success = success;
     }
 
     public getResults(sObject: SObject): ReadonlyArray<UnitOfWorkResult> {
@@ -154,42 +157,34 @@ export class UnitOfWorkResponse {
 }
 
 /**
- * Error thrown when any step of a composite request fails.
+ * Successful Unit of Work Response
  */
-export class UnitOfWorkError extends Error {
-    public static readonly DEFAULT_HTTP_STATUS = 500;
-    public readonly rootCause: UnitOfWorkResult;
-    public readonly otherResults: ReadonlyArray<UnitOfWorkResult>;
-    public readonly httpStatus: number;
+export class UnitOfWorkSuccessResponse extends UnitOfWorkResponse {
 
     constructor(
-        rootCause: UnitOfWorkResult,
-        otherResults: ReadonlyArray<UnitOfWorkResult>,
-        errorMessage: string|undefined = undefined,
-        httpStatus: number|undefined = undefined,
+        resultMapper: UnitOfWorkResultMapper,
     ) {
-        super(UnitOfWorkError._errorMessage(rootCause, errorMessage));
+        super(resultMapper, true);
+    }
+}
 
-        // https://github.com/Microsoft/TypeScript/wiki/Breaking-Changes#extending-built-ins-like-error-array-and-map-may-no-longer-work
-        Object.setPrototypeOf(this, UnitOfWorkError.prototype);
+/**
+ * Failed Unit of Work Response
+ */
+export class UnitOfWorkErrorResponse extends UnitOfWorkResponse {
+    private _rootCause: CompositeSubresponse;
 
-        this.rootCause = rootCause;
-        this.otherResults = otherResults;
-        this.httpStatus = httpStatus === undefined ? UnitOfWorkError.DEFAULT_HTTP_STATUS : httpStatus;
+    constructor(
+        resultMapper: UnitOfWorkResultMapper,
+        rootCause: CompositeSubresponse,
+    ) {
+        super(resultMapper, false);
+        this._rootCause = rootCause;
     }
 
-    // Use errorMessage if given in ctor, fall back to first error, then fall back to just 'UNKNOWN_ERROR'
-    private static _errorMessage(rootCause: UnitOfWorkResult, errorMessage: string|undefined): string {
-        let msg: string|undefined = errorMessage;
-        if (msg === undefined) {
-            const firstErr = rootCause.errors.find(e => e.message !== undefined);
-            if (firstErr) {
-                msg = firstErr.message;
-            }
-        }
-        return msg === undefined ? "UNKNOWN_ERROR" : msg;
+    public get rootCause(): UnitOfWorkResult {
+        return this._resultMapper.toUowResult(this._rootCause);
     }
-
 }
 
 /**
@@ -265,10 +260,10 @@ export class UnitOfWork {
 
     /**
      * Post this unit of work to be committed.
-     * @returns async resolved {@see UnitOfWorkResponse} if successful, or rejected
-     *          (thrown on `await`) with {@see UnitOfWorkError} if unsuccessful.
+     * @returns async resolved {@see UnitOfWorkSuccessResponse} if successful, or
+     *     {@see UnitOfWorkErrorResponse} if failed.
      */
-    public async commit(): Promise<UnitOfWorkResponse> {
+    public async commit(): Promise<UnitOfWorkSuccessResponse|UnitOfWorkErrorResponse> {
         //Use composite API, prior to 228/apiVersion 50.0
         //Use graph API to get higher limit, planned GA in 228/apiVersion 50.0
         if(this._config.apiVersion < APIVersion.V50) {
@@ -298,23 +293,20 @@ export class UnitOfWork {
          return rootSub;
      }
 
-     // Convert a failed composite response to a UnitOfWorkEr3ror
-     private toUnitOfWorkError(failedResponse: CompositeResponse, resMapper: UnitOfWorkResultMapper): UnitOfWorkError {
-         // Pull out the first subresponse that failed.  TODO: we need a better flag from Graph endpoint
-         // indicating which subrequest caused the transaciton to be rolled back.  For now, first unsuccessful.
-         const subResp: CompositeSubresponse = this.rootFailedSubResponse(failedResponse.compositeSubresponses);
-         const rootCause: UnitOfWorkResult = resMapper.toUowResult(subResp);
-         const otherRess: ReadonlyArray<UnitOfWorkResult> = failedResponse.compositeSubresponses
-                 .filter(r => !Object.is(r, subResp))
-                 .map(r => resMapper.toUowResult(r));
-         this.logger.warn(`UnitOfWork failed w/root cause ${rootCause} and ${otherRess.length} rolled-back results`);
-         return new UnitOfWorkError(rootCause, otherRess, undefined, subResp.httpStatusCode);
+     // Convert a failed composite response to a UnitOfWorkErrorResponse
+     private toUnitOfWorkErrorResponse(failedResponse: CompositeResponse, resMapper: UnitOfWorkResultMapper): UnitOfWorkErrorResponse {
+         // Attempt to find the "root cause" subresponse, if possible.  Otherwise, falls back to the first failed response
+         const rootCause: CompositeSubresponse = this.rootFailedSubResponse(failedResponse.compositeSubresponses);
+         const otherCount: number = failedResponse.compositeSubresponses.length - 1;
+
+         this.logger.warn(`UnitOfWork failed rootCause=${resMapper.toUowResult(rootCause)} and count=${otherCount} other rolled-back results`);
+         return new UnitOfWorkErrorResponse(resMapper, rootCause);
      }
 
      /**
       * Use composite API, prior to 228/apiVersion v50.0
       */
-    private async commitComposite(): Promise<UnitOfWorkResponse> {
+    private async commitComposite(): Promise<UnitOfWorkSuccessResponse|UnitOfWorkErrorResponse> {
         const compositeApi: CompositeApi = new CompositeApi(this._config, this.logger);
         const compositeResponse: CompositeResponse = await compositeApi.invoke(this._compositeRequest);
         const errorCount: number = compositeResponse.compositeSubresponses.filter(r => !r.isSuccess).length;
@@ -325,15 +317,15 @@ export class UnitOfWork {
         );
 
         if (errorCount > 0) {
-            throw this.toUnitOfWorkError(compositeResponse, resMapper);
+            return this.toUnitOfWorkErrorResponse(compositeResponse, resMapper);
         }
-        return new UnitOfWorkResponse(resMapper);
+        return new UnitOfWorkSuccessResponse(resMapper);
     }
 
     /**
      * Use graph API to get higher limit, planned GA in 228/apiVersion=50.0
      */
-    private async commitGraph(): Promise<UnitOfWorkResponse> {
+    private async commitGraph(): Promise<UnitOfWorkSuccessResponse|UnitOfWorkErrorResponse> {
         const uowGraph: UnitOfWorkGraph = new UnitOfWorkGraph(this._config, this.logger, this);
         const compositeGraphResponse: CompositeGraphResponse = await uowGraph.commit();
         const compositeResponse: CompositeResponse = compositeGraphResponse.graphResponses[0].compositeResponse;
@@ -345,9 +337,9 @@ export class UnitOfWork {
         );
 
         if (errorCount > 0) {
-            throw this.toUnitOfWorkError(compositeResponse, resMapper);
+            return this.toUnitOfWorkErrorResponse(compositeResponse, resMapper);
         }
-        return new UnitOfWorkResponse(resMapper);
+        return new UnitOfWorkSuccessResponse(resMapper);
     }
 
     private addCompositeSubrequest(sObject: SObject, compositeSubrequest: CompositeSubrequest): void {
