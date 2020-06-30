@@ -4,7 +4,7 @@ import { HttpClient, HttpClientResponse, HttpCodes } from 'typed-rest-client/Htt
 import { IHeaders } from 'typed-rest-client/Interfaces';
 import { Logger } from '@salesforce/core';
 
-import { ApiError, ConnectionConfig } from '../..';
+import { ConnectionConfig, Error as ApiError } from '../..';
 
 import { CompositeRequest } from './CompositeRequest';
 import { CompositeSubrequest } from './CompositeSubrequest';

@@ -1,9 +1,9 @@
 import { Logger } from '@salesforce/core';
 
 import {
-    ApiError,
     APIVersion,
     ConnectionConfig,
+    Error as ApiError,
     Method,
     SObject
 } from './../..';

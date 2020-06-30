@@ -9,7 +9,7 @@ import { Logger } from '@salesforce/core';
 
 const httpCodeCreated = 201;
 
-import {CompositeGraphResponse, ConnectionConfig, Constants, ApiError} from '../../../../src';
+import {CompositeGraphResponse, ConnectionConfig, Constants, Error as ApiError} from '../../../../src';
 import {
     CompositeApi,
     CompositeResponse,
