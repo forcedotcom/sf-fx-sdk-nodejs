@@ -264,8 +264,8 @@ export class UnitOfWork {
      *     {@see UnitOfWorkErrorResponse} if failed.
      */
     public async commit(): Promise<UnitOfWorkSuccessResponse|UnitOfWorkErrorResponse> {
-        //Use composite API, prior to 228/apiVersion 50.0
-        //Use graph API to get higher limit, planned GA in 228/apiVersion 50.0
+        //Use composite API, prior to  apiVersion 50.0
+        //Use graph API to get higher limit, planned GA in apiVersion 50.0
         if(this._config.apiVersion < APIVersion.V50) {
             return await this.commitComposite();
         } else {
@@ -304,13 +304,13 @@ export class UnitOfWork {
      }
 
      /**
-      * Use composite API, prior to 228/apiVersion v50.0
+      * Use composite API, prior to apiVersion v50.0
       */
     private async commitComposite(): Promise<UnitOfWorkSuccessResponse|UnitOfWorkErrorResponse> {
         const compositeApi: CompositeApi = new CompositeApi(this._config, this.logger);
         const compositeResponse: CompositeResponse = await compositeApi.invoke(this._compositeRequest);
-        const errorCount: number = compositeResponse.compositeSubresponses.filter(r => !r.isSuccess).length;
-        const resMapper: UnitOfWorkResultMapper = new UnitOfWorkResultMapper(
+        const errorCount = compositeResponse.compositeSubresponses.filter(r => !r.isSuccess).length;
+        const resMapper = new UnitOfWorkResultMapper(
             this._uuidToReferenceIds,
             this._referenceIdToCompositeSubrequests,
             compositeResponse,
@@ -323,14 +323,14 @@ export class UnitOfWork {
     }
 
     /**
-     * Use graph API to get higher limit, planned GA in 228/apiVersion=50.0
+     * Use graph API to get higher limit, planned GA in apiVersion=50.0
      */
     private async commitGraph(): Promise<UnitOfWorkSuccessResponse|UnitOfWorkErrorResponse> {
         const uowGraph: UnitOfWorkGraph = new UnitOfWorkGraph(this._config, this.logger, this);
         const compositeGraphResponse: CompositeGraphResponse = await uowGraph.commit();
         const compositeResponse: CompositeResponse = compositeGraphResponse.graphResponses[0].compositeResponse;
-        const errorCount: number = compositeResponse.compositeSubresponses.filter(r => !r.isSuccess).length;
-        const resMapper: UnitOfWorkResultMapper = new UnitOfWorkResultMapper(
+        const errorCount = compositeResponse.compositeSubresponses.filter(r => !r.isSuccess).length;
+        const resMapper = new UnitOfWorkResultMapper(
             this._uuidToReferenceIds,
             this._referenceIdToCompositeSubrequests,
             compositeResponse,

@@ -28,7 +28,7 @@ const instanceUrl = 'http://localhost:3000';
 const apiVersion = Constants.CURRENT_API_VERSION;
 const accessToken = 'accessToken1234';
 const connectionConfig: ConnectionConfig = new ConnectionConfig(accessToken, apiVersion, instanceUrl);
-const connectionConfig228: ConnectionConfig = new ConnectionConfig(accessToken, APIVersion.V50, instanceUrl);
+const connectionConfigV50: ConnectionConfig = new ConnectionConfig(accessToken, APIVersion.V50, instanceUrl);
 
 const httpCodeCreated = 201;
 const httpCodeNoContent = 204;
@@ -74,7 +74,7 @@ describe('UnitOfWork Tests', () => {
         expect(uowResult.id).to.equal('001xx000003EG4jAAG');
     });
 
-    it('Insert Account Err w/Missing Required Property', async () => {
+    it('Insert Account Err Missing Required Property', async () => {
         const nowHex = new Date().getTime().toString(16);
         const a1 = new SObject('Account')
             .withValue('Name', 'MyAccount - uowErr - integration ' + nowHex);
@@ -84,7 +84,7 @@ describe('UnitOfWork Tests', () => {
         nock(instanceUrl)
             .post('/services/data/v' + connectionConfig.apiVersion + '/composite/')
             .reply(HttpCodes.OK, {
-                  "compositeResponse": [{                        // Real response captured from 228 endpoint
+                  "compositeResponse": [{                        // Real response captured from v50.0 endpoint
                         "body": [{
                             "errorCode": "PROCESSING_HALTED",    // Actually-valid submission gets PROCESSING_HALTED
                             "message": "The transaction was rolled back since another operation in the same transaction failed."
@@ -95,7 +95,7 @@ describe('UnitOfWork Tests', () => {
                       }, {
                         "body": [{
                             "message": "No such column XName on sobject of type Account",
-                            "errorCode": "INVALID_FIELD"         // Real error/failure identified w/its own ERROR_CODE
+                            "errorCode": "INVALID_FIELD"         // Real error/failure identified w/ its own ERROR_CODE
                         }],
                         "httpHeaders": {},
                         "httpStatusCode": 400,
@@ -138,7 +138,7 @@ describe('UnitOfWork Tests', () => {
             expect(a2Result).lengthOf(1);
             expect(rootCause).to.deep.equal(a2Result[0]);            // 2nd result *is* root cause, props checked above
         } else {
-            fail('Unexpected UoW response type, expected UnitOfWorkErrorResponse, got: ' + uowResponse.constructor.name);
+            fail(`Unexpected UoW response type, expected UnitOfWorkErrorResponse, got: ${uowResponse.constructor.name}`);
         }
     });
 
@@ -146,11 +146,11 @@ describe('UnitOfWork Tests', () => {
         const account: SObject = new SObject('Account');
         account.setValue('Name', 'MyAccount - uow - integration - ' + new Date());
 
-        // release 228 and above w/API version 50.0+ have /composite/graph support
-        const uow: UnitOfWork = new UnitOfWork(connectionConfig228, NO_OP_LOGGER);
+        // release w/ API version 50.0+ have /composite/graph support
+        const uow: UnitOfWork = new UnitOfWork(connectionConfigV50, NO_OP_LOGGER);
 
         nock(instanceUrl)
-            .post('/services/data/v' + connectionConfig228.apiVersion + '/composite/graph/')
+            .post('/services/data/v' + connectionConfigV50.apiVersion + '/composite/graph/')
             .reply(HttpCodes.OK, {
                 graphs: [
                     {
@@ -186,26 +186,26 @@ describe('UnitOfWork Tests', () => {
         expect(uowResult.id).to.equal('001xx000003EG4jAAG');
     });
 
-    it('Graph Insert Account Err w/Missing Required Property', async () => {
+    it('Graph Insert Account Err Missing Required Property', async () => {
         const nowHex = new Date().getTime().toString(16);
         const a1 = new SObject('Account')
             .withValue('Name', 'MyAccount - uowErr - integration ' + nowHex);
         const a2 = new SObject('Account')
             .withValue('XName', 'MyAccount - uowErr - integration ' + nowHex);
 
-        // release 228 and above w/API version 50.0+ have /composite/graph support
-        const uow: UnitOfWork = new UnitOfWork(connectionConfig228, NO_OP_LOGGER)
+        // release w/ API version 50.0+ have /composite/graph support
+        const uow: UnitOfWork = new UnitOfWork(connectionConfigV50, NO_OP_LOGGER)
             .registerNew(a1)
             .registerNew(a2);
 
         nock(instanceUrl)
-            .post('/services/data/v' + connectionConfig228.apiVersion + '/composite/graph/')
+            .post('/services/data/v' + connectionConfigV50.apiVersion + '/composite/graph/')
             .reply(HttpCodes.OK, {
                 "graphs": [{
                     "graphId": "2cce375a-a611-47a5-a18d-a35048840d5c",
                     "graphResponse": {
                       "compositeResponse": [{
-                          // Unfortunately on current 228 release, we do not get PROCESSING_HALTED error code
+                          // Unfortunately on current v50.0 release, we do not get PROCESSING_HALTED error code
                           // like standard composite endpoint so we cannot identify that the *2nd* object 
                           // was the root cause.  In this test we can only identify root cause as first-failed
                           "body": [{
@@ -258,7 +258,7 @@ describe('UnitOfWork Tests', () => {
             expect(a2Result[0].errors[0].message).to.equal("No such column XName on sobject of type Account");
             expect(a2Result[0].errors[0].errorCode).to.equal('INVALID_FIELD');
         } else {
-            fail('Unexpected UoW response type, expected UnitOfWorkErrorResponse, got: ' + uowResponse.constructor.name);
+            fail(`Unexpected UoW response type, expected UnitOfWorkErrorResponse, got: ${uowResponse.constructor.name}`);
         }
     });
 

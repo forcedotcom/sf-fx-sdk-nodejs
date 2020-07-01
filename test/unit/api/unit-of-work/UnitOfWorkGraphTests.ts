@@ -19,7 +19,7 @@ const instanceUrl = 'http://localhost:3000';
 const apiVersion = Constants.CURRENT_API_VERSION;
 const accessToken = 'accessToken1234';
 const connectionConfig: ConnectionConfig = new ConnectionConfig(accessToken, apiVersion, instanceUrl);
-const connectionConfig228: ConnectionConfig = new ConnectionConfig(accessToken, APIVersion.V50, instanceUrl);
+const connectionConfigV50: ConnectionConfig = new ConnectionConfig(accessToken, APIVersion.V50, instanceUrl);
 
 describe('UnitOfWorkGraph Tests', () => {
     afterEach(() => {
@@ -28,7 +28,7 @@ describe('UnitOfWorkGraph Tests', () => {
     });
 
     it('New Unit Of Work Graph', async () => {
-        const uowg: UnitOfWorkGraph = new UnitOfWorkGraph(connectionConfig228, NO_OP_LOGGER);
+        const uowg: UnitOfWorkGraph = new UnitOfWorkGraph(connectionConfigV50, NO_OP_LOGGER);
         expect(uowg.getCount()).to.equal(0);
         const uow1 = uowg.newUnitOfWork();
         const uow2 = uowg.newUnitOfWork();
@@ -41,8 +41,8 @@ describe('UnitOfWorkGraph Tests', () => {
     });
 
     it('New Unit Of Work Graph With UOW', async () => {
-        const uow = new UnitOfWork(connectionConfig228, NO_OP_LOGGER);
-        const uowg: UnitOfWorkGraph = new UnitOfWorkGraph(connectionConfig228, NO_OP_LOGGER, uow);
+        const uow = new UnitOfWork(connectionConfigV50, NO_OP_LOGGER);
+        const uowg: UnitOfWorkGraph = new UnitOfWorkGraph(connectionConfigV50, NO_OP_LOGGER, uow);
 
         expect(uowg.getCount()).to.equal(1);
     });
