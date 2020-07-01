@@ -16,16 +16,19 @@ import {
     SObject,
     UnitOfWork,
     UnitOfWorkResponse,
+    UnitOfWorkSuccessResponse,
+    UnitOfWorkErrorResponse,
     UnitOfWorkResult
 }
     from '../../../../src';
+import { fail } from 'assert';
 
 const NO_OP_LOGGER = new Logger({name: 'test', level: 100});
 const instanceUrl = 'http://localhost:3000';
 const apiVersion = Constants.CURRENT_API_VERSION;
 const accessToken = 'accessToken1234';
 const connectionConfig: ConnectionConfig = new ConnectionConfig(accessToken, apiVersion, instanceUrl);
-const connectionConfig228: ConnectionConfig = new ConnectionConfig(accessToken, APIVersion.V50, instanceUrl);
+const connectionConfigV50: ConnectionConfig = new ConnectionConfig(accessToken, APIVersion.V50, instanceUrl);
 
 const httpCodeCreated = 201;
 const httpCodeNoContent = 204;
@@ -58,6 +61,8 @@ describe('UnitOfWork Tests', () => {
         const uowResponse: UnitOfWorkResponse = await uow.commit();
 
         expect(uowResponse).to.exist;
+        expect(uowResponse.success).to.be.true;
+        expect(uowResponse instanceof UnitOfWorkSuccessResponse).to.be.true;
         const results: ReadonlyArray<UnitOfWorkResult> = uowResponse.getResults(account);
         expect(results).to.exist;
         expect(results).lengthOf(1);
@@ -69,14 +74,83 @@ describe('UnitOfWork Tests', () => {
         expect(uowResult.id).to.equal('001xx000003EG4jAAG');
     });
 
+    it('Insert Account Err Missing Required Property', async () => {
+        const nowHex = new Date().getTime().toString(16);
+        const a1 = new SObject('Account')
+            .withValue('Name', 'MyAccount - uowErr - integration ' + nowHex);
+        const a2 = new SObject('Account')
+            .withValue('XName', 'MyAccount - uowErr - integration ' + nowHex);
+
+        nock(instanceUrl)
+            .post('/services/data/v' + connectionConfig.apiVersion + '/composite/')
+            .reply(HttpCodes.OK, {
+                  "compositeResponse": [{                        // Real response captured from v50.0 endpoint
+                        "body": [{
+                            "errorCode": "PROCESSING_HALTED",    // Actually-valid submission gets PROCESSING_HALTED
+                            "message": "The transaction was rolled back since another operation in the same transaction failed."
+                        }],
+                        "httpHeaders": {},
+                        "httpStatusCode": 400,
+                        "referenceId": a1.referenceId
+                      }, {
+                        "body": [{
+                            "message": "No such column XName on sobject of type Account",
+                            "errorCode": "INVALID_FIELD"         // Real error/failure identified w/ its own ERROR_CODE
+                        }],
+                        "httpHeaders": {},
+                        "httpStatusCode": 400,
+                        "referenceId": a2.referenceId
+                      }]
+            });
+
+        const uow: UnitOfWork = new UnitOfWork(connectionConfig, NO_OP_LOGGER)
+            .registerNew(a1)
+            .registerNew(a2);
+        
+        const uowResponse = await uow.commit();
+        expect(uowResponse).to.exist;
+        expect(uowResponse.success).to.be.false;
+
+        // Type guard avoids need for explicit cast
+        if (uowResponse instanceof UnitOfWorkErrorResponse) {
+            const rootCause: UnitOfWorkResult = uowResponse.rootCause;
+            expect(rootCause).to.exist;
+            expect(rootCause.isSuccess).to.be.false;
+            expect(rootCause.errors).to.exist;
+            expect(rootCause.errors).lengthOf(1);
+            const acctErr = rootCause.errors[0];
+            expect(acctErr.message).to.equal('No such column XName on sobject of type Account');
+            expect(acctErr.errorCode).to.equal('INVALID_FIELD');
+            expect(rootCause.method).to.equal(Method.POST);
+            expect(rootCause.id).to.not.exist;                       // object *not* inserted so no `id` defined
+
+            const a1Result = uowResponse.getResults(a1);
+            expect(Array.isArray(a1Result)).to.be.true;
+            expect(a1Result).lengthOf(1);
+            expect(rootCause).to.not.deep.equal(a1Result[0]);        // first result is *not* root cause
+            expect(a1Result[0].isSuccess).to.be.false;
+            expect(a1Result[0].errors).lengthOf(1);
+            expect(a1Result[0].errors[0].message).to.equal("The transaction was rolled back since another operation in the same transaction failed.");
+            expect(a1Result[0].errors[0].errorCode).to.equal('PROCESSING_HALTED');
+
+            const a2Result = uowResponse.getResults(a2);
+            expect(Array.isArray(a2Result)).to.be.true;
+            expect(a2Result).lengthOf(1);
+            expect(rootCause).to.deep.equal(a2Result[0]);            // 2nd result *is* root cause, props checked above
+        } else {
+            fail(`Unexpected UoW response type, expected UnitOfWorkErrorResponse, got: ${uowResponse.constructor.name}`);
+        }
+    });
+
     it('Graph Insert Account', async () => {
         const account: SObject = new SObject('Account');
         account.setValue('Name', 'MyAccount - uow - integration - ' + new Date());
 
-        const uow: UnitOfWork = new UnitOfWork(connectionConfig228, NO_OP_LOGGER);
+        // release w/ API version 50.0+ have /composite/graph support
+        const uow: UnitOfWork = new UnitOfWork(connectionConfigV50, NO_OP_LOGGER);
 
         nock(instanceUrl)
-            .post('/services/data/v' + connectionConfig228.apiVersion + '/composite/graph/')
+            .post('/services/data/v' + connectionConfigV50.apiVersion + '/composite/graph/')
             .reply(HttpCodes.OK, {
                 graphs: [
                     {
@@ -99,6 +173,8 @@ describe('UnitOfWork Tests', () => {
         const uowResponse: UnitOfWorkResponse = await uow.commit();
 
         expect(uowResponse).to.exist;
+        expect(uowResponse.success).to.be.true;
+        expect(uowResponse instanceof UnitOfWorkSuccessResponse).to.be.true;
         const results: ReadonlyArray<UnitOfWorkResult> = uowResponse.getResults(account);
         expect(results).to.exist;
         expect(results).lengthOf(1);
@@ -108,6 +184,82 @@ describe('UnitOfWork Tests', () => {
         expect(uowResult.method).to.equal(Method.POST);
         expect(uowResult.id).to.exist;
         expect(uowResult.id).to.equal('001xx000003EG4jAAG');
+    });
+
+    it('Graph Insert Account Err Missing Required Property', async () => {
+        const nowHex = new Date().getTime().toString(16);
+        const a1 = new SObject('Account')
+            .withValue('Name', 'MyAccount - uowErr - integration ' + nowHex);
+        const a2 = new SObject('Account')
+            .withValue('XName', 'MyAccount - uowErr - integration ' + nowHex);
+
+        // release w/ API version 50.0+ have /composite/graph support
+        const uow: UnitOfWork = new UnitOfWork(connectionConfigV50, NO_OP_LOGGER)
+            .registerNew(a1)
+            .registerNew(a2);
+
+        nock(instanceUrl)
+            .post('/services/data/v' + connectionConfigV50.apiVersion + '/composite/graph/')
+            .reply(HttpCodes.OK, {
+                "graphs": [{
+                    "graphId": "2cce375a-a611-47a5-a18d-a35048840d5c",
+                    "graphResponse": {
+                      "compositeResponse": [{
+                          // Unfortunately on current v50.0 release, we do not get PROCESSING_HALTED error code
+                          // like standard composite endpoint so we cannot identify that the *2nd* object 
+                          // was the root cause.  In this test we can only identify root cause as first-failed
+                          "body": [{
+                              "message": "No such column XName on sobject of type Account",
+                              "errorCode": "INVALID_FIELD"
+                          }],
+                          "httpHeaders": {},
+                          "httpStatusCode": 400,
+                          "referenceId": a1.referenceId
+                        }, {
+                          "body": [{
+                              "message": "No such column XName on sobject of type Account",
+                              "errorCode": "INVALID_FIELD"
+                            }],
+                          "httpHeaders": {},
+                          "httpStatusCode": 400,
+                          "referenceId": a2.referenceId
+                      }]
+                    },
+                    "isSuccessful": false
+                }]
+            });
+
+        const uowResponse = await uow.commit();
+        expect(uowResponse).to.exist;
+        expect(uowResponse.success).to.be.false;
+
+        if (uowResponse instanceof UnitOfWorkErrorResponse) {
+            const rootCause: UnitOfWorkResult = uowResponse.rootCause;
+            expect(rootCause).to.exist;
+            expect(rootCause.isSuccess).to.be.false;
+            expect(rootCause.errors).to.exist;
+            expect(rootCause.errors).lengthOf(1);
+            const acctErr = rootCause.errors[0];
+            expect(acctErr.message).to.equal("No such column XName on sobject of type Account");
+            expect(acctErr.errorCode).to.equal('INVALID_FIELD');
+            expect(rootCause.method).to.equal(Method.POST);
+            expect(rootCause.id).to.not.exist;                     // object *not* inserted so no `id` defined
+    
+            const a1Result = uowResponse.getResults(a1);
+            expect(Array.isArray(a1Result)).to.be.true;
+            expect(a1Result).lengthOf(1);
+            expect(rootCause).to.deep.equal(a1Result[0]);          // first result *is* root cause on graph endpoint
+
+            const a2Result = uowResponse.getResults(a2);
+            expect(Array.isArray(a2Result)).to.be.true;
+            expect(a2Result).lengthOf(1);
+            expect(a2Result[0].isSuccess).to.be.false;
+            expect(a2Result[0].errors).lengthOf(1);
+            expect(a2Result[0].errors[0].message).to.equal("No such column XName on sobject of type Account");
+            expect(a2Result[0].errors[0].errorCode).to.equal('INVALID_FIELD');
+        } else {
+            fail(`Unexpected UoW response type, expected UnitOfWorkErrorResponse, got: ${uowResponse.constructor.name}`);
+        }
     });
 
     it('Update Existing Account', async () => {
@@ -137,6 +289,8 @@ describe('UnitOfWork Tests', () => {
         const uowResponse: UnitOfWorkResponse = await uow.commit();
 
         expect(uowResponse).to.exist;
+        expect(uowResponse.success).to.be.true;
+        expect(uowResponse instanceof UnitOfWorkSuccessResponse).to.be.true;
         const results: ReadonlyArray<UnitOfWorkResult> = uowResponse.getResults(account);
         expect(results).to.exist;
         expect(results).lengthOf(1);
@@ -188,6 +342,8 @@ describe('UnitOfWork Tests', () => {
         const uowResponse: UnitOfWorkResponse = await uow.commit();
 
         expect(uowResponse).to.exist;
+        expect(uowResponse.success).to.be.true;
+        expect(uowResponse instanceof UnitOfWorkSuccessResponse).to.be.true;
         const results: ReadonlyArray<UnitOfWorkResult> = uowResponse.getResults(account);
         expect(results).to.exist;
         expect(results).lengthOf(2);
@@ -233,6 +389,8 @@ describe('UnitOfWork Tests', () => {
         const uowResponse: UnitOfWorkResponse = await uow.commit();
 
         expect(uowResponse).to.exist;
+        expect(uowResponse.success).to.be.true;
+        expect(uowResponse instanceof UnitOfWorkSuccessResponse).to.be.true;
         const results: ReadonlyArray<UnitOfWorkResult> = uowResponse.getResults(account);
         expect(results).to.exist;
         expect(results).lengthOf(1);
@@ -299,6 +457,8 @@ describe('UnitOfWork Tests', () => {
         const uowResponse: UnitOfWorkResponse = await uow.commit();
 
         expect(uowResponse).to.exist;
+        expect(uowResponse.success).to.be.true;
+        expect(uowResponse instanceof UnitOfWorkSuccessResponse).to.be.true;
 
         const accountResults: ReadonlyArray<UnitOfWorkResult> = uowResponse.getResults(account);
         expect(accountResults).to.exist;

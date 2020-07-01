@@ -9,7 +9,7 @@ import { Logger } from '@salesforce/core';
 
 const httpCodeCreated = 201;
 
-import {CompositeGraphResponse, ConnectionConfig, Constants, Error} from '../../../../src';
+import {CompositeGraphResponse, ConnectionConfig, Constants, Error as ApiError} from '../../../../src';
 import {
     CompositeApi,
     CompositeResponse,
@@ -484,10 +484,10 @@ describe('CompositeApi Tests', () => {
         );
 
         // Verify the body directly
-        const errors: ReadonlyArray<Error> = compositeSubResponse.errors;
+        const errors: ReadonlyArray<ApiError> = compositeSubResponse.errors;
         expect(errors).to.exist;
         expect(errors).lengthOf(1);
-        const error: Error = errors[0];
+        const error: ApiError = errors[0];
         expect(error).to.exist;
         expect(error.message).to.equal('Required fields are missing: [Name]');
         expect(error.errorCode).to.equal('REQUIRED_FIELD_MISSING');

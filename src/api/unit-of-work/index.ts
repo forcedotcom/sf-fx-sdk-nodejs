@@ -1,7 +1,9 @@
 export {
     UnitOfWork,
+    UnitOfWorkErrorResponse,
     UnitOfWorkResponse,
     UnitOfWorkResult,
+    UnitOfWorkSuccessResponse,
 } from './UnitOfWork';
 
 export {
