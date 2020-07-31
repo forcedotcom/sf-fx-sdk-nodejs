@@ -12,40 +12,77 @@ All function implementations must export a function accepting these arguments:
 
 Functions must return an object that can be serialized to JSON.
 
-```javascript
-import * as sdk from 'salesforce-sdk';
+The following JavaScript example makes a SOQL query to a Salesforce org: 
+
+```js
+const sdk = require('@salesforce/salesforce-sdk');
+
+module.exports = async function (event, context, logger) {
+     
+     const soql = 'SELECT Name FROM Account';
+     const queryResults = await context.org.data.query(soql);
+     logger.info(JSON.stringify(queryResults));
+     
+     return queryResults;
+}
+```
+
+and the same example in TypeScript is as follows:
+
+```ts
+import * as sdk from '@salesforce/salesforce-sdk';
 
 export default async function execute(event: sdk.InvocationEvent, context: sdk.Context, logger: sdk.Logger): Promise<any> {
-    debugger;
 
-    // Invoke function
-    const fx: HelloFunction = new HelloFunction(event, context, logger);
-    const response = await fx.invoke();
+    const soql = 'SELECT Name FROM Account';
+    const queryResults = await context.org.data.query(soql);
+    logger.info(JSON.stringify(queryResults));
 
-    return JSON.stringify(response);
+    return queryResults;
 }
+```
 
+For more complex transactions, the SDK provides the UnitOfWork class. A UnitOfWork represents a set of one or more Salesforce operations that need to be done as a single atomic operation. The following JavaScript example uses a UnitOfWork to create an Account record and several related records:
 
-class HelloFunction {
+```js
+module.exports = async function (event, context, logger) {
+    const payload = event.data;
+    const uniqueId = Date.now();
 
-    constructor(private readonly event: sdk.InvocationEvent,
-                private readonly context: sdk.Context,
-                private readonly logger: sdk.Logger) {
-        this.logger = context.logger;
-        this.logger.info(`${this.getName()}.init()`);
-    }
+    // Create a unit of work that inserts multiple objects.
+    const work = context.org.unitOfWork;
 
-    public getName(): string {
-        return this.constructor.name;
-    }
+    const account = new sdk.SObject('Account');
+    account.setValue('Name', payload.accountName + uniqueId);
+    work.registerNew(account);
 
-    public async invoke(): Promise<any>  {
-        this.logger.info(`${this.getName()}.invoke()`);
+    const contact = new sdk.SObject('Contact');
+    contact.setValue('LastName', payload.contactName + uniqueId);
+    contact.setValue('AccountId', account.fkId);
+    work.registerNew(contact);
 
-        const results = await this.context.org.data.query('SELECT Name FROM Account');
-        this.logger.info(JSON.stringify(query));
+    const opportunity = new sdk.SObject('Opportunity');
+    opportunity.setValue('Name', payload.opportunityName + uniqueId);
+    opportunity.setValue('StageName', 'Prospecting');
+    opportunity.setValue('CloseDate', Date.now());
+    opportunity.setValue('AccountId', account.fkId);
+    work.registerNew(opportunity);
 
-        return results;
+    // Commit the unit of work.
+    const response = await work.commit();
+    if (response.success) {
+        logger.info(JSON.stringify(response));
+        const result = { 'accountId' : response.getResults(account)[0].id,
+                         'contactId' : response.getResults(contact)[0].id,
+                         'opportunityId' : response.getResults(opportunity)[0].id };
+        logger.info('Committed a Unit of Work');
+        logger.info(JSON.stringify(result));
+    // If there was an error, log the root cause and throw an Error to indicate
+    // a failed Function status
+    } else {
+        const errMsg = `Failed to commit Unit of Work. Root cause: ${response.rootCause}`;
+        logger.error(errMsg);
+        throw new Error(errMsg);
     }
 }
 ```
