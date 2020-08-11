@@ -43,9 +43,9 @@
   },
   "homepage": "https://github.com/forcedotcom/sf-fx-sdk-nodejs#readme",
   "dependencies": {
-    "@salesforce/core": "2.1.6",
-    "tslib": "1.10.0",
-    "typed-rest-client": "~1.5.0"
+    "@salesforce/core": "2.10.0",
+    "tslib": "2.0.1",
+    "typed-rest-client": "~1.7.3"
   },
   "devDependencies": {
     "@salesforce/dev-scripts": "0.3.14",
@@ -72,7 +72,7 @@
     "shelljs": "0.8.1",
     "sinon": "^7.2.3",
     "ts-node": "7.0.0",
-    "typescript": "3.2.2",
+    "typescript": "3.9.7",
     "valid-url": "^1.0.9"
   }
 }
