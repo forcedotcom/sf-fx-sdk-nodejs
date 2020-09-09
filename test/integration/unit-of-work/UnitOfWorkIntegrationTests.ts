@@ -17,11 +17,11 @@ import {
 } from '../../../src';
 import * as tu from '../../TestUtils';
 
-const instanceUrl: string = process.env.SFDC_URL || 'http://dary-espresso-2226-dev-ed.localhost.internal.salesforce.com:6109/';
+const instanceUrl: string = process.env.SFDC_URL || '<Your instance URL here>';
 // TODO: Get latest API version from instance (eg parse http://ap1.stmpb.stm.salesforce.com/services/data/)
 const apiVersion: string = APIVersion.V50.toString();
-const sessionId: string = process.env.SFDC_SID || '00Dxx0000006HVn!AQEAQIlcv8wONY2aOhw5vHiifzY7G8dDyRZa1hvIksZJgt0RWXs0y_EwhrlWKBY2oizZBSShgs5HNGZaORwiwREzzsmRbS_v';
-const connectionConfig: ConnectionConfig = new ConnectionConfig(instanceUrl, apiVersion, sessionId);
+const sessionId: string = process.env.SFDC_SID || '<Your accessToken here>';
+const connectionConfig: ConnectionConfig = new ConnectionConfig(sessionId, apiVersion, instanceUrl);
 let uow: UnitOfWork;
 
 describe('UnitOfWork Integration Tests', () => {
@@ -43,7 +43,7 @@ describe('UnitOfWork Integration Tests', () => {
 
     it('Insert Account', async () => {
         const account: SObject = new SObject('Account');
-        account.setValue('Name', `MyAccount - uow - integration - ${new Date()}`);
+        account.setValue('Name', `MyAccountUoWInteg${(new Date()).getTime()}`);
 
         uow.registerNew(account);
 
@@ -81,7 +81,7 @@ describe('UnitOfWork Integration Tests', () => {
     });
 
     it('Insert and Update Account', async () => {
-        const originalName = `MyAccount - uow - integration - ${new Date()}`;
+        const originalName = `MyAccountUoWInteg${(new Date()).getTime()}`;
         const newName = `Updated ${originalName}`;
         const account: SObject = new SObject('Account');
         account.setValue('Name', originalName);
@@ -133,7 +133,7 @@ describe('UnitOfWork Integration Tests', () => {
     it('Insert Account and Contact', async () => {
         const uow: UnitOfWork = new UnitOfWork(connectionConfig, logger);
         const account: SObject = new SObject('Account');
-        account.setValue('Name', `MyAccount - uow - integration - ${new Date()}`);
+        account.setValue('Name', `MyAccountUoWInteg${(new Date()).getTime()}`);
         uow.registerNew(account);
 
         const contact: SObject = new SObject('Contact');

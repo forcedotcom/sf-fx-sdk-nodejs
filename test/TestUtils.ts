@@ -19,7 +19,7 @@ export interface IInsertResponse {
 }
 
 export async function insertAccount(connectionConfig: ConnectionConfig): Promise<IInsertResponse> {
-    const accountName = `Account ${new Date()}`;
+    const accountName = `Account ${(new Date()).getTime()}`;
     const compositeApi: CompositeApi = new CompositeApi(connectionConfig, NO_OP_LOGGER);
     const compositeRequest: CompositeRequest = new CompositeRequest();
     const compositeSubRequest: CompositeSubrequest =

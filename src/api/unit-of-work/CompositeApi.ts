@@ -157,7 +157,7 @@ export class CompositeApi {
 
     public async invoke(compositeRequest: CompositeRequest): Promise<CompositeResponse> {
         const bearerCredentialHandler: BearerCredentialHandler = new BearerCredentialHandler(
-            this._connectionConfig.accessToken,
+            this._connectionConfig.accessToken
         );
         const httpClient: HttpClient = new HttpClient('sf-fx-node', [bearerCredentialHandler]);
         const path = `/services/data/v${this._connectionConfig.apiVersion}/composite/`;
@@ -170,7 +170,7 @@ export class CompositeApi {
             }
         });
 
-        this.logger.debug(`POST ${path}`);
+        this.logger.debug(`POST ${path} ${data}`);
 
         const response: HttpClientResponse = await httpClient.post(
             this._connectionConfig.instanceUrl + path,
@@ -201,7 +201,7 @@ export class CompositeApi {
         const graphObj = {graphs : compositeRequests};
         const data: string = JSON.stringify(graphObj);
 
-        this.logger.debug(`POST ${path}`);
+        this.logger.debug(`POST ${path} ${data}`);
 
         const response: HttpClientResponse = await httpClient.post(
             this._connectionConfig.instanceUrl + path,
