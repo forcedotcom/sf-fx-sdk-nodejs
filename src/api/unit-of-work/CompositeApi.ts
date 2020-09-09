@@ -187,7 +187,7 @@ export class CompositeApi {
 
             return compositeResponse;
         } else {
-            throw new Error('Server returned status code: ' + response.message.statusCode);
+            throw new Error(`Composite API error: ${response.message.statusMessage ? response.message.statusMessage : 'UNKNOWN'} (${response.message.statusCode})`);
         }
     }
 
@@ -215,7 +215,7 @@ export class CompositeApi {
 
             return compositeGraphResponse;
         } else {
-            throw new Error('Graph composite api returned status code: ' + response.message.statusCode);
+            throw new Error(`Composite Graph API error: ${response.message.statusMessage ? response.message.statusMessage : 'UNKNOWN'} (${response.message.statusCode})`);
         }
     }
 }

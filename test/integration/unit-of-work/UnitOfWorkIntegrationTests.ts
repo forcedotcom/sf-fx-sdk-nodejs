@@ -17,10 +17,10 @@ import {
 } from '../../../src';
 import * as tu from '../../TestUtils';
 
-const instanceUrl: string = process.env.SFDC_URL || '<Put your server url here>';
+const instanceUrl: string = process.env.SFDC_URL || 'http://dary-espresso-2226-dev-ed.localhost.internal.salesforce.com:6109/';
 // TODO: Get latest API version from instance (eg parse http://ap1.stmpb.stm.salesforce.com/services/data/)
 const apiVersion: string = APIVersion.V50.toString();
-const sessionId: string = process.env.SFDC_SID || '<Put your session id here>';
+const sessionId: string = process.env.SFDC_SID || '00Dxx0000006HVn!AQEAQIlcv8wONY2aOhw5vHiifzY7G8dDyRZa1hvIksZJgt0RWXs0y_EwhrlWKBY2oizZBSShgs5HNGZaORwiwREzzsmRbS_v';
 const connectionConfig: ConnectionConfig = new ConnectionConfig(instanceUrl, apiVersion, sessionId);
 let uow: UnitOfWork;
 

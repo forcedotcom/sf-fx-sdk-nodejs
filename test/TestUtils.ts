@@ -1,23 +1,17 @@
 /* tslint:disable: no-unused-expression */
 import { expect } from 'chai';
 import 'mocha';
-import * as sinon from 'sinon';
 import { Logger } from '@salesforce/core';
 
-import {
-    CompositeApi,
-    CompositeRequest,
-    CompositeResponse,
-    CompositeSubrequest,
-    CompositeSubresponse,
-    ConnectionConfig,
-    Context,
-    InsertCompositeSubrequestBuilder }
-from '../src';
+import { APIVersion, ConnectionConfig } from '../src';
+import { CompositeRequest } from '../src/api/unit-of-work/CompositeRequest';
+import { CompositeSubrequest, InsertCompositeSubrequestBuilder } from '../src/api/unit-of-work/CompositeSubrequest';
+import { CompositeApi, CompositeResponse, CompositeSubresponse } from '../src/api/unit-of-work/CompositeApi';
 
 const NO_OP_LOGGER = new Logger({name: 'test', level: 100});
 
-const httpCodeCreated:number = 201;
+const apiVersion = APIVersion.V50.toString();
+const httpCodeCreated = 201;
 
 export interface IInsertResponse {
     readonly id: string;
@@ -25,11 +19,11 @@ export interface IInsertResponse {
 }
 
 export async function insertAccount(connectionConfig: ConnectionConfig): Promise<IInsertResponse> {
-    const accountName: string = `Account ${new Date()}`;
+    const accountName = `Account ${new Date()}`;
     const compositeApi: CompositeApi = new CompositeApi(connectionConfig, NO_OP_LOGGER);
     const compositeRequest: CompositeRequest = new CompositeRequest();
     const compositeSubRequest: CompositeSubrequest =
-    (new InsertCompositeSubrequestBuilder()).sObjectType('Account').named(accountName).build();
+    (new InsertCompositeSubrequestBuilder(apiVersion)).sObjectType('Account').named(accountName).build();
     compositeRequest.addSubrequest(compositeSubRequest);
 
     const compositeResponse: CompositeResponse = await compositeApi.invoke(compositeRequest);
