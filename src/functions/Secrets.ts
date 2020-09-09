@@ -88,13 +88,13 @@ export class Secrets {
     /**
      * Construct with logger and optional base path.
      * @param logger logger to use if unable to load/decode secret.
-     * @param basePath 
+     * @param basePath
      */
     constructor(
         private logger: Logger,
         private basePath: string = Secrets.DEFAULT_BASE_PATH,
         ) {}
-    
+
     /**
      * Get a secret object.
      *

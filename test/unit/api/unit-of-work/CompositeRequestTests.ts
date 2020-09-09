@@ -2,10 +2,11 @@
 import { expect } from 'chai';
 import 'mocha';
 
-import { SObject } from '../../../../src';
+import { APIVersion, SObject } from '../../../../src';
 import { CompositeRequest } from '../../../../src/api/unit-of-work/CompositeRequest';
 import { CompositeSubrequest, InsertCompositeSubrequestBuilder, PatchCompositeSubrequestBuilder } from '../../../../src/api/unit-of-work/CompositeSubrequest';
 
+const apiVersion = APIVersion.V50.toString();
 
 describe('CompositeRequest Tests', () => {
     let compositeRequest:CompositeRequest = null;
@@ -32,8 +33,8 @@ describe('CompositeRequest Tests', () => {
     });
 
     it('addSubrequest/getSubrequests with sObjectType', () => {
-        const compositeSubRequest1:CompositeSubrequest = new InsertCompositeSubrequestBuilder().sObjectType('Account').build();
-        const compositeSubRequest2:CompositeSubrequest = new InsertCompositeSubrequestBuilder().sObjectType('Account').build();
+        const compositeSubRequest1:CompositeSubrequest = new InsertCompositeSubrequestBuilder(apiVersion).sObjectType('Account').build();
+        const compositeSubRequest2:CompositeSubrequest = new InsertCompositeSubrequestBuilder(apiVersion).sObjectType('Account').build();
         compositeRequest.addSubrequest(compositeSubRequest1);
         compositeRequest.addSubrequest(compositeSubRequest2);
 
@@ -46,8 +47,8 @@ describe('CompositeRequest Tests', () => {
 
     it('addSubrequest/getSubrequests with sObject', () => {
         const account:SObject = new SObject('Account');
-        const compositeSubRequest1:CompositeSubrequest = new InsertCompositeSubrequestBuilder().sObject(account).build();
-        const compositeSubRequest2:CompositeSubrequest = new InsertCompositeSubrequestBuilder().sObject(account).build();
+        const compositeSubRequest1:CompositeSubrequest = new InsertCompositeSubrequestBuilder(apiVersion).sObject(account).build();
+        const compositeSubRequest2:CompositeSubrequest = new InsertCompositeSubrequestBuilder(apiVersion).sObject(account).build();
         compositeRequest.addSubrequest(compositeSubRequest1);
         compositeRequest.addSubrequest(compositeSubRequest2);
 
@@ -59,8 +60,8 @@ describe('CompositeRequest Tests', () => {
     });
 
     it('addSubrequest/getSubrequest by reference id', () => {
-        const compositeSubRequest1:CompositeSubrequest = new InsertCompositeSubrequestBuilder().sObjectType('Account').build();
-        const compositeSubRequest2:CompositeSubrequest = new InsertCompositeSubrequestBuilder().sObjectType('Account').build();
+        const compositeSubRequest1:CompositeSubrequest = new InsertCompositeSubrequestBuilder(apiVersion).sObjectType('Account').build();
+        const compositeSubRequest2:CompositeSubrequest = new InsertCompositeSubrequestBuilder(apiVersion).sObjectType('Account').build();
         compositeRequest.addSubrequest(compositeSubRequest1);
         compositeRequest.addSubrequest(compositeSubRequest2);
 
@@ -80,8 +81,8 @@ describe('CompositeRequest Tests', () => {
     it('Insert and Patch have different reference ids', () => {
         const account: SObject = new SObject('Account');
 
-        const compositeSubRequestInsert:CompositeSubrequest = new InsertCompositeSubrequestBuilder().sObject(account).build();
-        const compositeSubRequestPatch:CompositeSubrequest = new PatchCompositeSubrequestBuilder().sObject(account).build();
+        const compositeSubRequestInsert:CompositeSubrequest = new InsertCompositeSubrequestBuilder(apiVersion).sObject(account).build();
+        const compositeSubRequestPatch:CompositeSubrequest = new PatchCompositeSubrequestBuilder(apiVersion).sObject(account).build();
 
         expect(compositeSubRequestInsert.referenceId).to.not.equal(compositeSubRequestPatch.referenceId);
     });
@@ -89,15 +90,15 @@ describe('CompositeRequest Tests', () => {
     it('Insert and Put have different reference ids', () => {
         const account: SObject = new SObject('Account');
 
-        const compositeSubRequestInsert:CompositeSubrequest = new InsertCompositeSubrequestBuilder().sObject(account).build();
-        const compositeSubRequestPut:CompositeSubrequest = new PatchCompositeSubrequestBuilder().sObject(account).build();
+        const compositeSubRequestInsert:CompositeSubrequest = new InsertCompositeSubrequestBuilder(apiVersion).sObject(account).build();
+        const compositeSubRequestPut:CompositeSubrequest = new PatchCompositeSubrequestBuilder(apiVersion).sObject(account).build();
 
         expect(compositeSubRequestInsert.referenceId).to.not.equal(compositeSubRequestPut.referenceId);
     });
 
     it('JSON Serialization', () => {
-        const compositeSubRequest1:CompositeSubrequest = new InsertCompositeSubrequestBuilder().sObjectType('Account').build();
-        const compositeSubRequest2:CompositeSubrequest = new InsertCompositeSubrequestBuilder().sObjectType('Account').build();
+        const compositeSubRequest1:CompositeSubrequest = new InsertCompositeSubrequestBuilder(apiVersion).sObjectType('Account').build();
+        const compositeSubRequest2:CompositeSubrequest = new InsertCompositeSubrequestBuilder(apiVersion).sObjectType('Account').build();
         compositeRequest.addSubrequest(compositeSubRequest1);
         compositeRequest.addSubrequest(compositeSubRequest2);
 

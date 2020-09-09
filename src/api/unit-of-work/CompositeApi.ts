@@ -19,6 +19,24 @@ export class CompositeSubresponse {
     private readonly _errors: ReadonlyArray<ApiError>;
     private readonly _body: { [key: string]: any };
 
+    constructor(compositeSubresponse: CompositeSubresponse) {
+        this.httpHeaders = compositeSubresponse.httpHeaders;
+        this.httpStatusCode = compositeSubresponse.httpStatusCode;
+        this.referenceId = compositeSubresponse.referenceId;
+        // The response body has different meaning depending if there was an error
+        if (compositeSubresponse.httpStatusCode < HttpCodes.BadRequest) {
+            this._body = compositeSubresponse.body;
+        } else {
+            const errors: ApiError[] = [];
+            if (compositeSubresponse.body && Array.isArray(compositeSubresponse.body)) {
+                compositeSubresponse.body.forEach((element: ApiError) => {
+                    errors.push(element);
+                });
+            }
+            this._errors = errors;
+        }
+    }
+
     public get body(): { [key: string]: any } {
         if (this.httpStatusCode < HttpCodes.BadRequest) {
             return this._body;
@@ -52,24 +70,6 @@ export class CompositeSubresponse {
             return this.httpHeaders[CompositeSubresponse.HEADER_LOCATION];
         } else {
             return undefined;
-        }
-    }
-
-    constructor(compositeSubresponse: CompositeSubresponse) {
-        this.httpHeaders = compositeSubresponse.httpHeaders;
-        this.httpStatusCode = compositeSubresponse.httpStatusCode;
-        this.referenceId = compositeSubresponse.referenceId;
-        // The response body has different meaning depending if there was an error
-        if (compositeSubresponse.httpStatusCode < HttpCodes.BadRequest) {
-            this._body = compositeSubresponse.body;
-        } else {
-            const errors: ApiError[] = [];
-            if (compositeSubresponse.body && Array.isArray(compositeSubresponse.body)) {
-                compositeSubresponse.body.forEach((element: ApiError) => {
-                    errors.push(element);
-                });
-            }
-            this._errors = errors;
         }
     }
 }
@@ -151,12 +151,8 @@ export class CompositeGraphResponse {
 }
 
 export class CompositeApi {
-    private readonly _connectionConfig: ConnectionConfig;
-    private readonly logger: Logger;
-
-    constructor(connectionConfig: ConnectionConfig, logger: Logger) {
-        this._connectionConfig = connectionConfig;
-        this.logger = logger;
+    constructor(private readonly _connectionConfig: ConnectionConfig,
+                private readonly logger: Logger) {
     }
 
     public async invoke(compositeRequest: CompositeRequest): Promise<CompositeResponse> {

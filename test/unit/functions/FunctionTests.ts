@@ -3,20 +3,20 @@ import { expect } from 'chai';
 import 'mocha';
 
 import {
+  APIVersion,
   ConnectionConfig,
-  Constants,
   Context,
   DataApi,
   InvocationEvent,
   Logger,
-  Org,  
+  Org,
   UnitOfWork,
   User,
   Secrets} from '../../../src';
 
 const NO_OP_LOGGER = new Logger({name: 'test', level: 100});
 const instanceUrl = 'http://localhost:3000';
-const apiVersion = Constants.CURRENT_API_VERSION;
+const apiVersion = APIVersion.V50.toString();
 const accessToken = 'accessToken1234';
 const connectionConfig: ConnectionConfig = new ConnectionConfig(accessToken, apiVersion, instanceUrl);
 
@@ -33,7 +33,7 @@ describe('Function Tests', () => {
         event = new InvocationEvent('data', 'dataContentType', 'dataSchema', 'id', 'source', Date.now(), 'type', headers);
         user = new User('id', 'username', 'onBehalfOfUserId');
         org = new Org(apiVersion, 'baseUrl', 'domainUrl', 'id', user, new DataApi(undefined, NO_OP_LOGGER), new UnitOfWork(connectionConfig, NO_OP_LOGGER));
-        secrets = new Secrets(NO_OP_LOGGER);        
+        secrets = new Secrets(NO_OP_LOGGER);
         context = new Context('id', NO_OP_LOGGER, org, secrets);
     });
 

@@ -72,3 +72,5 @@ export class Context {
         public readonly secrets?: Secrets,
         ) {}
 }
+
+export * from './Secrets';
