@@ -2,7 +2,7 @@
 
 `salesforce-sdk` is published to [https://www.npmjs.com/package/@salesforce/salesforce-sdk](https://www.npmjs.com/package/@salesforce/salesforce-sdk).
 
-Note: Requires access to `@salesforce/salesforce-sdk`.
+Note: Requires access to `@salesforce/salesforce-sdk`.  Invoke `npm login` to publish.
 
 To publish to `@salesforce/salesforce-sdk`:
 
