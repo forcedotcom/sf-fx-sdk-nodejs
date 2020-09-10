@@ -3,14 +3,16 @@ import { expect } from 'chai';
 import 'mocha';
 import { beforeEach } from 'mocha';
 
-import { Constants } from '../../../../src';
+import { APIVersion } from '../../../../src';
 import { CompositeSubrequest, CompositeSubrequestBuilder, InsertCompositeSubrequestBuilder } from '../../../../src/api/unit-of-work/CompositeSubrequest';
+
+const apiVersion = APIVersion.V50.toString();
 
 describe('CompositeSubrequest Serialization Tests', () => {
     let builder:CompositeSubrequestBuilder = null;
 
     beforeEach(() => {
-        builder = new InsertCompositeSubrequestBuilder().sObjectType('Account');
+        builder = new InsertCompositeSubrequestBuilder(apiVersion).sObjectType('Account');
     });
 
     const convertToAndFromJson = (compositSubRequest:CompositeSubrequest):object => {
@@ -26,7 +28,7 @@ describe('CompositeSubrequest Serialization Tests', () => {
     });
 
     it('apiVersion is excluded from serialization', () => {
-        builder.apiVersion(Constants.CURRENT_API_VERSION);
+        builder.apiVersion(apiVersion);
         const jsonObject:object = convertToAndFromJson(builder.build());
 
         Object.keys(jsonObject).forEach((key) => {

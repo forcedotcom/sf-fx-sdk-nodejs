@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import * as _ from 'lodash';
-import { Constants, Method, SObject } from '../..';
+import { Method, SObject } from '../..';
 
 export class CompositeSubrequest {
     public readonly httpHeaders: { [key: string]: string };
@@ -28,21 +28,17 @@ export class CompositeSubrequest {
 }
 
 export abstract class CompositeSubrequestBuilder {
-    public readonly method: Method;
     public readonly httpHeaders: { [key: string]: string };
-    public readonly values: { [key: string]: any };
     protected _referenceId: string;
     protected _rootReferenceId: string;
-    private _apiVersion: string;
     private _id: string;
     private _sObjectType: string;
     private _url: string;
 
-    protected constructor(method: Method, values: { [key: string]: any } = {}) {
-        this._apiVersion = Constants.CURRENT_API_VERSION;
+    protected constructor(private _apiVersion: string,
+                          public readonly method: Method,
+                          public readonly values: { [key: string]: any } = {}) {
         this.httpHeaders = {};
-        this.method = method;
-        this.values = values;
     }
 
     public getApiVersion(): string {
@@ -151,8 +147,8 @@ export abstract class CompositeSubrequestBuilder {
 }
 
 abstract class NoBodyCompositeSubrequestBuilder extends CompositeSubrequestBuilder {
-    constructor(method: Method) {
-        super(method, undefined /*This request can't accept any values*/);
+    constructor(apiVersion: string, method: Method) {
+        super(apiVersion, method, undefined /*This request can't accept any values*/);
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -169,8 +165,8 @@ abstract class NoBodyCompositeSubrequestBuilder extends CompositeSubrequestBuild
 }
 
 export class DeleteCompositeSubrequestBuilder extends NoBodyCompositeSubrequestBuilder {
-    public constructor() {
-        super(Method.DELETE);
+    public constructor(apiVersion: string) {
+        super(apiVersion, Method.DELETE);
     }
 
     protected _internalGetUrl(): string {
@@ -179,8 +175,8 @@ export class DeleteCompositeSubrequestBuilder extends NoBodyCompositeSubrequestB
 }
 
 export class DescribeCompositeSubrequestBuilder extends NoBodyCompositeSubrequestBuilder {
-    public constructor() {
-        super(Method.GET);
+    public constructor(apiVersion: string,) {
+        super(apiVersion, Method.GET);
     }
 
     public sObject(sObject: SObject): CompositeSubrequestBuilder {
@@ -195,8 +191,8 @@ export class DescribeCompositeSubrequestBuilder extends NoBodyCompositeSubreques
 }
 
 export class HttpGETCompositeSubrequestBuilder extends NoBodyCompositeSubrequestBuilder {
-    public constructor() {
-        super(Method.GET);
+    public constructor(apiVersion: string) {
+        super(apiVersion, Method.GET);
     }
 
     protected _internalGetUrl(): string {
@@ -205,8 +201,8 @@ export class HttpGETCompositeSubrequestBuilder extends NoBodyCompositeSubrequest
 }
 
 export class InsertCompositeSubrequestBuilder extends CompositeSubrequestBuilder {
-    public constructor() {
-        super(Method.POST);
+    public constructor(apiVersion: string) {
+        super(apiVersion, Method.POST);
     }
 
     public id(id: string): CompositeSubrequestBuilder {
@@ -228,8 +224,8 @@ export class InsertCompositeSubrequestBuilder extends CompositeSubrequestBuilder
 }
 
 export class PatchCompositeSubrequestBuilder extends CompositeSubrequestBuilder {
-    public constructor() {
-        super(Method.PATCH);
+    public constructor(apiVersion: string) {
+        super(apiVersion, Method.PATCH);
     }
 
     public sObject(sObject: SObject): CompositeSubrequestBuilder {
@@ -244,8 +240,8 @@ export class PatchCompositeSubrequestBuilder extends CompositeSubrequestBuilder 
 }
 
 export class PutCompositeSubrequestBuilder extends CompositeSubrequestBuilder {
-    public constructor() {
-        super(Method.PUT);
+    public constructor(apiVersion: string) {
+        super(apiVersion, Method.PUT);
     }
 
     public sObject(sObject: SObject): CompositeSubrequestBuilder {

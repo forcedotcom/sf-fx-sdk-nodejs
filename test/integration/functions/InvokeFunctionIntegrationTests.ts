@@ -1,13 +1,12 @@
 /* tslint:disable: no-unused-expression */
 import { assert, expect } from 'chai';
 import 'mocha';
-import { beforeEach } from 'mocha';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as request from 'request-promise-native';
 import * as validUrl from 'valid-url';
 
-const functionResource: string = process.env.FUNCTION_RESOURCE || 'http://systematic-mamenchisaurus-1957.closed-cauliflower-6487.secret-hamlet-5094.herokuspace.com';
+const functionResource: string = process.env.FUNCTION_RESOURCE || 'http://spider-844zdrtz.orca-vet899to4u.peak-0c9bd7.evergreen.space';
 // Body or filepath to body
 const functionRequestBody: string = process.env.FUNCTION_REQUEST_BODY;
 const functionRequestBodyFilePath: string = process.env.FUNCTION_REQUEST_BODY_FILEPATH || path.join(__dirname, 'hello-payload.json');
@@ -16,12 +15,9 @@ const functionRequestTimeout: number = parseInt(process.env.FUNCTION_REQUEST_TIM
 
 describe('Invoke Function Integration Tests', () => {
 
-    const fetchRequestBody = async (url: string) => {
+    const fetchRequestBody = async (url: string): Promise<any> => {
         return await request.get(url);
-    }
-
-    beforeEach(() => {
-    });
+    };
 
     it('successfully invokes function (no payload)', async () => {
         expect(functionResource).to.exist;
@@ -29,7 +25,13 @@ describe('Invoke Function Integration Tests', () => {
 
         const options = {
             headers: {
-                'Content-type': 'application/json'
+                'Content-type': 'application/json',
+                'ce-specversion': '1.0',
+                'ce-id': '00Dxx0000006IYJEA2-4Y4W3Lw_LkoskcHdEaZze--MyFunction-2020-09-03T20:56:27.608444Z',
+                'ce-source': 'urn:event:from:salesforce/xx/228.0/00Dxx0000006IYJ/apex/MyFunctionApex:test():7',
+                'ce-type': 'com.salesforce.function.invoke.sync',
+                'ce-time': '2020-09-03T20:56:28.297915Z',
+                'X-Request-Id': '00Dxx0000006IYJEA2-4Y4W3Lw_LkoskcHdEaZze--MyFunction-2020-09-03T20:56:27.608444Z'
             },
             json: true, // Automatically parses the JSON string in the response
             method: 'POST',
@@ -46,12 +48,12 @@ describe('Invoke Function Integration Tests', () => {
                     || (functionRequestBodyFilePath && fs.readFileSync(functionRequestBodyFilePath).toString())
                     || await fetchRequestBody(functionRequestBodyUrl));
             } catch(err) {
-                assert.fail(`Invalid JSON body: ${err.message}`)
+                assert.fail(`Invalid JSON body: ${err.message}`);
             }
             options['body'] = body;
         }
 
-        console.log(`Invoking ${functionResource}...`)
+        console.log(`Invoking ${functionResource}...`);
         const response = await request(options);
         expect(response).to.exist;
         expect(response.statusCode).to.exist;
@@ -62,7 +64,7 @@ describe('Invoke Function Integration Tests', () => {
         try {
             responseBody = JSON.parse(response.body);
         } catch(err) {
-            assert.fail(`Invalid JSON response body: ${err.message}`)
+            assert.fail(`Invalid JSON response body: ${err.message}`);
         }
         expect(responseBody).to.exist;
         // Hello function specific validation

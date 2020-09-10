@@ -1,15 +1,27 @@
-/* tslint:disable: no-unused-expression */
 import { expect } from 'chai';
 import 'mocha';
 import { beforeEach } from 'mocha';
 
-import { ConnectionConfig, Constants, Context, Logger, Method, SObject, UnitOfWork, UnitOfWorkResponse, UnitOfWorkResult } from '../../../src';
+import {
+    APIVersion,
+    ConnectionConfig,
+    Context,
+    Logger,
+    Method,
+    Org,
+    SObject,
+    UnitOfWork,
+    UnitOfWorkResponse,
+    UnitOfWorkResult,
+    User
+} from '../../../src';
 import * as tu from '../../TestUtils';
 
-const instanceUrl: string = process.env.SFDC_URL || '<put your server url here>';
-const apiVersion: string = Constants.CURRENT_API_VERSION;
-const sessionId: string = process.env.SFDC_SID || '<Put your session id here>';
-const connectionConfig: ConnectionConfig = new ConnectionConfig(instanceUrl, apiVersion, sessionId);
+const instanceUrl: string = process.env.SFDC_URL || '<Your instance URL here>';
+// TODO: Get latest API version from instance (eg parse http://ap1.stmpb.stm.salesforce.com/services/data/)
+const apiVersion: string = APIVersion.V50.toString();
+const sessionId: string = process.env.SFDC_SID || '<Your accessToken here>';
+const connectionConfig: ConnectionConfig = new ConnectionConfig(sessionId, apiVersion, instanceUrl);
 let uow: UnitOfWork;
 
 describe('UnitOfWork Integration Tests', () => {
@@ -17,28 +29,21 @@ describe('UnitOfWork Integration Tests', () => {
     let logger: Logger;
 
     beforeEach(async () => {
-        // This needs to be reinitialized each time becauase Context#create deletes it
-        const payload = {
-            context: {
-                apiVersion: Constants.CURRENT_API_VERSION,
-                userContext: {
-                    orgDomainUrl: instanceUrl,
-                    orgId: '00D1U0000000000',
-                    salesforceBaseUrl: instanceUrl,
-                    sessionId,
-                    userId: '0051U0000000000',
-                    username: 'test@salesforce.com'
-                },
-            }
-        };
         logger = new Logger({name: 'test', level: 100});
-        const context = new Context(payload, logger);
-        uow = context.unitOfWork;
+        const org = new Org(APIVersion.V50.toString(),
+            instanceUrl,
+            instanceUrl,
+            'id',
+            new User('id', 'username'),
+            undefined,
+            new UnitOfWork(connectionConfig, logger));
+        const context = new Context('id', logger, org);
+        uow = context.org.unitOfWork;
     });
 
     it('Insert Account', async () => {
         const account: SObject = new SObject('Account');
-        account.setValue('Name', `MyAccount - uow - integration - ${new Date()}`);
+        account.setValue('Name', `MyAccountUoWInteg${(new Date()).getTime()}`);
 
         uow.registerNew(account);
 
@@ -57,7 +62,7 @@ describe('UnitOfWork Integration Tests', () => {
 
     it('Update Existing Account', async () => {
         const insertResponse:tu.IInsertResponse = await tu.insertAccount(connectionConfig);
-        const newAccountName:string = `Updated ${insertResponse.name}`
+        const newAccountName = `Updated ${insertResponse.name}`;
         const account: SObject = new SObject('Account').withId(insertResponse.id).named(newAccountName);
 
         uow.registerModified(account);
@@ -76,7 +81,7 @@ describe('UnitOfWork Integration Tests', () => {
     });
 
     it('Insert and Update Account', async () => {
-        const originalName = `MyAccount - uow - integration - ${new Date()}`
+        const originalName = `MyAccountUoWInteg${(new Date()).getTime()}`;
         const newName = `Updated ${originalName}`;
         const account: SObject = new SObject('Account');
         account.setValue('Name', originalName);
@@ -128,7 +133,7 @@ describe('UnitOfWork Integration Tests', () => {
     it('Insert Account and Contact', async () => {
         const uow: UnitOfWork = new UnitOfWork(connectionConfig, logger);
         const account: SObject = new SObject('Account');
-        account.setValue('Name', `MyAccount - uow - integration - ${new Date()}`);
+        account.setValue('Name', `MyAccountUoWInteg${(new Date()).getTime()}`);
         uow.registerNew(account);
 
         const contact: SObject = new SObject('Contact');

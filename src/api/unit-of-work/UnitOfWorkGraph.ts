@@ -22,15 +22,11 @@ import { UnitOfWork } from './UnitOfWork';
  */
 export class UnitOfWorkGraph {
     private _graphs: UnitOfWork[];
-    private readonly _config: ConnectionConfig;
-    private logger;
 
-    constructor(config: ConnectionConfig, logger: Logger, _unitOfWork?: UnitOfWork) {
-        if(config.apiVersion < APIVersion.V50){
+    constructor(private readonly _config: ConnectionConfig, private logger: Logger, _unitOfWork?: UnitOfWork) {
+        if(_config.apiVersion < APIVersion.V50){
             throw new Error(`UnitOfWorkGraph requires apiVersion v${APIVersion.V50} or above`);
         }
-        this._config = config;
-        this.logger = logger;
         this._graphs = [];
 
         if(_unitOfWork){

@@ -9,7 +9,7 @@ import { Logger } from '@salesforce/core';
 
 const httpCodeCreated = 201;
 
-import {CompositeGraphResponse, ConnectionConfig, Constants, Error as ApiError} from '../../../../src';
+import { APIVersion, CompositeGraphResponse, ConnectionConfig, Error as ApiError } from '../../../../src';
 import {
     CompositeApi,
     CompositeResponse,
@@ -20,11 +20,11 @@ import { CompositeRequest } from '../../../../src/api/unit-of-work/CompositeRequ
 import { CompositeSubrequest, InsertCompositeSubrequestBuilder } from '../../../../src/api/unit-of-work/CompositeSubrequest';
 
 const NO_OP_LOGGER = new Logger({name: 'test', level: 100});
+const apiVersion = APIVersion.V50.toString();
 
 describe('CompositeApi Tests', () => {
 
     const instanceUrl = 'http://localhost:3000';
-    const apiVersion = Constants.CURRENT_API_VERSION;
     const accessToken = 'accessToken1234';
     const connectionConfig: ConnectionConfig = new ConnectionConfig(accessToken, apiVersion, instanceUrl);
 
@@ -38,7 +38,7 @@ describe('CompositeApi Tests', () => {
                         compositeResponse: [
                             {
                                 body: {id: '001xx000003EG3oAAG', success: true, errors: []},
-                                httpHeaders: {Location: `/services/data/v${Constants.CURRENT_API_VERSION}/sobjects/Account/001xx000003EG3oAAG`},
+                                httpHeaders: {Location: `/services/data/v${apiVersion}/sobjects/Account/001xx000003EG3oAAG`},
                                 httpStatusCode: httpCodeCreated,
                                 referenceId: refId,
                             },
@@ -61,7 +61,7 @@ describe('CompositeApi Tests', () => {
 
     it('Composite Request is passed through as body', async () => {
         const compositeRequest: CompositeRequest = new CompositeRequest();
-        const compositeSubRequest: CompositeSubrequest = new InsertCompositeSubrequestBuilder()
+        const compositeSubRequest: CompositeSubrequest = new InsertCompositeSubrequestBuilder(apiVersion)
             .sObjectType('Account')
             .named('MyAccount ' + new Date())
             .build();
@@ -92,7 +92,7 @@ describe('CompositeApi Tests', () => {
 
     it('Graph Composite Requests are passed through as body', async () => {
         const compositeRequest: CompositeRequest = new CompositeRequest();
-        const compositeSubRequest: CompositeSubrequest = new InsertCompositeSubrequestBuilder()
+        const compositeSubRequest: CompositeSubrequest = new InsertCompositeSubrequestBuilder(apiVersion)
             .sObjectType('Account')
             .named('MyAccount ' + new Date())
             .build();
@@ -123,7 +123,7 @@ describe('CompositeApi Tests', () => {
 
     it('Composite Api passes through session id', async () => {
         const compositeRequest: CompositeRequest = new CompositeRequest();
-        const compositeSubRequest: CompositeSubrequest = new InsertCompositeSubrequestBuilder()
+        const compositeSubRequest: CompositeSubrequest = new InsertCompositeSubrequestBuilder(apiVersion)
             .sObjectType('Account')
             .named('MyAccount ' + new Date())
             .build();
@@ -152,7 +152,7 @@ describe('CompositeApi Tests', () => {
 
     it('Graph Composite Api passes through session id', async () => {
         const compositeRequest: CompositeRequest = new CompositeRequest();
-        const compositeSubRequest: CompositeSubrequest = new InsertCompositeSubrequestBuilder()
+        const compositeSubRequest: CompositeSubrequest = new InsertCompositeSubrequestBuilder(apiVersion)
             .sObjectType('Account')
             .named('MyAccount ' + new Date())
             .build();
@@ -181,7 +181,7 @@ describe('CompositeApi Tests', () => {
 
     it('Composite Api Correctly Parses response', async () => {
         const compositeRequest: CompositeRequest = new CompositeRequest();
-        const compositeSubRequest: CompositeSubrequest = new InsertCompositeSubrequestBuilder()
+        const compositeSubRequest: CompositeSubrequest = new InsertCompositeSubrequestBuilder(apiVersion)
             .sObjectType('Account')
             .named('MyAccount ' + new Date())
             .build();
@@ -195,7 +195,7 @@ describe('CompositeApi Tests', () => {
                 compositeResponse: [
                     {
                         body: { id: '001xx000003EG3oAAG', success: true, errors: [] },
-                        httpHeaders: { Location: `/services/data/v${Constants.CURRENT_API_VERSION}/sobjects/Account/001xx000003EG3oAAG` },
+                        httpHeaders: { Location: `/services/data/v${apiVersion}/sobjects/Account/001xx000003EG3oAAG` },
                         httpStatusCode: httpCodeCreated,
                         referenceId: compositeSubRequest.referenceId,
                     },
@@ -224,7 +224,7 @@ describe('CompositeApi Tests', () => {
 
     it('Graph Composite Api Correctly Parses response', async () => {
         const compositeRequest: CompositeRequest = new CompositeRequest();
-        const compositeSubRequest: CompositeSubrequest = new InsertCompositeSubrequestBuilder()
+        const compositeSubRequest: CompositeSubrequest = new InsertCompositeSubrequestBuilder(apiVersion)
             .sObjectType('Account')
             .named('MyAccount ' + new Date())
             .build();
@@ -270,7 +270,7 @@ describe('CompositeApi Tests', () => {
 
     it('Composite Api Correctly Parses response headers', async () => {
         const compositeRequest: CompositeRequest = new CompositeRequest();
-        const compositeSubRequest: CompositeSubrequest = new InsertCompositeSubrequestBuilder()
+        const compositeSubRequest: CompositeSubrequest = new InsertCompositeSubrequestBuilder(apiVersion)
             .sObjectType('Account')
             .named('MyAccount ' + new Date())
             .build();
@@ -284,7 +284,7 @@ describe('CompositeApi Tests', () => {
                 compositeResponse: [
                     {
                         body: { id: '001xx000003EG3oAAG', success: true, errors: [] },
-                        httpHeaders: { Location: `/services/data/v${Constants.CURRENT_API_VERSION}/sobjects/Account/001xx000003EG3oAAG` },
+                        httpHeaders: { Location: `/services/data/v${apiVersion}/sobjects/Account/001xx000003EG3oAAG` },
                         httpStatusCode: httpCodeCreated,
                         referenceId: compositeSubRequest.referenceId,
                     },
@@ -301,14 +301,14 @@ describe('CompositeApi Tests', () => {
         const headers: { [key: string]: string } = compositeSubResponse.httpHeaders;
         expect(headers).to.exist;
         expect(Object.keys(headers)).lengthOf(1);
-        expect(headers.Location).to.equal(`/services/data/v${Constants.CURRENT_API_VERSION}/sobjects/Account/001xx000003EG3oAAG`);
+        expect(headers.Location).to.equal(`/services/data/v${apiVersion}/sobjects/Account/001xx000003EG3oAAG`);
         expect(compositeSubResponse.location).to.exist;
-        expect(compositeSubResponse.location).to.equal(`/services/data/v${Constants.CURRENT_API_VERSION}/sobjects/Account/001xx000003EG3oAAG`);
+        expect(compositeSubResponse.location).to.equal(`/services/data/v${apiVersion}/sobjects/Account/001xx000003EG3oAAG`);
     });
 
     it('Graph Composite Api Correctly Parses response headers', async () => {
         const compositeRequest: CompositeRequest = new CompositeRequest();
-        const compositeSubRequest: CompositeSubrequest = new InsertCompositeSubrequestBuilder()
+        const compositeSubRequest: CompositeSubrequest = new InsertCompositeSubrequestBuilder(apiVersion)
             .sObjectType('Account')
             .named('MyAccount ' + new Date())
             .build();
@@ -332,14 +332,14 @@ describe('CompositeApi Tests', () => {
         const headers: { [key: string]: string } = compositeSubResponse.httpHeaders;
         expect(headers).to.exist;
         expect(Object.keys(headers)).lengthOf(1);
-        expect(headers.Location).to.equal(`/services/data/v${Constants.CURRENT_API_VERSION}/sobjects/Account/001xx000003EG3oAAG`);
+        expect(headers.Location).to.equal(`/services/data/v${apiVersion}/sobjects/Account/001xx000003EG3oAAG`);
         expect(compositeSubResponse.location).to.exist;
-        expect(compositeSubResponse.location).to.equal(`/services/data/v${Constants.CURRENT_API_VERSION}/sobjects/Account/001xx000003EG3oAAG`);
+        expect(compositeSubResponse.location).to.equal(`/services/data/v${apiVersion}/sobjects/Account/001xx000003EG3oAAG`);
     });
 
     it('Composite Api Correctly Parses response body', async () => {
         const compositeRequest: CompositeRequest = new CompositeRequest();
-        const compositeSubRequest: CompositeSubrequest = new InsertCompositeSubrequestBuilder()
+        const compositeSubRequest: CompositeSubrequest = new InsertCompositeSubrequestBuilder(apiVersion)
             .sObjectType('Account')
             .named('MyAccount ' + new Date())
             .build();
@@ -353,7 +353,7 @@ describe('CompositeApi Tests', () => {
                 compositeResponse: [
                     {
                         body: { id: '001xx000003EG3oAAG', success: true, errors: [] },
-                        httpHeaders: { Location: `/services/data/v${Constants.CURRENT_API_VERSION}/sobjects/Account/001xx000003EG3oAAG` },
+                        httpHeaders: { Location: `/services/data/v${apiVersion}/sobjects/Account/001xx000003EG3oAAG` },
                         httpStatusCode: httpCodeCreated,
                         referenceId: compositeSubRequest.referenceId,
                     },
@@ -380,7 +380,7 @@ describe('CompositeApi Tests', () => {
 
     it('Graph Composite Api Correctly Parses response body', async () => {
         const compositeRequest: CompositeRequest = new CompositeRequest();
-        const compositeSubRequest: CompositeSubrequest = new InsertCompositeSubrequestBuilder()
+        const compositeSubRequest: CompositeSubrequest = new InsertCompositeSubrequestBuilder(apiVersion)
             .sObjectType('Account')
             .named('MyAccount ' + new Date())
             .build();
@@ -413,7 +413,7 @@ describe('CompositeApi Tests', () => {
 
     it('Composite Api throws exception if errors accessed on success', async () => {
         const compositeRequest: CompositeRequest = new CompositeRequest();
-        const compositeSubRequest: CompositeSubrequest = new InsertCompositeSubrequestBuilder()
+        const compositeSubRequest: CompositeSubrequest = new InsertCompositeSubrequestBuilder(apiVersion)
             .sObjectType('Account')
             .named('MyAccount ' + new Date())
             .build();
@@ -427,7 +427,7 @@ describe('CompositeApi Tests', () => {
                 compositeResponse: [
                     {
                         body: { id: '001xx000003EG3oAAG', success: true, errors: [] },
-                        httpHeaders: { Location: `/services/data/v${Constants.CURRENT_API_VERSION}/sobjects/Account/001xx000003EG3oAAG` },
+                        httpHeaders: { Location: `/services/data/v${apiVersion}/sobjects/Account/001xx000003EG3oAAG` },
                         httpStatusCode: httpCodeCreated,
                         referenceId: compositeSubRequest.referenceId,
                     },
@@ -450,7 +450,7 @@ describe('CompositeApi Tests', () => {
 
     it('Composite Api Correctly Parses response body errors', async () => {
         const compositeRequest: CompositeRequest = new CompositeRequest();
-        const compositeSubRequest: CompositeSubrequest = new InsertCompositeSubrequestBuilder()
+        const compositeSubRequest: CompositeSubrequest = new InsertCompositeSubrequestBuilder(apiVersion)
             .sObjectType('Account')
             .named('MyAccount ' + new Date())
             .build();
@@ -498,7 +498,7 @@ describe('CompositeApi Tests', () => {
 
     it('Composite Api throws exception if body accessed on errors', async () => {
         const compositeRequest: CompositeRequest = new CompositeRequest();
-        const compositeSubRequest: CompositeSubrequest = new InsertCompositeSubrequestBuilder()
+        const compositeSubRequest: CompositeSubrequest = new InsertCompositeSubrequestBuilder(apiVersion)
             .sObjectType('Account')
             .named('MyAccount ' + new Date())
             .build();
@@ -536,7 +536,7 @@ describe('CompositeApi Tests', () => {
 
     it('Composite Response throws error if request id is not found', async () => {
         const compositeRequest: CompositeRequest = new CompositeRequest();
-        const compositeSubRequest: CompositeSubrequest = new InsertCompositeSubrequestBuilder()
+        const compositeSubRequest: CompositeSubrequest = new InsertCompositeSubrequestBuilder(apiVersion)
             .sObjectType('Account')
             .named('MyAccount ' + new Date())
             .build();
@@ -550,7 +550,7 @@ describe('CompositeApi Tests', () => {
                 compositeResponse: [
                     {
                         body: { id: '001xx000003EG3oAAG', success: true, errors: [] },
-                        httpHeaders: { Location: `/services/data/v${Constants.CURRENT_API_VERSION}/sobjects/Account/001xx000003EG3oAAG` },
+                        httpHeaders: { Location: `/services/data/v${apiVersion}/sobjects/Account/001xx000003EG3oAAG` },
                         httpStatusCode: httpCodeCreated,
                         referenceId: compositeSubRequest.referenceId,
                     },
@@ -562,7 +562,7 @@ describe('CompositeApi Tests', () => {
 
         expect(compositeResponse).to.exist;
 
-        const nonExistentCompositeSubRequest: CompositeSubrequest = new InsertCompositeSubrequestBuilder()
+        const nonExistentCompositeSubRequest: CompositeSubrequest = new InsertCompositeSubrequestBuilder(apiVersion)
             .sObjectType('Account')
             .named('MyAccount ' + new Date())
             .build();

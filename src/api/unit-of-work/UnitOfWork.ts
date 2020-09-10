@@ -37,12 +37,11 @@ interface UuidToReferenceIds {
  * Individual unit of work result.
  */
 export class UnitOfWorkResult {
-    public readonly method: Method;
-    public readonly id: string;
-    public readonly isSuccess: boolean;
-    public readonly errors: ReadonlyArray<ApiError>;
 
-    constructor(method: Method, id: string, isSuccess: boolean, errors: ReadonlyArray<ApiError>) {
+    constructor(public readonly method: Method,
+                public readonly id: string,
+                public readonly isSuccess: boolean,
+                public readonly errors: ReadonlyArray<ApiError>) {
         this.method = method;
         this.id = id;
         this.isSuccess = isSuccess;
@@ -70,19 +69,12 @@ export class UnitOfWorkResult {
  * and failed UnitOfWork responses.
  */
 class UnitOfWorkResultMapper {
-    protected readonly _uuidToReferenceIds: UuidToReferenceIds;
-    protected readonly _referenceIdToCompositeSubrequests: IReferenceIdToCompositeSubrequests;
-    protected readonly _compositeResponse: CompositeResponse;
 
     constructor(
-        uuidToReferenceIds: UuidToReferenceIds,
-        referenceIdToCompositeSubrequests: IReferenceIdToCompositeSubrequests,
-        compositeResponse: CompositeResponse,
-    ) {
-        this._uuidToReferenceIds = uuidToReferenceIds;
-        this._referenceIdToCompositeSubrequests = referenceIdToCompositeSubrequests;
-        this._compositeResponse = compositeResponse;
-    }
+        protected readonly _uuidToReferenceIds: UuidToReferenceIds,
+        protected readonly _referenceIdToCompositeSubrequests: IReferenceIdToCompositeSubrequests,
+        protected readonly _compositeResponse: CompositeResponse,
+    ) { }
 
     public getResults(sObject: SObject): ReadonlyArray<UnitOfWorkResult> {
         const results: UnitOfWorkResult[] = [];
@@ -136,16 +128,11 @@ class UnitOfWorkResultMapper {
  * Base Unit of Work Response.
  */
 export abstract class UnitOfWorkResponse {
-    protected _resultMapper: UnitOfWorkResultMapper;
-    public readonly success: boolean;
 
     constructor(
-        resultMapper: UnitOfWorkResultMapper,
-        success: boolean,
-    ) {
-        this._resultMapper = resultMapper;
-        this.success = success;
-    }
+        protected _resultMapper: UnitOfWorkResultMapper,
+        public readonly success: boolean,
+    ) { }
 
     public getResults(sObject: SObject): ReadonlyArray<UnitOfWorkResult> {
         return this._resultMapper.getResults(sObject);
@@ -172,14 +159,12 @@ export class UnitOfWorkSuccessResponse extends UnitOfWorkResponse {
  * Failed Unit of Work Response
  */
 export class UnitOfWorkErrorResponse extends UnitOfWorkResponse {
-    private _rootCause: CompositeSubresponse;
 
     constructor(
         resultMapper: UnitOfWorkResultMapper,
-        rootCause: CompositeSubresponse,
+        private _rootCause: CompositeSubresponse,
     ) {
         super(resultMapper, false);
-        this._rootCause = rootCause;
     }
 
     public get rootCause(): UnitOfWorkResult {
@@ -198,17 +183,14 @@ export class UnitOfWorkErrorResponse extends UnitOfWorkResponse {
  */
 export class UnitOfWork {
     private readonly _compositeRequest: CompositeRequest;
-    private readonly _config: ConnectionConfig;
     private readonly _uuidToReferenceIds: UuidToReferenceIds;
     private readonly _referenceIdToCompositeSubrequests: IReferenceIdToCompositeSubrequests;
-    private logger;
 
-    constructor(config: ConnectionConfig, logger: Logger) {
-        this._config = config;
+    constructor(private readonly _config: ConnectionConfig,
+                private logger: Logger) {
         this._compositeRequest = new CompositeRequest();
         this._uuidToReferenceIds = {};
         this._referenceIdToCompositeSubrequests = {};
-        this.logger = logger;
     }
 
     /**
@@ -217,7 +199,7 @@ export class UnitOfWork {
      * @returns this to allow chaining registerNew(...).register...
      */
     public registerNew(sObject: SObject): UnitOfWork {
-        const insertBuilder: CompositeSubrequestBuilder = new InsertCompositeSubrequestBuilder();
+        const insertBuilder: CompositeSubrequestBuilder = new InsertCompositeSubrequestBuilder(this._config.apiVersion);
         const compositeSubrequest: CompositeSubrequest = insertBuilder.sObject(sObject).build();
 
         this.addCompositeSubrequest(sObject, compositeSubrequest);
@@ -230,7 +212,7 @@ export class UnitOfWork {
      * @returns this to allow chaining registerModified(...).register...
      */
     public registerModified(sObject: SObject): UnitOfWork {
-        const patchBuilder: CompositeSubrequestBuilder = new PatchCompositeSubrequestBuilder();
+        const patchBuilder: CompositeSubrequestBuilder = new PatchCompositeSubrequestBuilder(this._config.apiVersion);
         const compositeSubrequest: CompositeSubrequest = patchBuilder.sObject(sObject).build();
 
         this.addCompositeSubrequest(sObject, compositeSubrequest);
@@ -248,7 +230,7 @@ export class UnitOfWork {
             throw new Error('Id not provided');
         }
 
-        const deleteBuilder: CompositeSubrequestBuilder = new DeleteCompositeSubrequestBuilder();
+        const deleteBuilder: CompositeSubrequestBuilder = new DeleteCompositeSubrequestBuilder(this._config.apiVersion);
         const compositeSubrequest: CompositeSubrequest = deleteBuilder
             .sObjectType(sObject.sObjectType)
             .id(id)

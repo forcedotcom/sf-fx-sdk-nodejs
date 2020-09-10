@@ -8,8 +8,8 @@ use(chaiAsPromised);
 import * as jsforce from 'jsforce';
 
 import {
+    APIVersion,
     Connection,
-    Constants,
     DataApi,
     ErrorResult,
     Logger,
@@ -22,6 +22,7 @@ import {
 } from '../../../src';
 
 const NO_OP_LOGGER = new Logger({name: 'test', level: 100});
+const apiVersion = APIVersion.V50.toString();
 
 //   T E S T S
 
@@ -208,13 +209,13 @@ describe('DataApi Tests', () => {
         });
         sandbox.stub(dataApi, 'connect' as any).returns(mockConnection);
 
-        const result = await dataApi.request('GET', `/services/data/v${Constants.CURRENT_API_VERSION}/sobjects/Account/describe`, '', { });
+        const result = await dataApi.request('GET', `/services/data/v${apiVersion}/sobjects/Account/describe`, '', { });
         expect(result['maxBatchSize']).to.equal(mockResult.maxBatchSize);
     });
 
     it('should lazily connect on first request', async() => {
         // Bad connection config that should fail on first request due to invalid url
-        const connConfig = new ConnectionConfig('BadAccessToken', Constants.CURRENT_API_VERSION, 'http://127.0.0.1:99999');
+        const connConfig = new ConnectionConfig('BadAccessToken', apiVersion, 'http://127.0.0.1:99999');
         const dataApi = new DataApi(connConfig, NO_OP_LOGGER);
 
         // whitebox assertion, connection is lazy

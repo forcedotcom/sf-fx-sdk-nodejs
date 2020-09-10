@@ -19,6 +19,24 @@ export class CompositeSubresponse {
     private readonly _errors: ReadonlyArray<ApiError>;
     private readonly _body: { [key: string]: any };
 
+    constructor(compositeSubresponse: CompositeSubresponse) {
+        this.httpHeaders = compositeSubresponse.httpHeaders;
+        this.httpStatusCode = compositeSubresponse.httpStatusCode;
+        this.referenceId = compositeSubresponse.referenceId;
+        // The response body has different meaning depending if there was an error
+        if (compositeSubresponse.httpStatusCode < HttpCodes.BadRequest) {
+            this._body = compositeSubresponse.body;
+        } else {
+            const errors: ApiError[] = [];
+            if (compositeSubresponse.body && Array.isArray(compositeSubresponse.body)) {
+                compositeSubresponse.body.forEach((element: ApiError) => {
+                    errors.push(element);
+                });
+            }
+            this._errors = errors;
+        }
+    }
+
     public get body(): { [key: string]: any } {
         if (this.httpStatusCode < HttpCodes.BadRequest) {
             return this._body;
@@ -52,24 +70,6 @@ export class CompositeSubresponse {
             return this.httpHeaders[CompositeSubresponse.HEADER_LOCATION];
         } else {
             return undefined;
-        }
-    }
-
-    constructor(compositeSubresponse: CompositeSubresponse) {
-        this.httpHeaders = compositeSubresponse.httpHeaders;
-        this.httpStatusCode = compositeSubresponse.httpStatusCode;
-        this.referenceId = compositeSubresponse.referenceId;
-        // The response body has different meaning depending if there was an error
-        if (compositeSubresponse.httpStatusCode < HttpCodes.BadRequest) {
-            this._body = compositeSubresponse.body;
-        } else {
-            const errors: ApiError[] = [];
-            if (compositeSubresponse.body && Array.isArray(compositeSubresponse.body)) {
-                compositeSubresponse.body.forEach((element: ApiError) => {
-                    errors.push(element);
-                });
-            }
-            this._errors = errors;
         }
     }
 }
@@ -151,17 +151,13 @@ export class CompositeGraphResponse {
 }
 
 export class CompositeApi {
-    private readonly _connectionConfig: ConnectionConfig;
-    private readonly logger: Logger;
-
-    constructor(connectionConfig: ConnectionConfig, logger: Logger) {
-        this._connectionConfig = connectionConfig;
-        this.logger = logger;
+    constructor(private readonly _connectionConfig: ConnectionConfig,
+                private readonly logger: Logger) {
     }
 
     public async invoke(compositeRequest: CompositeRequest): Promise<CompositeResponse> {
         const bearerCredentialHandler: BearerCredentialHandler = new BearerCredentialHandler(
-            this._connectionConfig.accessToken,
+            this._connectionConfig.accessToken
         );
         const httpClient: HttpClient = new HttpClient('sf-fx-node', [bearerCredentialHandler]);
         const path = `/services/data/v${this._connectionConfig.apiVersion}/composite/`;
@@ -174,7 +170,7 @@ export class CompositeApi {
             }
         });
 
-        this.logger.debug(`POST ${path}`);
+        this.logger.debug(`POST ${path} ${data}`);
 
         const response: HttpClientResponse = await httpClient.post(
             this._connectionConfig.instanceUrl + path,
@@ -191,7 +187,7 @@ export class CompositeApi {
 
             return compositeResponse;
         } else {
-            throw new Error('Server returned status code: ' + response.message.statusCode);
+            throw new Error(`Composite API error: ${response.message.statusMessage ? response.message.statusMessage : 'UNKNOWN'} (${response.message.statusCode})`);
         }
     }
 
@@ -205,7 +201,7 @@ export class CompositeApi {
         const graphObj = {graphs : compositeRequests};
         const data: string = JSON.stringify(graphObj);
 
-        this.logger.debug(`POST ${path}`);
+        this.logger.debug(`POST ${path} ${data}`);
 
         const response: HttpClientResponse = await httpClient.post(
             this._connectionConfig.instanceUrl + path,
@@ -219,7 +215,7 @@ export class CompositeApi {
 
             return compositeGraphResponse;
         } else {
-            throw new Error('Graph composite api returned status code: ' + response.message.statusCode);
+            throw new Error(`Composite Graph API error: ${response.message.statusMessage ? response.message.statusMessage : 'UNKNOWN'} (${response.message.statusCode})`);
         }
     }
 }

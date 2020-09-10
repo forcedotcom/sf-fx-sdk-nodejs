@@ -2,13 +2,13 @@
 import { expect } from 'chai';
 import 'mocha';
 
-import { ConnectionConfig, Constants } from '../../../src';
+import { APIVersion, ConnectionConfig } from '../../../src';
 
 describe('Connection Config Tests', () => {
 
     it('validate connection config', () => {
     const instanceUrl = 'http://localhost:3000';
-    const apiVersion = Constants.CURRENT_API_VERSION;
+    const apiVersion = APIVersion.V50.toString();
     const accessToken = 'accessToken1234';
     const connectionConfig: ConnectionConfig = new ConnectionConfig(accessToken, apiVersion, instanceUrl);
 

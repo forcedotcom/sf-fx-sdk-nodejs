@@ -8,7 +8,6 @@ import { Logger } from '@salesforce/core';
 import {
     APIVersion,
     ConnectionConfig,
-    Constants,
     UnitOfWork,
     UnitOfWorkGraph,
 }
@@ -16,7 +15,7 @@ import {
 
 const NO_OP_LOGGER = new Logger({name: 'test', level: 100});
 const instanceUrl = 'http://localhost:3000';
-const apiVersion = Constants.CURRENT_API_VERSION;
+const apiVersion = '48.0';
 const accessToken = 'accessToken1234';
 const connectionConfig: ConnectionConfig = new ConnectionConfig(accessToken, apiVersion, instanceUrl);
 const connectionConfigV50: ConnectionConfig = new ConnectionConfig(accessToken, APIVersion.V50, instanceUrl);

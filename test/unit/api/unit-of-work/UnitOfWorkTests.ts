@@ -10,7 +10,6 @@ import { Logger } from '@salesforce/core';
 import {
     APIVersion,
     ConnectionConfig,
-    Constants,
     Method,
     PlatformEvent,
     SObject,
@@ -25,7 +24,7 @@ import { fail } from 'assert';
 
 const NO_OP_LOGGER = new Logger({name: 'test', level: 100});
 const instanceUrl = 'http://localhost:3000';
-const apiVersion = Constants.CURRENT_API_VERSION;
+const apiVersion = '48.0';
 const accessToken = 'accessToken1234';
 const connectionConfig: ConnectionConfig = new ConnectionConfig(accessToken, apiVersion, instanceUrl);
 const connectionConfigV50: ConnectionConfig = new ConnectionConfig(accessToken, APIVersion.V50, instanceUrl);
@@ -49,7 +48,7 @@ describe('UnitOfWork Tests', () => {
                 'compositeResponse':
                     [{
                         'body': { 'id': '001xx000003EG4jAAG', 'success': true, 'errors': [] },
-                        'httpHeaders': { 'Location': `/services/data/v${Constants.CURRENT_API_VERSION}/sobjects/Account/001xx000003EG4jAAG` },
+                        'httpHeaders': { 'Location': `/services/data/v${apiVersion}/sobjects/Account/001xx000003EG4jAAG` },
                         'httpStatusCode': httpCodeCreated,
                         'referenceId': account.referenceId
                     }]
@@ -106,7 +105,7 @@ describe('UnitOfWork Tests', () => {
         const uow: UnitOfWork = new UnitOfWork(connectionConfig, NO_OP_LOGGER)
             .registerNew(a1)
             .registerNew(a2);
-        
+
         const uowResponse = await uow.commit();
         expect(uowResponse).to.exist;
         expect(uowResponse.success).to.be.false;
@@ -160,7 +159,7 @@ describe('UnitOfWork Tests', () => {
                             compositeResponse:
                                 [{
                                     'body': { 'id': '001xx000003EG4jAAG', 'success': true, 'errors': [] },
-                                    'httpHeaders': { 'Location': `/services/data/v${Constants.CURRENT_API_VERSION}/sobjects/Account/001xx000003EG4jAAG` },
+                                    'httpHeaders': { 'Location': `/services/data/v${apiVersion}/sobjects/Account/001xx000003EG4jAAG` },
                                     'httpStatusCode': httpCodeCreated,
                                     'referenceId': account.referenceId
                                 }]
@@ -206,7 +205,7 @@ describe('UnitOfWork Tests', () => {
                     "graphResponse": {
                       "compositeResponse": [{
                           // Unfortunately on current v50.0 release, we do not get PROCESSING_HALTED error code
-                          // like standard composite endpoint so we cannot identify that the *2nd* object 
+                          // like standard composite endpoint so we cannot identify that the *2nd* object
                           // was the root cause.  In this test we can only identify root cause as first-failed
                           "body": [{
                               "message": "No such column XName on sobject of type Account",
@@ -244,7 +243,7 @@ describe('UnitOfWork Tests', () => {
             expect(acctErr.errorCode).to.equal('INVALID_FIELD');
             expect(rootCause.method).to.equal(Method.POST);
             expect(rootCause.id).to.not.exist;                     // object *not* inserted so no `id` defined
-    
+
             const a1Result = uowResponse.getResults(a1);
             expect(Array.isArray(a1Result)).to.be.true;
             expect(a1Result).lengthOf(1);
@@ -327,7 +326,7 @@ describe('UnitOfWork Tests', () => {
                 'compositeResponse': [
                     {
                         'body': { 'id': '001xx000003EG6oAAG', 'success': true, 'errors': [] },
-                        'httpHeaders': { 'Location': `/services/data/v${Constants.CURRENT_API_VERSION}/sobjects/Account/001xx000003EG6oAAG` },
+                        'httpHeaders': { 'Location': `/services/data/v${apiVersion}/sobjects/Account/001xx000003EG6oAAG` },
                         'httpStatusCode': httpCodeCreated,
                         'referenceId': account.referenceId
                     },
@@ -430,13 +429,13 @@ describe('UnitOfWork Tests', () => {
             .reply(HttpCodes.OK, {
                 'compositeResponse': [{
                     'body': { 'id': '001xx000003EG4jAAG', 'success': true, 'errors': [] },
-                    'httpHeaders': { 'Location': `/services/data/v${Constants.CURRENT_API_VERSION}/sobjects/Account/003xx000003EG4jAAG` },
+                    'httpHeaders': { 'Location': `/services/data/v${apiVersion}/sobjects/Account/003xx000003EG4jAAG` },
                     'httpStatusCode': httpCodeCreated,
                     'referenceId': mockedReferenceIds[0]
                 },
                 {
                     'body': { 'id': '003xx000003EG4jAAG', 'success': true, 'errors': [] },
-                    'httpHeaders': { 'Location': `/services/data/v${Constants.CURRENT_API_VERSION}/sobjects/Contact/003xx000003EG4jAAG` },
+                    'httpHeaders': { 'Location': `/services/data/v${apiVersion}/sobjects/Contact/003xx000003EG4jAAG` },
                     'httpStatusCode': httpCodeCreated,
                     'referenceId': mockedReferenceIds[1]
                 },
