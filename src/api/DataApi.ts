@@ -13,6 +13,7 @@ export class DataApi {
 
     /**
      * Execute the given SOQL by using "/query" API.
+     * See [jsforce types](https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/jsforce) for details on Query and QueryResult
      *
      * @param soql - SOQL to be executed.
      * @return Query<QueryResult<T>>
@@ -23,6 +24,7 @@ export class DataApi {
 
     /**
      * Query further records using nextRecordsURL.
+     * See [jsforce types](https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/jsforce) for details on QueryResult
      *
      * @param locator - query locator.
      * @return Promise<QueryResult<T>>
@@ -33,6 +35,7 @@ export class DataApi {
 
     /**
      * Insert an SObject.
+     * See [jsforce types](https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/jsforce) for details on RecordResult 
      *
      * @param sobject - sobject to insert
      * @returns Promise<(RecordResult)>
@@ -45,6 +48,7 @@ export class DataApi {
 
     /**
      * Update an SObject.
+     * See [jsforce types](https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/jsforce) for details on RecordResult
      *
      * @param sobject - sobject to update
      * @returns Promise<RecordResult>
@@ -57,6 +61,7 @@ export class DataApi {
 
     /**
      * Publish Platform Event.
+     * See [jsforce types](https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/jsforce) for details on RecordResult
      *
      * @param event - Platform Event to insert
      * @returns Promise<(RecordResult)>
