@@ -7,6 +7,7 @@
         "experimentalDecorators": true,
         "allowSyntheticDefaultImports": true,
         "pretty": true,
+        "lib": ["dom"]
     },
     "include": [
         "./src/**/*.ts"

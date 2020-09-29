@@ -7,6 +7,7 @@ import {
   ConnectionConfig,
   Context,
   DataApi,
+  Headers,
   InvocationEvent,
   Logger,
   Org,
@@ -28,8 +29,8 @@ describe('Function Tests', () => {
     let context: Context;
 
     beforeEach(function () {
-        const headers = new Map<string, ReadonlyArray<string>>();
-        headers.set('header1', ['value1', 'value2'])
+        const headers: Headers = new Map();
+        headers.set('header1', ['value1', 'value2']);
         event = new InvocationEvent('data', 'dataContentType', 'dataSchema', 'id', 'source', Date.now(), 'type', headers);
         user = new User('id', 'username', 'onBehalfOfUserId');
         org = new Org(apiVersion, 'baseUrl', 'domainUrl', 'id', user, new DataApi(undefined, NO_OP_LOGGER), new UnitOfWork(connectionConfig, NO_OP_LOGGER));
