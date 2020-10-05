@@ -3,7 +3,7 @@ import { Context, InvocationEvent, Headers, User, Org, Secrets } from "../functi
 import { UnitOfWorkGraph, UnitOfWork } from "../api/unit-of-work";
 import { ConnectionConfig } from "../api/ConnectionConfig";
 import { APIVersion } from "../utils";
-import { DataApi } from "../api/dataApi";
+import { DataApi } from "../api/DataApi";
 
 interface CloudEvent {
   id:               string,
