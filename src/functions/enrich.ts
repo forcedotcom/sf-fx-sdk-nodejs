@@ -36,7 +36,7 @@ interface UserContext {
   salesforceBaseUrl: string
 }
 
-interface SdkFn {
+interface UserFn {
   (InvocationEvent, Context, Logger): JSON
 }
 
@@ -99,11 +99,13 @@ function createSecrets(logger: Logger): Secrets {
 }
 
 /**
-* Construct Org object from the request context.
-*
-* @param reqContext
-* @return org
-*/
+ * Construct Org object from the request context.
+ *
+ * @param logger
+ * @param reqContext
+ * @param accessToken
+ * @return org
+ */
 function createOrg(logger: Logger, reqContext: RequestContext, accessToken?: string): Org {
     const userContext = reqContext.userContext;
     if (!userContext) {
@@ -189,59 +191,57 @@ function createLogger(requestID?: string): Logger {
  * function that matches the expectations of the upstream invoker. Enriches
  * the function by providing serialized InvocationEvent, Context, and a Logger.
  *
- * @param sdkfn -- A function written by the end user with an arity of 3 that
+ * @param fn -- A function written by the end user with an arity of 3 that
  *        expects to recieve serialized SDK objects as arguments
  *
- * @return enrichedfn -- A wrapped, enriched version of the SDK function
- *        provided that is enriched with SDK serialization. It expects a 
- *        CloudEvent and Headers object, which are provided by the upstream 
+ * @return enrichedFn -- A wrapped, enriched version of the SDK function
+ *        provided that is enriched with SDK serialization. It expects a
+ *        CloudEvent and Headers object, which are provided by the upstream
  *        invoker.
  */
-export const enrichFn: (SdkFn) => RawFn = function(fn) {
-  return function(cloudEvent: CloudEvent, headers: Headers): JSON {
-    // Validate the input request
-    if (!(cloudEvent && headers)) {
-        throw new Error('Request Data not provided');
-    }
+export const enrichFn: (fn: UserFn) => RawFn = function(fn) {
+    // The wrapped/enriched function
+    return function(cloudEvent: CloudEvent, headers: Headers): JSON {
+        // Validate the input request
+        if (!(cloudEvent && headers)) {
+            throw new Error('Request Data not provided');
+        }
 
-    // Initialize logger with request ID
-    const requestId = cloudEvent.id || headers['x-request-id'].join(',');
-    const logger = createLogger(requestId);
+        // Initialize logger with request ID
+        const logger = createLogger(cloudEvent.id);
 
-    //use secret here in lieu of DEBUG runtime environment var until we have deployment time support of config var
-    const secrets = createSecrets(logger);
-    const debugSecret = secrets.getValue('sf-debug', 'DEBUG');
-    logger.info(`DEBUG flag is ${debugSecret ? debugSecret : 'unset'}`);
-    if (debugSecret || LoggerLevel.DEBUG === logger.getLevel() || process.env.DEBUG) {
-        //for dev preview, we log the ENTIRE raw request, may need to filter sensitive properties out later
-        //the hard part of filtering is to know which property name to filter
-        //change the logger level, so any subsequent user function's logger.debug would log as well
-        logger.setLevel(LoggerLevel.DEBUG);
-        logger.debug('debug raw request in middleware');
-        logger.debug(`headers=${JSON.stringify(headers)}`);
-        logger.debug(cloudEvent);
-    }
+        //use secret here in lieu of DEBUG runtime environment var until we have deployment time support of config var
+        const secrets = createSecrets(logger);
+        const debugSecret = secrets.getValue('sf-debug', 'DEBUG');
+        logger.info(`DEBUG flag is ${debugSecret ? debugSecret : 'unset'}`);
+        if (debugSecret || LoggerLevel.DEBUG === logger.getLevel() || process.env.DEBUG) {
+            //for dev preview, we log the ENTIRE raw request, may need to filter sensitive properties out later
+            //the hard part of filtering is to know which property name to filter
+            //change the logger level, so any subsequent user function's logger.debug would log as well
+            logger.setLevel(LoggerLevel.DEBUG);
+            logger.debug(`headers=${JSON.stringify(headers)}`);
+            logger.debug(cloudEvent);
+        }
 
-    const ceCtx = cloudEvent.sfcontext;
-    const ceFnCtx = cloudEvent.sffncontext;
-    if (!ceCtx) {
-        logger.warn('Context not provided in data: context is partially initialized');
-    }
-    let accessToken: string;
-    if (ceFnCtx) {
-        accessToken = ceFnCtx.accessToken;
-    }
+        const ceCtx = cloudEvent.sfcontext;
+        const ceFnCtx = cloudEvent.sffncontext;
+        if (!ceCtx) {
+            logger.warn('Context not provided in data: context is partially initialized');
+        }
+        let accessToken: string;
+        if (ceFnCtx) {
+            accessToken = ceFnCtx.accessToken;
+        }
 
+        const invocationEvent = createEvent(cloudEvent, headers);
+        const context = createContext(
+            cloudEvent.id,
+            logger,
+            secrets,
+            ceCtx,
+            accessToken,
+        );
 
-    const invocationEvent = createEvent(cloudEvent, headers);
-    const context = createContext(
-        cloudEvent.id,
-        logger,
-        secrets,
-        ceCtx,
-        accessToken
-    );
-
-    return fn(invocationEvent, context, logger);
-  };
+        return fn(invocationEvent, context, logger);
+    };
 };
