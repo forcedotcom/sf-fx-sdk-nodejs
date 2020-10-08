@@ -68,8 +68,6 @@ git push origin --tags
 * Log into yarn and publish according to the docs at https://classic.yarnpkg.com/en/docs/publishing-a-package/
 ```
 yarn login
-yarn publish
-# when prompted for New Version, just hit Return
-# you should then be prompted for your MFA 6-digit token that was set up as part of 2-factor auth
+yarn publish --non-interactive --otp 999999  # replace 999999 with your MFA 2-factor auth code
 # then if all goes well, the new version is published
 ```
