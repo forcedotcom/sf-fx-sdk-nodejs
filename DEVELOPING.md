@@ -41,3 +41,33 @@ errors. The results of this is deeper than what the tslint extension in VS Code
 does because of [semantic lint
 rules](https://palantir.github.io/tslint/usage/type-checking/) which requires a
 tsconfig.json to be passed to tslint.
+
+## Release process
+
+* Make sure version is correct in package.json - of not, create PR for that, get it reviewed and merged
+* make sure local `master` branch is up-to-date and has target commit(s):
+```
+    git checkout master && git pull origin master && git fetch -p
+    git log  # check for desired commits
+```
+* Do a full clean build and test, ensure there are no errors:
+```
+    yarn clean-all
+    yarn
+    yarn build
+    yarn test
+```
+* Create and push tag for release:
+```
+git tag v1.4.0
+git push origin --tags
+```
+* on github, create release with that tag: https://github.com/forcedotcom/sf-fx-sdk-nodejs/tags (... Edit Release or Create Release)
+* Make sure you are a member of the salesforce org on npmjs: https://www.npmjs.com/~MY_USERNAME under the Organizations tab
+* Make sure npm account is enabled for *2-factor authorization and publishing* at https://www.npmjs.com/settings/MY_USERNAME/profile.  If not, set that up and enable it (should be required as part of being in the salesforce org)
+* Log into yarn and publish according to the docs at https://classic.yarnpkg.com/en/docs/publishing-a-package/
+```
+yarn login
+yarn publish --non-interactive --otp 999999  # replace 999999 with your MFA 2-factor auth code
+# then if all goes well, the new version is published
+```
