@@ -44,6 +44,8 @@ export default async function execute(event: sdk.InvocationEvent, context: sdk.C
 
 For more complex transactions, the SDK provides the UnitOfWork class. A UnitOfWork represents a set of one or more Salesforce operations that need to be done as a single atomic operation. The following JavaScript example uses a UnitOfWork to create an Account record and several related records:
 
+> For the Salesforce Functions pilot, always use a new instance of UnitOfWork for each transaction and never re-use a committed UnitOfWork.
+
 ```js
 module.exports = async function (event, context, logger) {
     const payload = event.data;
