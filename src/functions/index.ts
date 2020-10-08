@@ -2,6 +2,11 @@ import { Logger } from '@salesforce/core';
 import {DataApi, Secrets, UnitOfWork, UnitOfWorkGraph} from '..';
 
 /**
+ * Represents http headers that are part of the function invocation
+ */
+export type Headers =  Map<string, ReadonlyArray<string>>;
+
+/**
  * Represents a function invocation event.
  */
 export class InvocationEvent {
@@ -14,7 +19,7 @@ export class InvocationEvent {
         public readonly source: string,
         public readonly time: number,
         public readonly type: string,
-        public readonly headers?: ReadonlyMap<string, ReadonlyArray<string>>,
+        public readonly headers?: Headers,
     ) {}
 }
 
@@ -74,3 +79,4 @@ export class Context {
 }
 
 export * from './Secrets';
+export * from './enrich';
