@@ -109,7 +109,6 @@ class UnitOfWorkResultMapper {
     }
 
     public toUowResult(subResp: CompositeSubresponse): UnitOfWorkResult {
-        const id: string = subResp.id;
         const success: boolean = subResp.isSuccess;
         let errors: ReadonlyArray<ApiError>;
         if (!success) {
@@ -118,7 +117,8 @@ class UnitOfWorkResultMapper {
 
         let method: Method;
 
-        //in some error situations, e.g. exceeding 
+        //in some error situations, when there is error for the whole transaction, e.g. "Limit of 500 reached for number of Nodes in the Graph" 
+        //the response referenceId would be null
         if (subResp.referenceId) {
             const subReq: CompositeSubrequest|undefined = this._referenceIdToCompositeSubrequests[subResp.referenceId];
             if (!subReq) {
@@ -127,6 +127,7 @@ class UnitOfWorkResultMapper {
             method = subReq.method;
         }
 
+        const id: string = subResp.id;        
         return new UnitOfWorkResult(method, id, success, errors);
     }
 }
@@ -319,7 +320,7 @@ export class UnitOfWork {
         const compositeGraphResponse: CompositeGraphResponse = await uowGraph.commit();
         const graph1Response: GraphResponse = compositeGraphResponse.graphResponses[0];
         const compositeResponse: CompositeResponse = graph1Response.compositeResponse;
-        const errorCount = compositeResponse.compositeSubresponses.filter(r => !r.isSuccess.length);
+        const errorCount = compositeResponse.compositeSubresponses.filter(r => !r.isSuccess).length;
         const resMapper = new UnitOfWorkResultMapper(
             this._uuidToReferenceIds,
             this._referenceIdToCompositeSubrequests,
