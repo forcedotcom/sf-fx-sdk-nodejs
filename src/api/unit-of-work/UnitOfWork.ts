@@ -14,7 +14,8 @@ import {
     CompositeApi,
     CompositeGraphResponse,
     CompositeResponse,
-    CompositeSubresponse
+    CompositeSubresponse,
+    GraphResponse
 } from './CompositeApi';
 
 import {
@@ -108,18 +109,24 @@ class UnitOfWorkResultMapper {
     }
 
     public toUowResult(subResp: CompositeSubresponse): UnitOfWorkResult {
-        const subReq: CompositeSubrequest|undefined = this._referenceIdToCompositeSubrequests[subResp.referenceId];
-        if (!subReq) {
-            throw new Error('Unable to find CompositeSubrequest with referenceId=' + subResp.referenceId);
-        }
-
-        const method: Method = subReq.method;
         const id: string = subResp.id;
         const success: boolean = subResp.isSuccess;
         let errors: ReadonlyArray<ApiError>;
         if (!success) {
             errors = subResp.errors;
         }
+
+        let method: Method;
+
+        //in some error situations, e.g. exceeding 
+        if (subResp.referenceId) {
+            const subReq: CompositeSubrequest|undefined = this._referenceIdToCompositeSubrequests[subResp.referenceId];
+            if (!subReq) {
+                throw new Error('Unable to find CompositeSubrequest with referenceId=' + subResp.referenceId);
+            }
+            method = subReq.method;
+        }
+
         return new UnitOfWorkResult(method, id, success, errors);
     }
 }
@@ -310,15 +317,16 @@ export class UnitOfWork {
     private async commitGraph(): Promise<UnitOfWorkSuccessResponse|UnitOfWorkErrorResponse> {
         const uowGraph: UnitOfWorkGraph = new UnitOfWorkGraph(this._config, this.logger, this);
         const compositeGraphResponse: CompositeGraphResponse = await uowGraph.commit();
-        const compositeResponse: CompositeResponse = compositeGraphResponse.graphResponses[0].compositeResponse;
-        const errorCount = compositeResponse.compositeSubresponses.filter(r => !r.isSuccess).length;
+        const graph1Response: GraphResponse = compositeGraphResponse.graphResponses[0];
+        const compositeResponse: CompositeResponse = graph1Response.compositeResponse;
+        const errorCount = compositeResponse.compositeSubresponses.filter(r => !r.isSuccess.length);
         const resMapper = new UnitOfWorkResultMapper(
             this._uuidToReferenceIds,
             this._referenceIdToCompositeSubrequests,
             compositeResponse,
         );
 
-        if (errorCount > 0) {
+        if (!graph1Response.isSuccessful || errorCount > 0) {
             return this.toUnitOfWorkErrorResponse(compositeResponse, resMapper);
         }
         return new UnitOfWorkSuccessResponse(resMapper);
