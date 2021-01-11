@@ -2,7 +2,7 @@
 import { expect } from 'chai';
 import 'mocha';
 import nock = require('nock');
-import { restore, stub } from 'sinon';
+import { assert, restore, stub } from 'sinon';
 import { HttpCodes } from 'typed-rest-client/HttpClient';
 import { v4 as uuid } from 'uuid';
 import { Logger } from '@salesforce/core';
@@ -256,6 +256,99 @@ describe('UnitOfWork Tests', () => {
             expect(a2Result[0].errors).lengthOf(1);
             expect(a2Result[0].errors[0].message).to.equal("No such column XName on sobject of type Account");
             expect(a2Result[0].errors[0].errorCode).to.equal('INVALID_FIELD');
+        } else {
+            fail(`Unexpected UoW response type, expected UnitOfWorkErrorResponse, got: ${uowResponse.constructor.name}`);
+        }
+    });
+
+    it('Graph Exceeding Graph 500 Nodes imit', async () => {
+        const nowHex = new Date().getTime().toString(16);
+        const a1 = new SObject('Account')
+            .withValue('Name', 'MyAccount - uowErr - integration ' + nowHex);
+        const a2 = new SObject('Account')
+            .withValue('XName', 'MyAccount - uowErr - integration ' + nowHex);
+
+        // release w/ API version 50.0+ have /composite/graph support
+        const uow: UnitOfWork = new UnitOfWork(connectionConfigV50, NO_OP_LOGGER)
+                                    .registerNew(a1)
+                                    .registerNew(a2);
+        // for
+
+        nock(instanceUrl)
+            .post('/services/data/v' + connectionConfigV50.apiVersion + '/composite/graph/')
+            .reply(HttpCodes.OK, {
+                    "graphs": [{
+                        "graphId": "_default",
+                        "graphResponse": {
+                          "compositeResponse": [{
+                              "body": [
+                                {
+                                  "errorCode": "LIMIT_EXCEEDED",
+                                  "message": "Limit of 500 reached for number of Nodes in the Graph"
+                                }
+                              ],
+                              "httpHeaders": {},
+                              "httpStatusCode": 400,
+                              "referenceId": null
+                            }]
+                        },
+                        "isSuccessful": false
+                      }]
+                  });
+
+        const uowResponse = await uow.commit();
+        expect(uowResponse).to.exist;
+        expect(uowResponse.success).to.be.false;
+
+        if (uowResponse instanceof UnitOfWorkErrorResponse) {
+            const rootCause: UnitOfWorkResult = uowResponse.rootCause;
+            expect(rootCause).to.exist;
+            expect(rootCause.isSuccess).to.be.false;
+            expect(rootCause.errors).to.exist;
+            expect(rootCause.errors).lengthOf(1);
+            const acctErr = rootCause.errors[0];
+            expect(acctErr.message).to.equal("Limit of 500 reached for number of Nodes in the Graph");
+            expect(acctErr.errorCode).to.equal('LIMIT_EXCEEDED');
+            expect(rootCause.method).to.not.exist;
+            expect(rootCause.id).to.not.exist;                     // object *not* inserted so no `id` defined
+
+            const a1Result = uowResponse.getResults(a1);
+            expect(Array.isArray(a1Result)).to.be.true;
+            expect(a1Result).lengthOf(1);
+            expect(rootCause).to.deep.equal(a1Result[0]);          // every sobject result *is* root cause on graph endpoint
+            expect(a1Result[0].isSuccess).to.be.false;
+            expect(a1Result[0].errors).lengthOf(1);   
+            expect(a1Result[0].errors[0].message).to.equal("Limit of 500 reached for number of Nodes in the Graph");
+            expect(a1Result[0].errors[0].errorCode).to.equal('LIMIT_EXCEEDED');
+            expect(a1Result[0].method).to.not.exist;
+            expect(a1Result[0].id).to.not.exist;
+
+            try {
+                uowResponse.getId(a1);
+                assert.fail('It should have thrown Error indicating getId is not avaialbe');
+            } catch (err) {
+                expect(err.message).to.contain('No Id is availalbe because of rootCause');
+                expect(err.message).to.contain('Limit of 500 reached for number of Nodes in the Graph');
+            }
+
+            const a2Result = uowResponse.getResults(a2);
+            expect(Array.isArray(a2Result)).to.be.true;
+            expect(a2Result).lengthOf(1);
+            expect(rootCause).to.deep.equal(a2Result[0]);
+            expect(a2Result[0].isSuccess).to.be.false;
+            expect(a2Result[0].errors).lengthOf(1);
+            expect(a2Result[0].errors[0].message).to.equal("Limit of 500 reached for number of Nodes in the Graph");
+            expect(a2Result[0].errors[0].errorCode).to.equal('LIMIT_EXCEEDED');
+            expect(a2Result[0].method).to.not.exist;
+            expect(a2Result[0].id).to.not.exist;
+
+            try {
+                uowResponse.getId(a2);
+                assert.fail('It should have thrown Error indicating getId is not avaialbe');
+            } catch (err) {
+                expect(err.message).to.contain('No Id is availalbe because of rootCause');
+                expect(err.message).to.contain('Limit of 500 reached for number of Nodes in the Graph');
+            }            
         } else {
             fail(`Unexpected UoW response type, expected UnitOfWorkErrorResponse, got: ${uowResponse.constructor.name}`);
         }

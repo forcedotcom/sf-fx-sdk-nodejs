@@ -52,7 +52,7 @@ export class UnitOfWorkResult {
     /**
      * @returns string for logging, starts with 'ok' if successful, 'ERROR' if not.
      */
-    public toString(): string {
+public toString(): string {
         return this.isSuccess ? `ok ${this.method} id=${this.id}` :
             this.errors.map(e => this.errToString(e)).join(', ');
     }
@@ -171,6 +171,7 @@ export class UnitOfWorkErrorResponse extends UnitOfWorkResponse {
     constructor(
         resultMapper: UnitOfWorkResultMapper,
         private _rootCause: CompositeSubresponse,
+        private _isGraphError: boolean
     ) {
         super(resultMapper, false);
     }
@@ -178,6 +179,23 @@ export class UnitOfWorkErrorResponse extends UnitOfWorkResponse {
     public get rootCause(): UnitOfWorkResult {
         return this._resultMapper.toUowResult(this._rootCause);
     }
+
+    public getResults(sObject: SObject): ReadonlyArray<UnitOfWorkResult> {
+        if (this._isGraphError) {
+            const results: UnitOfWorkResult[] = [];
+            results.push(this.rootCause);
+            return results;
+        }
+        return super.getResults(sObject);
+    }
+
+    public getId(sObject: SObject): string {
+        if (this._isGraphError) {
+            throw new Error(`No Id is availalbe because of rootCause: ${this.rootCause.toString()}`);
+        }
+        return super.getId(sObject);
+
+    }    
 }
 
 /**
@@ -287,10 +305,17 @@ export class UnitOfWork {
      private toUnitOfWorkErrorResponse(failedResponse: CompositeResponse, resMapper: UnitOfWorkResultMapper): UnitOfWorkErrorResponse {
          // Attempt to find the "root cause" subresponse, if possible.  Otherwise, falls back to the first failed response
          const rootCause: CompositeSubresponse = this.rootFailedSubResponse(failedResponse.compositeSubresponses);
-         const otherCount: number = failedResponse.compositeSubresponses.length - 1;
+         const subResponseCount: number = failedResponse.compositeSubresponses.length;
+         const otherCount: number = subResponseCount - 1;
 
-         this.logger.warn(`UnitOfWork failed rootCause=${resMapper.toUowResult(rootCause)} and count=${otherCount} other rolled-back results`);
-         return new UnitOfWorkErrorResponse(resMapper, rootCause);
+         let isGraphTransactionError = false;
+         if (subResponseCount == 1 && rootCause && !rootCause.referenceId) {
+            isGraphTransactionError = true;
+         }
+
+         this.logger.warn(`UnitOfWork failed rootCause=${resMapper.toUowResult(rootCause)} and ${isGraphTransactionError ? 'all' :  `${otherCount} other`} rolled-back results`);
+         
+         return new UnitOfWorkErrorResponse(resMapper, rootCause, isGraphTransactionError);
      }
 
      /**
