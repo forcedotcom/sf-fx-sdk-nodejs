@@ -273,6 +273,10 @@ describe('UnitOfWork Tests', () => {
                                     .registerNew(a1)
                                     .registerNew(a2);
 
+        const ERRMSG_EXCEEDLIMIT = 'Limit of 500 reached for number of Nodes in the Graph';
+        const ERRCODE_EXEEDLIMIT = 'LIMIT_EXCEEDED';
+        const ERRMSG_NOIDAVAILABLE = 'No Id is availalbe because of rootCause';
+
         nock(instanceUrl)
             .post('/services/data/v' + connectionConfigV50.apiVersion + '/composite/graph/')
             .reply(HttpCodes.OK, {
@@ -282,8 +286,8 @@ describe('UnitOfWork Tests', () => {
                           "compositeResponse": [{
                               "body": [
                                 {
-                                  "errorCode": "LIMIT_EXCEEDED",
-                                  "message": "Limit of 500 reached for number of Nodes in the Graph"
+                                  "errorCode": ERRCODE_EXEEDLIMIT,
+                                  "message": ERRMSG_EXCEEDLIMIT
                                 }
                               ],
                               "httpHeaders": {},
@@ -306,8 +310,8 @@ describe('UnitOfWork Tests', () => {
             expect(rootCause.errors).to.exist;
             expect(rootCause.errors).lengthOf(1);
             const acctErr = rootCause.errors[0];
-            expect(acctErr.message).to.equal("Limit of 500 reached for number of Nodes in the Graph");
-            expect(acctErr.errorCode).to.equal('LIMIT_EXCEEDED');
+            expect(acctErr.message).to.equal(ERRMSG_EXCEEDLIMIT);
+            expect(acctErr.errorCode).to.equal(ERRCODE_EXEEDLIMIT);
             expect(rootCause.method).to.not.exist;
             expect(rootCause.id).to.not.exist;                     // object *not* inserted so no `id` defined
 
@@ -317,17 +321,17 @@ describe('UnitOfWork Tests', () => {
             expect(rootCause).to.deep.equal(a1Result[0]);          // every sobject result *is* root cause on graph endpoint
             expect(a1Result[0].isSuccess).to.be.false;
             expect(a1Result[0].errors).lengthOf(1);   
-            expect(a1Result[0].errors[0].message).to.equal("Limit of 500 reached for number of Nodes in the Graph");
-            expect(a1Result[0].errors[0].errorCode).to.equal('LIMIT_EXCEEDED');
+            expect(a1Result[0].errors[0].message).to.equal(ERRMSG_EXCEEDLIMIT);
+            expect(a1Result[0].errors[0].errorCode).to.equal(ERRCODE_EXEEDLIMIT);
             expect(a1Result[0].method).to.not.exist;
             expect(a1Result[0].id).to.not.exist;
 
             try {
                 uowResponse.getId(a1);
-                assert.fail('It should have thrown Error indicating getId is not avaialbe');
+                assert.fail('It should have thrown Error indicating getId is not avaialbe for a1');
             } catch (err) {
-                expect(err.message).to.contain('No Id is availalbe because of rootCause');
-                expect(err.message).to.contain('Limit of 500 reached for number of Nodes in the Graph');
+                expect(err.message).to.contain(ERRMSG_NOIDAVAILABLE);
+                expect(err.message).to.contain(ERRMSG_EXCEEDLIMIT);
             }
 
             const a2Result = uowResponse.getResults(a2);
@@ -336,17 +340,17 @@ describe('UnitOfWork Tests', () => {
             expect(rootCause).to.deep.equal(a2Result[0]);
             expect(a2Result[0].isSuccess).to.be.false;
             expect(a2Result[0].errors).lengthOf(1);
-            expect(a2Result[0].errors[0].message).to.equal("Limit of 500 reached for number of Nodes in the Graph");
-            expect(a2Result[0].errors[0].errorCode).to.equal('LIMIT_EXCEEDED');
+            expect(a2Result[0].errors[0].message).to.equal(ERRMSG_EXCEEDLIMIT);
+            expect(a2Result[0].errors[0].errorCode).to.equal(ERRCODE_EXEEDLIMIT);
             expect(a2Result[0].method).to.not.exist;
             expect(a2Result[0].id).to.not.exist;
 
             try {
                 uowResponse.getId(a2);
-                assert.fail('It should have thrown Error indicating getId is not avaialbe');
+                assert.fail('It should have thrown Error indicating getId is not avaialbe for a2');
             } catch (err) {
-                expect(err.message).to.contain('No Id is availalbe because of rootCause');
-                expect(err.message).to.contain('Limit of 500 reached for number of Nodes in the Graph');
+                expect(err.message).to.contain(ERRMSG_NOIDAVAILABLE);
+                expect(err.message).to.contain(ERRMSG_EXCEEDLIMIT);
             }            
         } else {
             fail(`Unexpected UoW response type, expected UnitOfWorkErrorResponse, got: ${uowResponse.constructor.name}`);
