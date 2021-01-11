@@ -52,7 +52,7 @@ export class UnitOfWorkResult {
     /**
      * @returns string for logging, starts with 'ok' if successful, 'ERROR' if not.
      */
-public toString(): string {
+    public toString(): string {
         return this.isSuccess ? `ok ${this.method} id=${this.id}` :
             this.errors.map(e => this.errToString(e)).join(', ');
     }
@@ -115,10 +115,9 @@ class UnitOfWorkResultMapper {
             errors = subResp.errors;
         }
 
-        let method: Method;
-
         //in some error situations, when there is error for the whole transaction, e.g. "Limit of 500 reached for number of Nodes in the Graph" 
         //the response referenceId would be null
+        let method: Method;        
         if (subResp.referenceId) {
             const subReq: CompositeSubrequest|undefined = this._referenceIdToCompositeSubrequests[subResp.referenceId];
             if (!subReq) {
@@ -126,7 +125,6 @@ class UnitOfWorkResultMapper {
             }
             method = subReq.method;
         }
-
         const id: string = subResp.id;        
         return new UnitOfWorkResult(method, id, success, errors);
     }
@@ -194,7 +192,6 @@ export class UnitOfWorkErrorResponse extends UnitOfWorkResponse {
             throw new Error(`No Id is availalbe because of rootCause: ${this.rootCause.toString()}`);
         }
         return super.getId(sObject);
-
     }    
 }
 
