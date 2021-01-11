@@ -272,7 +272,6 @@ describe('UnitOfWork Tests', () => {
         const uow: UnitOfWork = new UnitOfWork(connectionConfigV50, NO_OP_LOGGER)
                                     .registerNew(a1)
                                     .registerNew(a2);
-        // for
 
         nock(instanceUrl)
             .post('/services/data/v' + connectionConfigV50.apiVersion + '/composite/graph/')
