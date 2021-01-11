@@ -14,7 +14,8 @@ import {
     CompositeApi,
     CompositeGraphResponse,
     CompositeResponse,
-    CompositeSubresponse
+    CompositeSubresponse,
+    GraphResponse
 } from './CompositeApi';
 
 import {
@@ -108,18 +109,23 @@ class UnitOfWorkResultMapper {
     }
 
     public toUowResult(subResp: CompositeSubresponse): UnitOfWorkResult {
-        const subReq: CompositeSubrequest|undefined = this._referenceIdToCompositeSubrequests[subResp.referenceId];
-        if (!subReq) {
-            throw new Error('Unable to find CompositeSubrequest with referenceId=' + subResp.referenceId);
-        }
-
-        const method: Method = subReq.method;
-        const id: string = subResp.id;
         const success: boolean = subResp.isSuccess;
         let errors: ReadonlyArray<ApiError>;
         if (!success) {
             errors = subResp.errors;
         }
+
+        //in some error situations, when there is error for the whole transaction, e.g. "Limit of 500 reached for number of Nodes in the Graph" 
+        //the response referenceId would be null
+        let method: Method;        
+        if (subResp.referenceId) {
+            const subReq: CompositeSubrequest|undefined = this._referenceIdToCompositeSubrequests[subResp.referenceId];
+            if (!subReq) {
+                throw new Error('Unable to find CompositeSubrequest with referenceId=' + subResp.referenceId);
+            }
+            method = subReq.method;
+        }
+        const id: string = subResp.id;        
         return new UnitOfWorkResult(method, id, success, errors);
     }
 }
@@ -163,6 +169,7 @@ export class UnitOfWorkErrorResponse extends UnitOfWorkResponse {
     constructor(
         resultMapper: UnitOfWorkResultMapper,
         private _rootCause: CompositeSubresponse,
+        private _isGraphError: boolean
     ) {
         super(resultMapper, false);
     }
@@ -170,6 +177,22 @@ export class UnitOfWorkErrorResponse extends UnitOfWorkResponse {
     public get rootCause(): UnitOfWorkResult {
         return this._resultMapper.toUowResult(this._rootCause);
     }
+
+    public getResults(sObject: SObject): ReadonlyArray<UnitOfWorkResult> {
+        if (this._isGraphError) {
+            const results: UnitOfWorkResult[] = [];
+            results.push(this.rootCause);
+            return results;
+        }
+        return super.getResults(sObject);
+    }
+
+    public getId(sObject: SObject): string {
+        if (this._isGraphError) {
+            throw new Error(`No Id is availalbe because of rootCause: ${this.rootCause.toString()}`);
+        }
+        return super.getId(sObject);
+    }    
 }
 
 /**
@@ -279,10 +302,17 @@ export class UnitOfWork {
      private toUnitOfWorkErrorResponse(failedResponse: CompositeResponse, resMapper: UnitOfWorkResultMapper): UnitOfWorkErrorResponse {
          // Attempt to find the "root cause" subresponse, if possible.  Otherwise, falls back to the first failed response
          const rootCause: CompositeSubresponse = this.rootFailedSubResponse(failedResponse.compositeSubresponses);
-         const otherCount: number = failedResponse.compositeSubresponses.length - 1;
+         const subResponseCount: number = failedResponse.compositeSubresponses.length;
+         const otherCount: number = subResponseCount - 1;
 
-         this.logger.warn(`UnitOfWork failed rootCause=${resMapper.toUowResult(rootCause)} and count=${otherCount} other rolled-back results`);
-         return new UnitOfWorkErrorResponse(resMapper, rootCause);
+         let isGraphTransactionError = false;
+         if (subResponseCount == 1 && rootCause && !rootCause.referenceId) {
+            isGraphTransactionError = true;
+         }
+
+         this.logger.warn(`UnitOfWork failed rootCause=${resMapper.toUowResult(rootCause)} and ${isGraphTransactionError ? 'all' :  `${otherCount} other`} rolled-back results`);
+         
+         return new UnitOfWorkErrorResponse(resMapper, rootCause, isGraphTransactionError);
      }
 
      /**
@@ -310,7 +340,8 @@ export class UnitOfWork {
     private async commitGraph(): Promise<UnitOfWorkSuccessResponse|UnitOfWorkErrorResponse> {
         const uowGraph: UnitOfWorkGraph = new UnitOfWorkGraph(this._config, this.logger, this);
         const compositeGraphResponse: CompositeGraphResponse = await uowGraph.commit();
-        const compositeResponse: CompositeResponse = compositeGraphResponse.graphResponses[0].compositeResponse;
+        const graph1Response: GraphResponse = compositeGraphResponse.graphResponses[0];
+        const compositeResponse: CompositeResponse = graph1Response.compositeResponse;
         const errorCount = compositeResponse.compositeSubresponses.filter(r => !r.isSuccess).length;
         const resMapper = new UnitOfWorkResultMapper(
             this._uuidToReferenceIds,
@@ -318,7 +349,7 @@ export class UnitOfWork {
             compositeResponse,
         );
 
-        if (errorCount > 0) {
+        if (!graph1Response.isSuccessful || errorCount > 0) {
             return this.toUnitOfWorkErrorResponse(compositeResponse, resMapper);
         }
         return new UnitOfWorkSuccessResponse(resMapper);

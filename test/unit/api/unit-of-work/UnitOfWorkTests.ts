@@ -2,7 +2,7 @@
 import { expect } from 'chai';
 import 'mocha';
 import nock = require('nock');
-import { restore, stub } from 'sinon';
+import { assert, restore, stub } from 'sinon';
 import { HttpCodes } from 'typed-rest-client/HttpClient';
 import { v4 as uuid } from 'uuid';
 import { Logger } from '@salesforce/core';
@@ -256,6 +256,102 @@ describe('UnitOfWork Tests', () => {
             expect(a2Result[0].errors).lengthOf(1);
             expect(a2Result[0].errors[0].message).to.equal("No such column XName on sobject of type Account");
             expect(a2Result[0].errors[0].errorCode).to.equal('INVALID_FIELD');
+        } else {
+            fail(`Unexpected UoW response type, expected UnitOfWorkErrorResponse, got: ${uowResponse.constructor.name}`);
+        }
+    });
+
+    it('Graph Exceeding Graph 500 Nodes imit', async () => {
+        const nowHex = new Date().getTime().toString(16);
+        const a1 = new SObject('Account')
+            .withValue('Name', 'MyAccount - uowErr - integration ' + nowHex);
+        const a2 = new SObject('Account')
+            .withValue('XName', 'MyAccount - uowErr - integration ' + nowHex);
+
+        // release w/ API version 50.0+ have /composite/graph support
+        const uow: UnitOfWork = new UnitOfWork(connectionConfigV50, NO_OP_LOGGER)
+                                    .registerNew(a1)
+                                    .registerNew(a2);
+
+        const ERRMSG_EXCEEDLIMIT = 'Limit of 500 reached for number of Nodes in the Graph';
+        const ERRCODE_EXEEDLIMIT = 'LIMIT_EXCEEDED';
+        const ERRMSG_NOIDAVAILABLE = 'No Id is availalbe because of rootCause';
+
+        nock(instanceUrl)
+            .post('/services/data/v' + connectionConfigV50.apiVersion + '/composite/graph/')
+            .reply(HttpCodes.OK, {
+                    "graphs": [{
+                        "graphId": "_default",
+                        "graphResponse": {
+                          "compositeResponse": [{
+                              "body": [
+                                {
+                                  "errorCode": ERRCODE_EXEEDLIMIT,
+                                  "message": ERRMSG_EXCEEDLIMIT
+                                }
+                              ],
+                              "httpHeaders": {},
+                              "httpStatusCode": 400,
+                              "referenceId": null
+                            }]
+                        },
+                        "isSuccessful": false
+                      }]
+                  });
+
+        const uowResponse = await uow.commit();
+        expect(uowResponse).to.exist;
+        expect(uowResponse.success).to.be.false;
+
+        if (uowResponse instanceof UnitOfWorkErrorResponse) {
+            const rootCause: UnitOfWorkResult = uowResponse.rootCause;
+            expect(rootCause).to.exist;
+            expect(rootCause.isSuccess).to.be.false;
+            expect(rootCause.errors).to.exist;
+            expect(rootCause.errors).lengthOf(1);
+            const acctErr = rootCause.errors[0];
+            expect(acctErr.message).to.equal(ERRMSG_EXCEEDLIMIT);
+            expect(acctErr.errorCode).to.equal(ERRCODE_EXEEDLIMIT);
+            expect(rootCause.method).to.not.exist;
+            expect(rootCause.id).to.not.exist;                     // object *not* inserted so no `id` defined
+
+            const a1Result = uowResponse.getResults(a1);
+            expect(Array.isArray(a1Result)).to.be.true;
+            expect(a1Result).lengthOf(1);
+            expect(rootCause).to.deep.equal(a1Result[0]);          // every sobject result *is* root cause on graph endpoint
+            expect(a1Result[0].isSuccess).to.be.false;
+            expect(a1Result[0].errors).lengthOf(1);   
+            expect(a1Result[0].errors[0].message).to.equal(ERRMSG_EXCEEDLIMIT);
+            expect(a1Result[0].errors[0].errorCode).to.equal(ERRCODE_EXEEDLIMIT);
+            expect(a1Result[0].method).to.not.exist;
+            expect(a1Result[0].id).to.not.exist;
+
+            try {
+                uowResponse.getId(a1);
+                assert.fail('It should have thrown Error indicating getId is not avaialbe for a1');
+            } catch (err) {
+                expect(err.message).to.contain(ERRMSG_NOIDAVAILABLE);
+                expect(err.message).to.contain(ERRMSG_EXCEEDLIMIT);
+            }
+
+            const a2Result = uowResponse.getResults(a2);
+            expect(Array.isArray(a2Result)).to.be.true;
+            expect(a2Result).lengthOf(1);
+            expect(rootCause).to.deep.equal(a2Result[0]);
+            expect(a2Result[0].isSuccess).to.be.false;
+            expect(a2Result[0].errors).lengthOf(1);
+            expect(a2Result[0].errors[0].message).to.equal(ERRMSG_EXCEEDLIMIT);
+            expect(a2Result[0].errors[0].errorCode).to.equal(ERRCODE_EXEEDLIMIT);
+            expect(a2Result[0].method).to.not.exist;
+            expect(a2Result[0].id).to.not.exist;
+
+            try {
+                uowResponse.getId(a2);
+                assert.fail('It should have thrown Error indicating getId is not avaialbe for a2');
+            } catch (err) {
+                expect(err.message).to.contain(ERRMSG_NOIDAVAILABLE);
+                expect(err.message).to.contain(ERRMSG_EXCEEDLIMIT);
+            }            
         } else {
             fail(`Unexpected UoW response type, expected UnitOfWorkErrorResponse, got: ${uowResponse.constructor.name}`);
         }
