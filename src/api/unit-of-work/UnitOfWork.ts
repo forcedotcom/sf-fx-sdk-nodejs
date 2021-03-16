@@ -214,6 +214,13 @@ export class UnitOfWork {
         this._compositeRequest = new CompositeRequest();
         this._uuidToReferenceIds = {};
         this._referenceIdToCompositeSubrequests = {};
+        this._values = {};
+    }
+
+    public setValue(json: JSON): void {
+        Object.keys(json).forEach(key => {
+          this._values[key] = json[key];
+        });
     }
 
     /**

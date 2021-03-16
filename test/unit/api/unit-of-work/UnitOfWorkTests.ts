@@ -38,6 +38,39 @@ describe('UnitOfWork Tests', () => {
         restore();
     });
 
+    it('setValue with single value', () => {
+        const uow: UnitOfWork = new UnitOfWork(connectionConfig, NO_OP_LOGGER);
+        const json: object = { 'key1': 'value1' };
+
+        uow.setValue(json);
+
+        const values = uow.values;
+        expect(values).to.exist;
+
+        const keys: string[] = Object.keys(values);
+        expect(keys.length).to.equal(1);
+        expect(keys[0]).to.equal('key1');
+        expect(values[key]).to.to.equal('value1');
+    });
+
+
+    it('setValue with multiple values', () => {
+        const uow: UnitOfWork = new UnitOfWork(connectionConfig, NO_OP_LOGGER);
+        const json: object = { 'key1': 'value1', 'key2': 'value2' };
+
+        uow.setValue(json);
+
+        const values = sObject.values;
+        expect(values).to.exist;
+
+        const keys: string[] = Object.keys(values);
+        expect(keys.length).to.equal(2);
+        expect(keys).to.contain('key1');
+        expect(keys).to.contain('key2');
+        expect(values[key1]).to.equal('value1');
+        expect(values[key2]).to.equal('value2');
+    });
+
     it('Insert Account', async () => {
         const account: SObject = new SObject('Account');
         account.setValue('Name', 'MyAccount - uow - integration - ' + new Date());
