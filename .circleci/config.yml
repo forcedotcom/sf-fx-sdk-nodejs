@@ -51,4 +51,3 @@ jobs:
           command: echo yarn tirekick
           environment:
             FUNCTION_RESOURCE: http://basic-puffin-6927.descriptive-turnip-7558.morning-ocean-4277.herokuspace.com
-

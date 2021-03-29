@@ -1,20 +1,14 @@
 {
-    "extends": "./node_modules/@salesforce/dev-config/tsconfig",
-    "compilerOptions": {
-        "outDir": "./dist",
-        "moduleResolution": "node",
-        "emitDecoratorMetadata": true,
-        "experimentalDecorators": true,
-        "allowSyntheticDefaultImports": true,
-        "pretty": true,
-        "lib": ["dom"]
-    },
-    "include": [
-        "./src/**/*.ts"
-    ],
-    "exclude": [
-        "./node_modules",
-        "./dist",
-        "./lib"
-    ]
+  "extends": "./node_modules/@salesforce/dev-config/tsconfig",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "moduleResolution": "node",
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "allowSyntheticDefaultImports": true,
+    "pretty": true,
+    "lib": ["dom"]
+  },
+  "include": ["./src"],
+  "exclude": ["./node_modules", "./dist", "./lib"]
 }

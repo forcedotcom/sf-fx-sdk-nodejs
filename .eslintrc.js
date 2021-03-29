@@ -1,9 +1,7 @@
 module.exports = {
   root: true,
   parser: '@typescript-eslint/parser',
-  plugins: [
-    '@typescript-eslint',
-  ],
+  plugins: ['@typescript-eslint'],
   extends: [
     'eslint:recommended',
     'plugin:@typescript-eslint/eslint-recommended',
@@ -12,7 +10,7 @@ module.exports = {
   ],
   rules: {
     '@typescript-eslint/interface-name-prefix': 'off',
-    'semi': 'off',
+    semi: 'off',
     '@typescript-eslint/semi': ['error'],
-  }
+  },
 };
