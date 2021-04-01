@@ -44,7 +44,7 @@ describe('UnitOfWork Tests', () => {
 
         uow.setValue(json);
 
-        const values = uow.values;
+        const values = uow._values;
         expect(values).to.exist;
 
         const keys: string[] = Object.keys(values);
@@ -62,7 +62,7 @@ describe('UnitOfWork Tests', () => {
 
         uow.setValue(json);
 
-        const values = uow.values;
+        const values = uow._values;
         expect(values).to.exist;
 
         const keys: string[] = Object.keys(values);
