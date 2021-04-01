@@ -34,6 +34,10 @@ interface UuidToReferenceIds {
     [key: string]: Set<string>;
 }
 
+export interface Values {
+    [key: string]: any;
+}
+
 /**
  * Individual unit of work result.
  */
@@ -222,6 +226,10 @@ export class UnitOfWork {
         Object.keys(json).forEach(key => {
           this._values[key] = json[key];
         });
+    }
+
+    public get values(): Values {
+        return this._values as Readonly<Values>;
     }
 
     /**

@@ -39,18 +39,19 @@ describe('UnitOfWork Tests', () => {
     });
 
     it('setValue with single value', () => {
+        const key = 'key1';
         const uow: UnitOfWork = new UnitOfWork(connectionConfig, NO_OP_LOGGER);
         const json: object = { 'key1': 'value1' };
 
         uow.setValue(json);
 
-        const values = uow._values;
+        const values = uow.values;
         expect(values).to.exist;
 
         const keys: string[] = Object.keys(values);
         expect(keys.length).to.equal(1);
         expect(keys[0]).to.equal('key1');
-        expect(values[keys]).to.equal('value1');
+        expect(values[key]).to.equal('value1');
     });
 
 
@@ -62,7 +63,7 @@ describe('UnitOfWork Tests', () => {
 
         uow.setValue(json);
 
-        const values = uow._values;
+        const values = uow.values;
         expect(values).to.exist;
 
         const keys: string[] = Object.keys(values);
