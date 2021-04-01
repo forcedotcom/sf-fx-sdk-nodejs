@@ -208,6 +208,7 @@ export class UnitOfWork {
     private readonly _compositeRequest: CompositeRequest;
     private readonly _uuidToReferenceIds: UuidToReferenceIds;
     private readonly _referenceIdToCompositeSubrequests: IReferenceIdToCompositeSubrequests;
+    private _values: { [key: string]: any };
 
     constructor(private readonly _config: ConnectionConfig,
                 private logger: Logger) {
@@ -217,7 +218,7 @@ export class UnitOfWork {
         this._values = {};
     }
 
-    public setValue(json: JSON): void {
+    public setValue(json: object): void {
         Object.keys(json).forEach(key => {
           this._values[key] = json[key];
         });

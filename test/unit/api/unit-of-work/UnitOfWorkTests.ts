@@ -50,17 +50,19 @@ describe('UnitOfWork Tests', () => {
         const keys: string[] = Object.keys(values);
         expect(keys.length).to.equal(1);
         expect(keys[0]).to.equal('key1');
-        expect(values[key]).to.to.equal('value1');
+        expect(values[keys])to.equal('value1');
     });
 
 
     it('setValue with multiple values', () => {
+        const key1 = 'key1';
+        const key2 = 'key2';
         const uow: UnitOfWork = new UnitOfWork(connectionConfig, NO_OP_LOGGER);
         const json: object = { 'key1': 'value1', 'key2': 'value2' };
 
         uow.setValue(json);
 
-        const values = sObject.values;
+        const values = uow.values;
         expect(values).to.exist;
 
         const keys: string[] = Object.keys(values);
