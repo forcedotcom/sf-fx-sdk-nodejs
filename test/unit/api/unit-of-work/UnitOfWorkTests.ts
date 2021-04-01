@@ -50,7 +50,7 @@ describe('UnitOfWork Tests', () => {
         const keys: string[] = Object.keys(values);
         expect(keys.length).to.equal(1);
         expect(keys[0]).to.equal('key1');
-        expect(values[keys])to.equal('value1');
+        expect(values[keys]).to.equal('value1');
     });
 
 
