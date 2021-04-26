@@ -15,27 +15,27 @@ import {
 } from "./records";
 
 export class DataApi {
-  private baseUrl: string;
-  private apiVersion: string;
-  readonly accessToken: string;
-  private conn: Connection;
+  private baseUrl;
+  private apiVersion;
+  readonly accessToken;
+  private conn;
 
-  constructor(baseUrl: string, apiVersion: string, accessToken: string) {
+  constructor(baseUrl, apiVersion, accessToken) {
     this.baseUrl = baseUrl;
     this.apiVersion = apiVersion;
     this.accessToken = accessToken;
   }
 
-  private async connect(): Promise<Connection> {
+  private async connect() {
     if (!this.conn) {
-      const authInfo = await AuthInfo.create({ username: this.accessToken });
+      const authInfo = await AuthInfo.create({ this.accessToken });
       this.conn = await Connection.create({ authInfo });
     }
 
     return this.conn;
   }
 
-  private async promisifyRequests(callback: Function): Promise<any> {
+  private async promisifyRequests(callback) {
     let conn: Connection;
     let result: RecordResult;
 
@@ -53,7 +53,7 @@ export class DataApi {
    * Creates a record, based on the given {@link RecordCreate}.
    * @param recordCreate.
    */
-  async create(recordInsert: RecordCreate): Promise<RecordModificationResult> {
+  async create(recordInsert) {
     return this.promisifyRequests(async (conn: Connection) => {
       // TODO: shape response to return id
       const response: any = await conn.insert(recordInsert.type, recordInsert);
@@ -67,7 +67,7 @@ export class DataApi {
    * Queries for records with a given SOQL string.
    * @param soql The SOQL string.
    */
-  async query(soql: string): Promise<RecordQueryResult> {
+  async query(soql) {
     return this.promisifyRequests(async (conn: Connection) => {
       const response = await conn.autoFetchQuery(soql);
       const recordQueryResult = new RecordQueryResult(response.done, response.totalSize, response.nextRecordsUrl, response.records);
@@ -80,7 +80,7 @@ export class DataApi {
    * Queries for more records, based on the given {@link RecordQueryResult}.
    * @param queryResult
    */
-  async queryMore(queryResult: RecordQueryResult): Promise<RecordQueryResult> {
+  async queryMore(queryResult) {
     return this.promisifyRequests(async (conn: Connection) => {
       const response = await conn.autoFetchQuery(queryResult.nextRecordsUrl);
       const recordQueryResult = new RecordQueryResult(response.done, response.totalSize, response.nextRecordsUrl, response.records);
@@ -93,7 +93,7 @@ export class DataApi {
    * Updates an existing record described by the given {@link RecordUpdate}.
    * @param recordUpdate The record update description.
    */
-  async update(recordUpdate: RecordModification): Promise<RecordModificationResult> {
+  async update(recordUpdate) {
     return this.promisifyRequests(async (conn: Connection) => {
       const response: any = await conn.update(recordUpdate.type, recordUpdate);
       const result = new RecordModificationResult(response.id);
@@ -106,7 +106,7 @@ export class DataApi {
   * Deletes a record, based on the given {@link RecordDelete}.
   * @param recordDelete
   */
-  async delete(recordDelete: RecordDelete): Promise<RecordDeleteResult> {
+  async delete(recordDelete) {
     return this.promisifyRequests(async (conn: Connection) => {
       const response: any = await conn.delete(recordDelete.type, recordDelete.id);
       const result = new RecordDeleteResult(response.id);

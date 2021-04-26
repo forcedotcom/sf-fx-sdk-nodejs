@@ -1,13 +1,11 @@
-import { CloudEvent } from "cloudevents";
-
 export class InvocationEvent {
-  id: string;
-  type: string;
-  source: string;
-  data: any;
-  dataContentType?: string;
-  dataSchema?: string;
-  time?: string;
+  id;
+  type;
+  source
+  data;
+  dataContentType;
+  dataSchema;
+  time;
 
   constructor({
     id,
@@ -17,7 +15,7 @@ export class InvocationEvent {
     datacontenttype,
     schemaurl,
     time
-  }: CloudEvent) {
+  }) {
     this.id = id;
     this.type = type;
     this.source = source;
