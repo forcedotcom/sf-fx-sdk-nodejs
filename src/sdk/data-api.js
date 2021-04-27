@@ -36,8 +36,8 @@ export class DataApi {
   }
 
   private async promisifyRequests(callback) {
-    let conn: Connection;
-    let result: RecordResult;
+    let conn = new Connection();
+    let result = new RecordResult();
 
     try {
       conn = await this.connect();
@@ -54,7 +54,7 @@ export class DataApi {
    * @param recordCreate.
    */
   async create(recordInsert) {
-    return this.promisifyRequests(async (conn: Connection) => {
+    return this.promisifyRequests(async (conn) => {
       // TODO: shape response to return id
       const response: any = await conn.insert(recordInsert.type, recordInsert);
       const result = new RecordCreateResult(response.id);
@@ -68,7 +68,7 @@ export class DataApi {
    * @param soql The SOQL string.
    */
   async query(soql) {
-    return this.promisifyRequests(async (conn: Connection) => {
+    return this.promisifyRequests(async (conn) => {
       const response = await conn.autoFetchQuery(soql);
       const recordQueryResult = new RecordQueryResult(response.done, response.totalSize, response.nextRecordsUrl, response.records);
 
@@ -81,7 +81,7 @@ export class DataApi {
    * @param queryResult
    */
   async queryMore(queryResult) {
-    return this.promisifyRequests(async (conn: Connection) => {
+    return this.promisifyRequests(async (conn) => {
       const response = await conn.autoFetchQuery(queryResult.nextRecordsUrl);
       const recordQueryResult = new RecordQueryResult(response.done, response.totalSize, response.nextRecordsUrl, response.records);
 
@@ -94,7 +94,7 @@ export class DataApi {
    * @param recordUpdate The record update description.
    */
   async update(recordUpdate) {
-    return this.promisifyRequests(async (conn: Connection) => {
+    return this.promisifyRequests(async (conn) => {
       const response: any = await conn.update(recordUpdate.type, recordUpdate);
       const result = new RecordModificationResult(response.id);
 
@@ -107,7 +107,7 @@ export class DataApi {
   * @param recordDelete
   */
   async delete(recordDelete) {
-    return this.promisifyRequests(async (conn: Connection) => {
+    return this.promisifyRequests(async (conn) => {
       const response: any = await conn.delete(recordDelete.type, recordDelete.id);
       const result = new RecordDeleteResult(response.id);
 
