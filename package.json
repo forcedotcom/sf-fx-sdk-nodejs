@@ -8,14 +8,12 @@
     "lib": "./dist"
   },
   "scripts": {
-    "build": "tsc",
     "format": "npm run format:check",
     "format:check": "prettier --check .",
     "format:fix": "prettier --write .",
     "lint": "eslint . --ext .ts",
     "postcompile": "tsc -p test",
     "posttest": "eslint src --ext .ts",
-    "test": "npm run compile && nyc --extension .ts mocha --forbid-only -r ts-node/register 'test/unit/**/*.ts'",
     "test-all": "mocha -r ts-node/register 'test/**/*.ts'",
     "test-integration": "mocha -r ts-node/register 'test/integration/**/*.ts'",
     "tirekick": "mocha --timeout 60000 -r ts-node/register 'test/integration/functions/InvokeFunctionIntegrationTests.ts'",

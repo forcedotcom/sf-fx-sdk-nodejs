@@ -4,9 +4,6 @@ import {
 } from '@salesforce/core';
 // import { ReferenceId } from "./types/reference-id";
 import {
-  RecordCreate,
-  RecordModification,
-  RecordDelete,
   RecordResult,
   RecordCreateResult,
   RecordQueryResult,
