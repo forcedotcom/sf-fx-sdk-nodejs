@@ -1,12 +1,4 @@
 export class InvocationEvent {
-  id;
-  type;
-  source
-  data;
-  dataContentType;
-  dataSchema;
-  time;
-
   constructor({
     id,
     type,

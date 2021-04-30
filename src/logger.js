@@ -1,11 +1,5 @@
-export function createLogger(cloudEvent) {
-  return new Logger(cloudEvent.id);
-}
-
-class Logger {
-  private readonly id;
-
-  constructor(id) {
+export class Logger {
+  constructor({id}) {
     this.id = id;
   }
 
