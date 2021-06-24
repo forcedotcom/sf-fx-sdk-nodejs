@@ -20,17 +20,12 @@
     "prepack": "yarn sfdx-build",
     "preversion": "npm run lint",
     "postversion": "git push && git push --tags",
-    "test": "npm run compile && nyc --extension .ts mocha --forbid-only -r ts-node/register 'test/unit/**/*.ts'",
-    "test-all": "mocha -r ts-node/register 'test/**/*.ts'",
-    "test-integration": "mocha -r ts-node/register 'test/integration/**/*.ts'",
-    "tirekick": "mocha --timeout 60000 -r ts-node/register 'test/integration/functions/InvokeFunctionIntegrationTests.ts'",
     "version": "npm run format && git add -A src",
     "watch-ts": "tsc -w"
   },
   "pre-commit": [
     "build",
-    "lint",
-    "test"
+    "lint"
   ],
   "repository": {
     "type": "git",
