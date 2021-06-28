@@ -39,16 +39,3 @@ jobs:
       - run:
           name: Build again
           command: yarn build
-
-      # run tests!
-      - run:
-          name: Run tests
-          command: yarn test
-
-      # run tirekick test!
-      - run:
-          name: Run tirekick Integration test
-          command: echo yarn tirekick
-          environment:
-            FUNCTION_RESOURCE: http://basic-puffin-6927.descriptive-turnip-7558.morning-ocean-4277.herokuspace.com
-
