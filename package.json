@@ -2,36 +2,12 @@
   "name": "@salesforce/salesforce-sdk",
   "version": "1.4.1",
   "description": "Salesforce SDK for Node.js",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
-  "directories": {
-    "lib": "./dist"
-  },
-  "scripts": {
-    "build": "yarn sfdx-build",
-    "clean": "yarn sfdx-clean",
-    "clean-all": "yarn sfdx-clean all",
-    "compile": "yarn sfdx-compile",
-    "docs": "yarn sfdx-docs",
-    "format": "yarn sfdx-format",
-    "lint": "eslint src --ext .ts",
-    "postcompile": "tsc -p test",
-    "posttest": "eslint src --ext .ts",
-    "prepack": "yarn sfdx-build",
-    "preversion": "npm run lint",
-    "postversion": "git push && git push --tags",
-    "version": "npm run format && git add -A src",
-    "watch-ts": "tsc -w"
-  },
-  "pre-commit": [
-    "build",
-    "lint"
-  ],
+  "main": "src/index.js",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/forcedotcom/sf-fx-sdk-nodejs.git"
   },
-  "author": "cwall@salesforce.com",
+  "author": "zhang.l@salesforce.com",
   "license": "BSD-3-Clause",
   "bugs": {
     "url": "https://github.com/forcedotcom/sf-fx-sdk-nodejs/issues"
