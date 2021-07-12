@@ -15,13 +15,6 @@ jobs:
     steps:
       - checkout
 
-      # Download and cache dependencies
-      - restore_cache:
-          keys:
-            - v1-dependencies-{{ checksum "package.json" }}
-            # fallback to using the latest cache if no exact match is found
-            - v1-dependencies-
-
       - run:
           name: Install Dependencies
           command: yarn install
@@ -30,12 +23,6 @@ jobs:
           name: Build
           command: yarn build
 
-      - save_cache:
-          paths:
-            - node_modules
-          key: v1-dependencies-{{ checksum "package.json" }}
-
-      # run build (again, to be sure)
-      - run:
-          name: Build again
-          command: yarn build
+      -run:
+          name: Run linter
+          command: npm run lint
