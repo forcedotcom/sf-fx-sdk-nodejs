@@ -14,6 +14,7 @@
     "prepack": "yarn sfdx-build",
     "preversion": "npm run lint",
     "postversion": "git push && git push --tags",
+    "tsc": "tsc",
     "version": "npm run format && git add -A src",
     "watch-ts": "tsc -w"
   },
