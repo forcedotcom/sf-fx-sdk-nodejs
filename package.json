@@ -4,7 +4,6 @@
   "description": "Salesforce SDK for Node.js",
   "main": "src/index.js",
   "scripts": {
-    "build": "yarn build",
     "lint": "eslint src --ext .ts",
     "tsc": "tsc"
   },
