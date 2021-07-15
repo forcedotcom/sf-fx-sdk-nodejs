@@ -20,10 +20,6 @@ jobs:
           command: yarn install
 
       - run:
-          name: Build
-          command: yarn build
-
-      - run:
           name: Run linter
           command: npm run lint
 
