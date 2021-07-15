@@ -20,13 +20,9 @@ jobs:
           command: yarn install
 
       - run:
-          name: Build
-          command: yarn build
-
+          name: Compiles
+          command: npm run tsc
+          
       - run:
           name: Run linter
           command: npm run lint
-
-      - run:
-          name: Compiles
-          command: npm run tsc
