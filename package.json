@@ -4,19 +4,9 @@
   "description": "Salesforce SDK for Node.js",
   "main": "src/index.js",
   "scripts": {
-    "build": "yarn sfdx-build",
-    "clean": "yarn sfdx-clean",
-    "clean-all": "yarn sfdx-clean all",
-    "compile": "yarn sfdx-compile",
-    "docs": "yarn sfdx-docs",
-    "format": "yarn sfdx-format",
+    "build": "yarn build",
     "lint": "eslint src --ext .ts",
-    "prepack": "yarn sfdx-build",
-    "preversion": "npm run lint",
-    "postversion": "git push && git push --tags",
-    "tsc": "tsc",
-    "version": "npm run format && git add -A src",
-    "watch-ts": "tsc -w"
+    "tsc": "tsc"
   },
   "repository": {
     "type": "git",
@@ -29,6 +19,7 @@
   },
   "homepage": "https://github.com/forcedotcom/sf-fx-sdk-nodejs#readme",
   "devDependencies": {
+    "@salesforce/dev-scripts": "^0.9.18",
     "@typescript-eslint/eslint-plugin": "^2.17.0",
     "@typescript-eslint/parser": "^2.17.0",
     "eslint": "^6.8.0",
