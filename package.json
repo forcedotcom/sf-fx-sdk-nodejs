@@ -2,7 +2,7 @@
   "name": "sf-fx-sdk-nodejs",
   "version": "2.0.0",
   "description": "Salesforce SDK for Node.js",
-  "main": "src/index.js",
+  "main": "src/index.ts",
   "scripts": {
     "lint": "eslint src --ext .ts",
     "tsc": "tsc"
