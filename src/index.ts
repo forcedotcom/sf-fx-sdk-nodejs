@@ -32,7 +32,7 @@ export type SalesforceFunction<A, B> = (
  * respect. In other words, either they all use the actual time of the occurrence or they all use
  * the same algorithm to determine the value used.
  */
-interface InvocationEvent<A> {
+export interface InvocationEvent<A> {
   readonly id: string;
   readonly type: string;
   readonly source: string;
@@ -48,7 +48,7 @@ interface InvocationEvent<A> {
  * @property id The unique identifier for a given execution of a function.
  * @property org Information about the invoking Salesforce organization in Customer 360.
  */
-interface Context {
+export interface Context {
   readonly id: string;
   readonly org?: Org;
 }
@@ -62,7 +62,7 @@ interface Context {
  * @property dataApi An initialized data API client instance.
  * @property user The currently logged in user
  */
-interface Org {
+export interface Org {
   readonly id: string;
   readonly baseUrl: string;
   readonly domainUrl: string;
@@ -78,7 +78,7 @@ interface Org {
  * @property totalSize The total amount of records returned by the query.
  * @property records The records in this query result.
  */
-interface RecordQueryResult {
+export interface RecordQueryResult {
   readonly done: boolean;
   readonly totalSize: number;
   readonly records: Array<Record>;
@@ -101,7 +101,7 @@ export type Record = {
  * Represents the result of a record modification such as a create, delete, or insert.
  * @property id The ID of the modified record.
  */
-interface RecordModificationResult {
+export interface RecordModificationResult {
   readonly id: string;
 }
 
@@ -140,7 +140,7 @@ export type RecordForUpdate = {
 /**
  * Represents a UnitOfWork.
  */
-interface UnitOfWork {
+export interface UnitOfWork {
   /**
    * Registers a {@link RecordForCreate} for the {@link UnitOfWork} and returns a {@link ReferenceId} that
    * can be used to refer to the created record in subsequent operations in this UnitOfWork.
@@ -174,7 +174,7 @@ interface UnitOfWork {
  * @property accessToken The access token used by this API client. Can be used to initialize a
  * third-party API client or to perform custom API calls with a HTTP library.
  */
-interface DataApi {
+export interface DataApi {
   readonly accessToken: string;
 
   /**
@@ -238,7 +238,7 @@ interface DataApi {
  * @property username The name of the user.
  * @property onBehalfOfUserId The id of the user this user operates in behalf of.
  */
-interface User {
+export interface User {
   readonly id: string;
   readonly username: string;
   readonly onBehalfOfUserId?: string;
@@ -247,7 +247,7 @@ interface User {
 /**
  * Represents the logging functionality to log given messages at various levels.
  */
-interface Logger {
+export interface Logger {
   /**
    * Logs the given message at the 'error' level.
    * @param message The message to log.
