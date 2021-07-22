@@ -21,7 +21,7 @@ jobs:
 
       - run:
           name: Compiles
-          command: npm run tsc
+          command: npm run build
 
       - run:
           name: Run linter

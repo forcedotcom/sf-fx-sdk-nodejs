@@ -1,11 +1,15 @@
 {
-  "name": "@salesforce/salesforce-sdk",
+  "name": "sf-fx-sdk-nodejs",
   "version": "2.0.0",
   "description": "Salesforce SDK for Node.js",
-  "main": "src/index.js",
+  "main": "dist/index.js",
+  "files": [
+      "dist/index.js"
+  ],
+  "types": "dist/index.d.ts",
   "scripts": {
     "lint": "eslint src --ext .ts",
-    "tsc": "tsc"
+    "build": "tsc"
   },
   "repository": {
     "type": "git",

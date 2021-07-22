@@ -3,8 +3,10 @@
         "outDir": "./dist",
         "moduleResolution": "node",
         "emitDecoratorMetadata": true,
+        "declaration": true,
         "experimentalDecorators": true,
         "allowSyntheticDefaultImports": true,
+        "rootDirs": ["src/"],
         "pretty": true,
         "lib": ["dom"]
     },
