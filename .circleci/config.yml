@@ -26,3 +26,7 @@ jobs:
       - run:
           name: Run linter
           command: npm run lint
+
+      - run:
+          name: Test types are built
+          command: cd test/fixtures/typescript-function && npm install && npx tsc

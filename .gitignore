@@ -14,3 +14,5 @@ npm-debug.log
 *.log
 
 /.nyc_output/
+node_modules/
+test/fixtures/*/dist/**
