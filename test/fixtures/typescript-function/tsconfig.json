@@ -1,9 +1,0 @@
-{
-  "compilerOptions": {
-    "outDir": "./dist",
-    "allowJs": true,
-    "target": "es5",
-    "lib": ["es5", "es6", "dom"]
-  },
-  "include": ["./src/**/*"]
-}
