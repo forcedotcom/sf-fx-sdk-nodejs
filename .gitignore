@@ -1,5 +1,5 @@
 # Node build artifacts
-/node_modules
+node_modules/
 npm-debug.log
 **/package-lock.json
 
@@ -14,5 +14,4 @@ npm-debug.log
 *.log
 
 /.nyc_output/
-node_modules/
 test/fixtures/*/dist/**
