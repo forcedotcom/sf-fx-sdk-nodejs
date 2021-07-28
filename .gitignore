@@ -1,5 +1,6 @@
 # Node build artifacts
-/node_modules
+dist/
+node_modules/
 npm-debug.log
 **/package-lock.json
 
@@ -7,7 +8,6 @@ npm-debug.log
 .vscode
 .idea
 .DS_Store
-/dist
 /lib
 .sfdx
 *.swp
