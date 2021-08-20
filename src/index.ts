@@ -20,7 +20,7 @@ export type SalesforceFunction<A, B> = (
  * @property id The platform event occurrence id for event invocation.
  * @property type A value describing the type of invocation. The format of this is producer defined
  * and might include information such as the version of the type.
- * @property source An URI which Identifies the context in which an event happened. Often this will
+ * @property source An URI which identifies the context in which an event happened. Often this will
  * include information such as the type of the event source, the organization publishing the event
  * or the process that produced the event.
  * @property data The payload of the event
@@ -43,10 +43,10 @@ export interface InvocationEvent<A> {
 }
 
 /**
- * Represents the connection to the the execution environment and the Customer 360 instance that
+ * Represents the connection to the execution environment and the Salesforce instance that
  * the function is associated with.
  * @property id The unique identifier for a given execution of a function.
- * @property org Information about the invoking Salesforce organization in Customer 360.
+ * @property org Information about the invoking Salesforce organization.
  */
 export interface Context {
   readonly id: string;
@@ -54,7 +54,7 @@ export interface Context {
 }
 
 /**
- * Holds information about the invoking Salesforce organization and user in Customer 360.
+ * Holds information about the invoking Salesforce organization and user.
  * @property id The Salesforce organization ID.
  * @property baseUrl The base URL of the Salesforce organization.
  * @property domainUrl The domain URL of the Salesforce organization.
@@ -76,7 +76,8 @@ export interface Org {
  * @property done If true, no additional records can be retrieved from the query result.
  * If false, one or more records remain to be retrieved.
  * @property totalSize The total amount of records returned by the query.
- * @property records The records in this query result.
+ * @property records The records in this query result
+ * @property nextRecordsUrl The URL for the next set of records, if any.
  */
 export interface RecordQueryResult {
   readonly done: boolean;
@@ -114,7 +115,7 @@ export type ReferenceId = string;
  * Creates a single record for create or registers a record creation for the {@link UnitOfWork}
  * and returns a {@link ReferenceId}.
  * @property type The Salesforce Object type
- * @property fields A JavaScript Object for the fields that the record will be created with. The keys
+ * @property fields A JavaScript Object for the fields that the record will be updated with. The keys
  * in the object are case insensitive.
  */
 export type RecordForCreate = {
@@ -233,7 +234,7 @@ export interface DataApi {
 }
 
 /**
- * Holds information about the invoking Salesforce user in Customer 360.
+ * Holds information about the invoking Salesforce user.
  * @property id The user's ID.
  * @property username The name of the user.
  * @property onBehalfOfUserId The id of the user this user operates in behalf of.
