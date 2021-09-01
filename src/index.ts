@@ -107,11 +107,24 @@ export interface RecordModificationResult {
 }
 
 /**
- * References a record that will be created, deleted or modified in the future.
+ * References a modification, creation, or deletion of an object that may
+ * occur as a part of a UnitOfWork.
  */
 export interface ReferenceId {
-  readonly id: string;
+  /**
+   * Get a reference to a record modification, creation, or deletion that may
+   * occur as a part of a UnitOfWork.
+   *
+   * @returns A string identifier
+   */
   toString(): string;
+
+  /**
+   * Get a reference to a record's ID that may be created, deleted, or modified
+   * as part of a UnitOfWork.
+   *
+   * @returns A string reference to a record id
+   */
   toApiString(): string;
 };
 
