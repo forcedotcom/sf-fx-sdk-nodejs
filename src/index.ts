@@ -109,7 +109,11 @@ export interface RecordModificationResult {
 /**
  * References a record that will be created, deleted or modified in the future.
  */
-export type ReferenceId = string;
+export interface ReferenceId {
+  readonly id: string;
+  toString(): string;
+  toApiString(): string;
+};
 
 /**
  * Creates a single record for create or registers a record creation for the {@link UnitOfWork}
