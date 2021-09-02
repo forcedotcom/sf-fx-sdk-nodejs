@@ -9,5 +9,3 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### 3.0.0
 
 - Change ReferenceID to an interface ([#98](https://github.com/forcedotcom/sf-fx-sdk-nodejs/pull/98))
-
-### Changed
