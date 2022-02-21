@@ -1377,8 +1377,8 @@ eslint-config-prettier@^6.11.0:
     get-stdin "^6.0.0"
 
 eslint-config-prettier@^8.3.0:
-  version "8.3.0"
-  resolved "https://registry.npmjs.org/eslint-config-prettier/-/eslint-config-prettier-8.3.0.tgz"
+  version "8.4.0"
+  resolved "https://registry.yarnpkg.com/eslint-config-prettier/-/eslint-config-prettier-8.4.0.tgz#8e6d17c7436649e98c4c2189868562921ef563de"
 
 eslint-config-salesforce-license@^0.1.6:
   version "0.1.6"
