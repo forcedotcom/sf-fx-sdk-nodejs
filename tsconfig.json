@@ -8,7 +8,7 @@
         "allowSyntheticDefaultImports": true,
         "rootDirs": ["src/"],
         "pretty": true,
-        "lib": ["dom"]
+        "lib": ["ES2017"]
     },
     "include": [
         "./src/**/*.ts"

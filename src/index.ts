@@ -301,3 +301,25 @@ export interface Logger {
    */
   trace(message: string): void;
 }
+
+export interface BulkApi {
+  submit(job: Job): Promise<JobResult[]>
+}
+
+export interface Job {
+  objectType: string;
+  operation: Operation;
+  records: Iterable<Record>;
+  assignmentRuleId?: string;
+  externalIdFieldName?: string;
+}
+
+export type Operation = 'insert' | 'delete' | 'hardDelete' | 'update' | 'upsert';
+
+export interface JobResult {
+  jobId?: string;
+  error?: Error;
+  isSuccess: boolean;
+  isError: boolean;
+  unsubmittedRecords: Iterable<Record>;
+}
