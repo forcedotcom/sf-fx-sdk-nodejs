@@ -303,7 +303,7 @@ export interface Logger {
 }
 
 export interface BulkApi {
-  submit(job: Job): Promise<JobResult[]>
+  submit(job: Job): Promise<JobBatchResult[]>
 }
 
 export interface Job {
@@ -316,7 +316,7 @@ export interface Job {
 
 export type Operation = 'insert' | 'delete' | 'hardDelete' | 'update' | 'upsert';
 
-export interface JobResult {
+export interface JobBatchResult {
   jobId?: string;
   error?: Error;
   isSuccess: boolean;
