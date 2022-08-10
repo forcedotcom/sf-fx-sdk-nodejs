@@ -97,7 +97,7 @@ export interface RecordQueryResult {
 export type Record = {
   readonly type: string;
   readonly fields: { [key: string]: unknown };
-  readonly binaryFields: { [key: string]: Buffer };
+  readonly binaryFields?: { [key: string]: Buffer };
 };
 
 /**
