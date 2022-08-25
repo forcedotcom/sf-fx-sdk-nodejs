@@ -134,11 +134,13 @@ export interface ReferenceId {
  * Creates a single record for create or registers a record creation for the {@link UnitOfWork}
  * and returns a {@link ReferenceId}.
  * @property type The Salesforce Object type
- * @property fields A JavaScript Object for the fields that the record will be updated with. The keys
- * in the object are case insensitive.
+ * @property fields A JavaScript Object for the fields that the record will be updated with.
+ * @property binaryFields An optional JavaScript Object that the binary content fields the record will be updated with.
+ * The keys in fields and binaryFields are case insensitive.
  */
 export type RecordForCreate = {
   type: string;
+  binaryFields?: { [key: string]: Buffer },
   fields: { [key: string]: unknown };
 };
 
@@ -146,11 +148,13 @@ export type RecordForCreate = {
  * Creates a single record for update or registers a record update for the {@link UnitOfWork}
  * and returns a {@link ReferenceId}.
  * @property type The Salesforce Object type
- * @property fields A JavaScript Object for the fields that the record will be created with. The keys
- * in the object are case insensitive.
+ * @property fields A JavaScript Object for the fields that the record will be updated with.
+ * @property binaryFields An optional JavaScript Object for the binary content fields the record will be updated with.
+ * The keys in fields and binaryFields are case insensitive.
  */
 export type RecordForUpdate = {
   type: string;
+  binaryFields?: { [key: string]: Buffer },
   fields: {
     id: string;
     [key: string]: unknown;
