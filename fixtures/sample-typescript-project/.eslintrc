@@ -6,6 +6,7 @@
   "parserOptions":  {
     "ecmaVersion": 2018
   },
+  "root": true,
   "rules":  {
     // Specify ESLint rules.
     "@typescript-eslint/no-explicit-any": "off"
