@@ -90,7 +90,7 @@ export interface RecordQueryResult {
  * Record items from a query or queryMore request
  * @property type The Salesforce Object type
  * @property fields A JavaScript object with all fields from the returned records.
- * @property binaryFields A JavaScript object with eagerly-loaded base64 decoded binary content.
+ * @property binaryFields An optional JavaScript object with any eagerly-loaded base64 decoded binary content.
  * Each key in fields and binaryFields is case insensitive; the getters and setters for each
  * key/value pair will ignore casing when getting and setting fields.
  */
@@ -134,14 +134,14 @@ export interface ReferenceId {
  * Creates a single record for create or registers a record creation for the {@link UnitOfWork}
  * and returns a {@link ReferenceId}.
  * @property type The Salesforce Object type
- * @property fields A JavaScript Object for the fields that the record will be updated with.
- * @property binaryFields An optional JavaScript Object that the binary content fields the record will be updated with.
+ * @property fields A JavaScript Object for the fields that the record will be created with.
+ * @property binaryFields An optional JavaScript Object with unencoded binary content buffers to create the record with. Values will be automatically base64 encoded.
  * The keys in fields and binaryFields are case insensitive.
  */
 export type RecordForCreate = {
   type: string;
-  binaryFields?: { [key: string]: Buffer },
   fields: { [key: string]: unknown };
+  binaryFields?: { [key: string]: Buffer };
 };
 
 /**
@@ -149,16 +149,16 @@ export type RecordForCreate = {
  * and returns a {@link ReferenceId}.
  * @property type The Salesforce Object type
  * @property fields A JavaScript Object for the fields that the record will be updated with.
- * @property binaryFields An optional JavaScript Object for the binary content fields the record will be updated with.
+ * @property binaryFields An optional JavaScript Object with unencoded binary content buffers to update the record with. Values will be automatically base64 encoded.
  * The keys in fields and binaryFields are case insensitive.
  */
 export type RecordForUpdate = {
   type: string;
-  binaryFields?: { [key: string]: Buffer },
   fields: {
     id: string;
     [key: string]: unknown;
   };
+  binaryFields?: { [key: string]: Buffer };
 };
 
 /**
