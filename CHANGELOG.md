@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### 3.1.0
+
 - Add `binaryFields` property to enable support for base64 / binary field automatic handling ([#141](https://github.com/forcedotcom/sf-fx-sdk-nodejs/pull/141))
 
 ### 3.0.0
