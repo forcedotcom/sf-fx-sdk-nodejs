@@ -1,0 +1,21 @@
+name: forcedotcom/sf-fx-sdk-nodejs/forcedotcom/sf-fx-sdk-nodejs
+on:
+  push:
+jobs:
+  build:
+    defaults:
+      run:
+        working-directory: "~/repo"
+    runs-on: sfdc-hk-ubuntu-latest
+    container:
+      image: node:current
+    steps:
+    - uses: actions/checkout@v2
+    - name: Install Dependencies
+      run: yarn install
+    - name: Compiles
+      run: npm run build
+    - name: Run linter
+      run: npm run lint
+    - name: Test types are built
+      run: cd fixtures/sample-typescript-project && npm install && npm run build && npm run lint && npm run test
