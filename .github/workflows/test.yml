@@ -1,0 +1,18 @@
+name: Test
+on: [push]
+jobs:
+  build:
+    strategy:
+      matrix:
+        version: [18, 16, 14]
+    name: Node ${{ matrix.version }} on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.version }}
+          cache: 'yarn'
+      - run: yarn install --immutable
+      - run: yarn build
+      - run: yarn lint
