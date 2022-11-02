@@ -1,5 +1,12 @@
 name: Test
-on: [push]
+on:
+  push:
+    # Avoid duplicate builds on PRs.
+    branches:
+      - main
+  pull_request:
+permissions:
+  contents: read
 jobs:
   build:
     strategy:
